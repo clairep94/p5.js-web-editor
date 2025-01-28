@@ -13,7 +13,7 @@ const getFilteredSketches = createSelector(
   getSearchTerm,
   (sketches, search) => {
     if (search) {
-      const searchStrings = sketches.map((sketch) => {
+      const searchStrings = sketches?.projects.map((sketch) => {
         const smallSketch = {
           name: sketch.name
         };
@@ -30,25 +30,33 @@ const getFilteredSketches = createSelector(
   }
 );
 
-const getSortedSketches = createSelector(
+export const getSortedSketches = createSelector(
   getFilteredSketches,
   getField,
   getDirection,
   (sketches, field, direction) => {
+    if (!sketches?.projects) {
+      return [];
+    }
+
     if (field === 'name') {
       if (direction === DIRECTION.DESC) {
-        return orderBy(sketches, 'name', 'desc');
+        return orderBy(sketches.projects, 'name', 'desc');
       }
-      return orderBy(sketches, 'name', 'asc');
+      return orderBy(sketches.projects, 'name', 'asc');
     }
-    const sortedSketches = [...sketches].sort((a, b) => {
+
+    const sortedSketches = [...sketches.projects].sort((a, b) => {
       const result =
         direction === DIRECTION.ASC
           ? differenceInMilliseconds(new Date(a[field]), new Date(b[field]))
           : differenceInMilliseconds(new Date(b[field]), new Date(a[field]));
       return result;
     });
-    return sortedSketches;
+
+    return sketches.metadata?.hasPagination
+      ? { sketches: sortedSketches, metadata: sketches.metadata }
+      : sortedSketches;
   }
 );
 

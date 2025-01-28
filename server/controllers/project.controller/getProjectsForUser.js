@@ -10,22 +10,53 @@ import { toApi as toApiProjectObject } from '../../domain-objects/Project';
 const createCoreHandler = (mapProjectsToResponse) => async (req, res) => {
   try {
     const { username } = req.params;
+    const { page, limit } = req.query;
+
     if (!username) {
       res.status(422).json({ message: 'Username not provided' });
       return;
     }
     const user = await User.findByUsername(username);
+
     if (!user) {
       res
         .status(404)
         .json({ message: 'User with that username does not exist.' });
       return;
     }
-    const projects = await Project.find({ user: user._id })
+
+    const usePagination = page !== undefined && limit !== undefined;
+
+    const parsedPage = parseInt(page, 10) || 1;
+    const parsedLimit = parseInt(limit, 10) || 10;
+
+    const query = Project.find({ user: user._id })
       .sort('-createdAt')
-      .select('name files id createdAt updatedAt')
-      .exec();
-    const response = mapProjectsToResponse(projects);
+      .select('name files id createdAt updatedAt');
+
+    if (usePagination) {
+      query.skip((page - 1) * limit).limit(limit);
+    }
+
+    const projects = await query.exec();
+
+    const totalProjects = usePagination
+      ? await Project.countDocuments({ user: user._id })
+      : projects?.length;
+
+    const response = {
+      projects: mapProjectsToResponse(projects),
+      ...(usePagination && {
+        metadata: {
+          currentPage: parsedPage || 1,
+          totalPages: Math.ceil(totalProjects / parsedLimit) || 1,
+          totalProjects,
+          limit: parsedLimit,
+          hasPagination: true
+        }
+      })
+    };
+
     res.json(response);
   } catch (e) {
     res.status(500).json({ message: 'Error fetching projects' });

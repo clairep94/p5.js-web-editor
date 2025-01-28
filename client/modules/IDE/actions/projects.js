@@ -3,15 +3,18 @@ import * as ActionTypes from '../../../constants';
 import { startLoader, stopLoader } from '../reducers/loading';
 
 // eslint-disable-next-line
-export function getProjects(username) {
+export function getProjects(username, currentPage, sketchesPerPage) {
   return (dispatch) => {
     dispatch(startLoader());
     let url;
-    if (username) {
+    if (username && currentPage && sketchesPerPage) {
+      url = `/${username}/projects?page=${currentPage}&limit=${sketchesPerPage}`;
+    } else if (username) {
       url = `/${username}/projects`;
     } else {
       url = '/projects';
     }
+
     return apiClient
       .get(url)
       .then((response) => {
