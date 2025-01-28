@@ -14,6 +14,7 @@ import Loader from '../../App/components/loader';
 import Overlay from '../../App/components/Overlay';
 import AddToCollectionList from './AddToCollectionList';
 import SketchListRowBase from './SketchListRowBase';
+import Pagination from './Pagination';
 import ArrowUpIcon from '../../../images/sort-arrow-up.svg';
 import ArrowDownIcon from '../../../images/sort-arrow-down.svg';
 
@@ -24,6 +25,7 @@ const SketchList = ({
   username,
   loading,
   sorting,
+  paginationData,
   toggleDirectionForField,
   resetSorting,
   mobile
@@ -33,10 +35,12 @@ const SketchList = ({
   const [sketchToAddToCollection, setSketchToAddToCollection] = useState(null);
   const { t } = useTranslation();
 
+  const sketchesPerPage = mobile ? 7 : 10;
+
   useEffect(() => {
-    getProjects(username);
+    getProjects(username, currentPage, sketchesPerPage);
     resetSorting();
-  }, [getProjects, username, resetSorting]);
+  }, [getProjects, username, currentPage, resetSorting]);
 
   useEffect(() => {
     if (Array.isArray(sketches)) {
@@ -54,12 +58,12 @@ const SketchList = ({
 
   const isLoading = () => loading && isInitialDataLoad;
 
-  const hasSketches = () => !isLoading() && sketches.length > 0;
+  const hasSketches = () => !isLoading() && sketches?.length > 0;
 
   const renderLoader = () => isLoading() && <Loader />;
 
   const renderEmptyTable = () => {
-    if (!isLoading() && sketches.length === 0) {
+    if (!isLoading() && sketches?.length === 0) {
       return (
         <p className="sketches-table__empty">{t('SketchList.NoSketches')}</p>
       );
@@ -119,19 +123,6 @@ const SketchList = ({
     [sorting, getButtonLabel, toggleDirectionForField, t]
   );
 
-  const pageNumbers = [];
-  let sketchesPerPage = 5;
-  if (mobile) {
-    sketchesPerPage = 7;
-  }
-  const totalSketches = sketches.length;
-  const indexOfLastSketch = currentPage * sketchesPerPage;
-  const indexOfFirstSketch = indexOfLastSketch - sketchesPerPage;
-  const TotalPages = Math.ceil(totalSketches / sketchesPerPage);
-  for (let i = 1; i <= TotalPages; i += 1) {
-    pageNumbers.push(i);
-  }
-
   return (
     <article className="sketches-table-container">
       <Helmet>
@@ -163,68 +154,31 @@ const SketchList = ({
             </tr>
           </thead>
           <tbody>
-            {sketches
-              .slice(indexOfFirstSketch, indexOfLastSketch)
-              .map((sketch) => (
-                <SketchListRowBase
-                  mobile={mobile}
-                  key={sketch.id}
-                  sketch={sketch}
-                  user={user}
-                  username={username}
-                  onAddToCollection={() => setSketchToAddToCollection(sketch)}
-                  t={t}
-                />
-              ))}
+            {sketches.map((sketch) => (
+              <SketchListRowBase
+                mobile={mobile}
+                key={sketch.id}
+                sketch={sketch}
+                user={user}
+                username={username}
+                onAddToCollection={() => setSketchToAddToCollection(sketch)}
+                t={t}
+              />
+            ))}
           </tbody>
         </table>
       )}
-      <div className="pagination">
-        <ul className="pagination-ul">
-          <li className="page-item">
-            <button
-              className="page-link"
-              onClick={() => setCurrentPage(Math.max(currentPage - 1, 1))}
-              disabled={currentPage === 1}
-            >
-              Prev
-            </button>
-          </li>
-          <li>
-            <button className="page-link" onClick={() => setCurrentPage(1)}>
-              1
-            </button>
-          </li>
-          <li>
-            <span>.......</span>
-          </li>
-          <li>
-            <button className="page-link"> {currentPage} </button>
-          </li>
-          <li>
-            <span>&nbsp;of&nbsp;</span>
-          </li>
-          <li>
-            <button
-              className="page-link"
-              onClick={() => setCurrentPage(TotalPages)}
-            >
-              {TotalPages}
-            </button>
-          </li>
-          <li className="page-item">
-            <button
-              className="page-link"
-              onClick={() =>
-                setCurrentPage(Math.min(currentPage + 1, TotalPages))
-              }
-              disabled={currentPage === TotalPages}
-            >
-              Next
-            </button>
-          </li>
-        </ul>
-      </div>
+
+      {hasSketches() && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={paginationData.totalPages}
+          onPageChange={setCurrentPage}
+          sketchesPerPage={sketchesPerPage}
+          totalSketches={paginationData.totalProjects}
+        />
+      )}
+
       {sketchToAddToCollection && (
         <Overlay
           isFixedHeight
@@ -252,6 +206,13 @@ SketchList.propTypes = {
       updatedAt: PropTypes.string.isRequired
     })
   ).isRequired,
+  paginationData: PropTypes.shape({
+    currentPage: PropTypes.number.isRequired,
+    totalPages: PropTypes.number.isRequired,
+    totalProjects: PropTypes.number.isRequired,
+    limit: PropTypes.number.isRequired,
+    hasPagination: PropTypes.bool.isRequired
+  }).isRequired,
   username: PropTypes.string,
   loading: PropTypes.bool.isRequired,
   toggleDirectionForField: PropTypes.func.isRequired,
@@ -271,7 +232,8 @@ SketchList.defaultProps = {
 function mapStateToProps(state) {
   return {
     user: state.user,
-    sketches: getSortedSketches(state),
+    sketches: getSortedSketches(state).sketches,
+    paginationData: getSortedSketches(state).metadata,
     sorting: state.sorting,
     loading: state.loading,
     project: state.project
