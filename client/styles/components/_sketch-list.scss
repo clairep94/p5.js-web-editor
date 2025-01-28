@@ -73,35 +73,38 @@
 .pagination {
   width: 100%;
   position: fixed;
-  bottom: 0;
+  z-index: 1;
+  bottom: 1.5rem;
   left: 0;
-  justify-content: center;
 
   .pagination-ul {
     bottom: 0;
-    margin-top: auto;
     display: flex;
     justify-content: center;
 
     > li {
-      margin: 0 2px;
+      margin: 0 0.2rem;
 
       .page-link {
-        @include themify() {
-          color: #ed225d;
-          font-weight: 800;
-          padding: 0 10px;
-          border: 1px solid #fbd2de;
-        }
+        font-weight: 800;
+        padding: 0 1rem;
       }
     }
+
+    .bold-text {
+      font-weight: bold;
+    }
+  }
+
+  .page-link:disabled,
+  .page-item.disabled .page-link {
+    cursor: not-allowed;
+    opacity: 0.5;
   }
 }
 
 .pagination-ul > li button:hover {
-  @include themify() {
-    background-color: #f9bcce;
-  }
+  text-decoration: underline;
 }
 
 .sketches-table {
