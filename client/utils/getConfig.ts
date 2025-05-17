@@ -1,4 +1,4 @@
-export function isTestEnvironment(): boolean {
+export function isTestEnvironment() {
   // eslint-disable-next-line no-use-before-define
   const env = getConfig('NODE_ENV', { warn: false });
   return env === 'test';
@@ -11,7 +11,7 @@ interface GetConfigOptions {
 /**
  * Returns config item from environment
  */
-function getConfig(key:string, options: GetConfigOptions = { warn: !isTestEnvironment() }):string | undefined {
+function getConfig(key, options: GetConfigOptions = { warn: !isTestEnvironment() }):string | undefined {
   if (!key) {
     throw new Error('"key" must be provided to getConfig()');
   }
