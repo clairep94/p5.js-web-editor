@@ -1,30 +1,67 @@
-export function isTestEnvironment() {
-  // eslint-disable-next-line no-use-before-define
-  const env = getConfig('NODE_ENV', { warn: false });
-  return env === 'test';
+export function isTestEnvironment():boolean {
+  return process.env.NODE_ENV === 'test'
 }
 
-interface GetConfigOptions {
-  warn?: boolean;
+interface GetConfigOptions{
+  parseType?: 'string' | 'number' | 'boolean',
+  nullishString?: boolean,
+  warn?: boolean
+}
+
+const defaultOptions: GetConfigOptions = {
+  parseType: 'string',
+  nullishString: false,
+  warn: !isTestEnvironment()
 }
 
 /**
  * Returns config item from environment
  */
-function getConfig(key, options: GetConfigOptions = { warn: !isTestEnvironment() }):string | undefined {
+export default function getConfig( key:string, optionsOverrides:GetConfigOptions={} ) :string | number | boolean | undefined {
   if (!key) {
     throw new Error('"key" must be provided to getConfig()');
   }
 
+  // set options for the output of getConfig
+  const options = { ...defaultOptions, ...optionsOverrides };
+  const { parseType, nullishString, warn } = options;
+
   const env =
     (typeof global !== 'undefined' ? global : window)?.process?.env || {};
-  const value = env[key];
+    const value = env[key];
 
-  if (value == null && options?.warn !== false) {
-    console.warn(`getConfig("${key}") returned null`);
+  // handle nullish values
+  if (!value) {
+    if(warn !== false){
+      console.warn(`getConfig("${key}") returned null`);
+    }
+    return nullishString ? '' : value
   }
 
-  return value;
+  // handle parsing desired return type
+  switch (parseType) {
+    case 'number': {
+      const parsed = Number(value);
+      if (isNaN(parsed)) {
+        if (warn !== false) {
+          console.warn(`getConfig("${key}") expected a number but got: ${value}`);
+        }
+        return value;
+      }
+      return parsed;
+    }
+    case 'boolean': {
+      const normalized = value.toLowerCase();
+      if(normalized === 'true') return true;
+      if(normalized === 'false') return false;
+      if (warn !== false) {
+        console.warn(`getConfig("${key}") expected a boolean but got: ${value}`);
+      }
+      return value;
+    }
+    case 'string':
+      return value
+    default:
+      return value;
+  }
 }
-
-export default getConfig;
