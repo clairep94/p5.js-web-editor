@@ -38,7 +38,7 @@ export default function getConfig(
     if (!warn) {
       console.warn(`getConfig("${key}") returned null`);
     }
-    return nullishString ? '' : value;
+    return nullishString ? '' : undefined;
   }
 
   // handle parsing desired return type
@@ -55,17 +55,18 @@ export default function getConfig(
       }
       return parsed;
     }
-    case 'boolean': {
-      const normalized = value.toLowerCase();
-      if (normalized === 'true') return true;
-      if (normalized === 'false') return false;
-      if (!warn) {
-        console.warn(
-          `getConfig("${key}") expected a boolean but got: ${value}`
-        );
-      }
-      return value;
-    }
+    // case 'boolean': {
+    //   console.log('get config wants boolean:', value);
+    //   const normalized = value.toLowerCase();
+    //   if (normalized === 'true') return true;
+    //   if (normalized === 'false') return false;
+    //   if (!warn) {
+    //     console.warn(
+    //       `getConfig("${key}") expected a boolean but got: ${value}`
+    //     );
+    //   }
+    //   return value;
+    // }
     case 'string':
       return value;
     default:
