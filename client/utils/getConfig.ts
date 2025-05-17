@@ -55,18 +55,21 @@ export default function getConfig(
       }
       return parsed;
     }
-    // case 'boolean': {
-    //   console.log('get config wants boolean:', value);
-    //   const normalized = value.toLowerCase();
-    //   if (normalized === 'true') return true;
-    //   if (normalized === 'false') return false;
-    //   if (!warn) {
-    //     console.warn(
-    //       `getConfig("${key}") expected a boolean but got: ${value}`
-    //     );
-    //   }
-    //   return value;
-    // }
+    case 'boolean': {
+      console.log('get config wants boolean:', value);
+      if (typeof value === 'boolean') {
+        return value;
+      }
+      const normalized = value.toLowerCase();
+      if (normalized === 'true') return true;
+      if (normalized === 'false') return false;
+      if (!warn) {
+        console.warn(
+          `getConfig("${key}") expected a boolean but got: ${value}`
+        );
+      }
+      return value;
+    }
     case 'string':
       return value;
     default:
