@@ -38,7 +38,7 @@ export default function getConfig(
     if (!warn) {
       console.warn(`getConfig("${key}") returned null`);
     }
-    return nullishString ? '' : undefined;
+    return nullishString ? '' : value;
   }
 
   // handle parsing desired return type
@@ -56,7 +56,6 @@ export default function getConfig(
       return parsed;
     }
     case 'boolean': {
-      console.log('get config wants boolean:', value);
       if (typeof value === 'boolean') {
         return value;
       }
