@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import MenubarSubmenu from '../../../../components/Menubar/MenubarSubmenu';
 import MenubarItem from '../../../../components/Menubar/MenubarItem';
 import { availableLanguages, languageKeyToLabel } from '../../../../i18n';
-import getConfig from '../../../../utils/getConfig';
+import getConfig from '../../../../utils/getConfig.ts';
 import { showToast } from '../../actions/toast';
 import { setLanguage } from '../../actions/preferences';
 import Menubar from '../../../../components/Menubar/Menubar';
@@ -75,7 +75,7 @@ LeftLayout.defaultProps = {
 };
 
 const UserMenu = () => {
-  const isLoginEnabled = getConfig('LOGIN_ENABLED');
+  const isLoginEnabled = getConfig('LOGIN_ENABLED', { parseType: 'boolean' });
   const isAuthenticated = useSelector(getAuthenticated);
 
   if (isLoginEnabled && isAuthenticated) {
@@ -167,7 +167,8 @@ const ProjectMenu = () => {
         <MenubarItem onClick={newSketch}>{t('Nav.File.New')}</MenubarItem>
         <MenubarItem
           hideIf={
-            !getConfig('LOGIN_ENABLED') || (project?.owner && !isUserOwner)
+            !getConfig('LOGIN_ENABLED', { parseType: 'boolean' }) ||
+            (project?.owner && !isUserOwner)
           }
           onClick={() => saveSketch(cmRef.current)}
         >
@@ -194,7 +195,7 @@ const ProjectMenu = () => {
         </MenubarItem>
         <MenubarItem
           hideIf={
-            !getConfig('UI_COLLECTIONS_ENABLED') ||
+            !getConfig('UI_COLLECTIONS_ENABLED', { parseType: 'boolean' }) ||
             !user.authenticated ||
             isUnsaved
           }
@@ -203,7 +204,7 @@ const ProjectMenu = () => {
           {t('Nav.File.AddToCollection')}
         </MenubarItem>
         <MenubarItem
-          hideIf={!getConfig('EXAMPLES_ENABLED')}
+          hideIf={!getConfig('EXAMPLES_ENABLED', { parseType: 'boolean' })}
           href="/p5/sketches"
         >
           {t('Nav.File.Examples')}
@@ -251,7 +252,9 @@ const ProjectMenu = () => {
         </MenubarItem>
         <MenubarItem href="/about">{t('Nav.Help.About')}</MenubarItem>
       </MenubarSubmenu>
-      {getConfig('TRANSLATIONS_ENABLED') && <LanguageMenu />}
+      {getConfig('TRANSLATIONS_ENABLED', { parseType: 'boolean' }) && (
+        <LanguageMenu />
+      )}
     </ul>
   );
 };
@@ -334,7 +337,9 @@ const AuthenticatedUserMenu = () => {
         </MenubarItem>
         <MenubarItem
           href={`/${username}/collections`}
-          hideIf={!getConfig('UI_COLLECTIONS_ENABLED')}
+          hideIf={
+            !getConfig('UI_COLLECTIONS_ENABLED', { parseType: 'boolean' })
+          }
         >
           {t('Nav.Auth.MyCollections')}
         </MenubarItem>

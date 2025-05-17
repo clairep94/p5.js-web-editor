@@ -1,4 +1,4 @@
-import getConfig, { isTestEnvironment } from './getConfig';
+import getConfig from './getConfig.ts';
 
 describe('utils/getConfig()', () => {
   beforeEach(() => {
@@ -64,7 +64,7 @@ describe('utils/getConfig()', () => {
   });
   it('can be set to return an empty string as the nullish value', () => {
     const result = getConfig('CONFIG_TEST_KEY_NAME', { nullishString: true });
-    expect(`${result}`).toBe(''); //eg.IDE>actions>uploader.js `https://s3-${getConfig('AWS_REGION')}.amazonaws.com/${getConfig('S3_BUCKET')}
+    expect(`${result}`).toBe(''); // eg.IDE>actions>uploader.js `https://s3-${getConfig('AWS_REGION')}.amazonaws.com/${getConfig('S3_BUCKET')}
   });
   it('can warns but does not throw if the wrong parseType is provided', () => {
     window.process.env.CONFIG_TEST_KEY_NAME = 'TRUE';
