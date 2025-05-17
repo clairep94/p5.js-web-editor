@@ -1,4 +1,4 @@
-import getConfig from './getConfig';
+import getConfig, { isTestEnvironment } from './getConfig';
 
 describe('utils/getConfig()', () => {
   beforeEach(() => {
@@ -8,6 +8,16 @@ describe('utils/getConfig()', () => {
 
   it('throws if key is not defined', () => {
     expect(() => getConfig(/* key is missing */)).toThrow(/must be provided/);
+  });
+
+  it('throws if key is empty string', () => {
+    expect(() => getConfig(/* key is empty string */ '')).toThrow(
+      /must be provided/
+    );
+  });
+
+  it('throws if key is null', () => {
+    expect(() => getConfig(/* key is null */ null)).toThrow(/must be provided/);
   });
 
   it('fetches from global.process', () => {

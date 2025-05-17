@@ -1,13 +1,18 @@
-function isTestEnvironment() {
+export function isTestEnvironment(): boolean {
   // eslint-disable-next-line no-use-before-define
-  return getConfig('NODE_ENV', { warn: false }) === 'test';
+  const env = getConfig('NODE_ENV', { warn: false });
+  return env === 'test';
+}
+
+interface GetConfigOptions {
+  warn?: boolean;
 }
 
 /**
  * Returns config item from environment
  */
-function getConfig(key, options = { warn: !isTestEnvironment() }) {
-  if (key == null) {
+function getConfig(key:string, options: GetConfigOptions = { warn: !isTestEnvironment() }):string | undefined {
+  if (!key) {
     throw new Error('"key" must be provided to getConfig()');
   }
 
