@@ -75,4 +75,10 @@ describe('utils/getConfig()', () => {
       getConfig('CONFIG_TEST_KEY_NAME', { parseType: 'number' })
     ).not.toThrow();
   });
+
+  it('returns expected for parseing a boolean if the value does not exist', () => {
+    const result = getConfig('CONFIG_TEST_KEY_NAME', { parseType: 'boolean' });
+    expect(result).toBe(undefined);
+    expect(!result).toBe(true);
+  });
 });

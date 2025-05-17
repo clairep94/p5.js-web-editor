@@ -35,7 +35,7 @@ export default function getConfig(
 
   // handle nullish values
   if (!value) {
-    if (warn !== false) {
+    if (!warn) {
       console.warn(`getConfig("${key}") returned null`);
     }
     return nullishString ? '' : value;
@@ -46,7 +46,7 @@ export default function getConfig(
     case 'number': {
       const parsed = Number(value);
       if (Number.isNaN(parsed)) {
-        if (warn !== false) {
+        if (!warn) {
           console.warn(
             `getConfig("${key}") expected a number but got: ${value}`
           );
@@ -59,7 +59,7 @@ export default function getConfig(
       const normalized = value.toLowerCase();
       if (normalized === 'true') return true;
       if (normalized === 'false') return false;
-      if (warn !== false) {
+      if (!warn) {
         console.warn(
           `getConfig("${key}") expected a boolean but got: ${value}`
         );
