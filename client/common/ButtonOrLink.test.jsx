@@ -33,4 +33,14 @@ describe('ButtonOrLink', () => {
 
     await waitFor(() => expect(history.location.pathname).toEqual('/about'));
   });
+
+  it('can render any child components', () => {
+    const MockChild = () => <div data-testid="mock-child">Mock Child</div>;
+    render(
+      <ButtonOrLink>
+        <MockChild />
+      </ButtonOrLink>
+    );
+    expect(screen.getByTestId('mock-child')).toBeInTheDocument();
+  })
 });

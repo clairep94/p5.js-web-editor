@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import ButtonOrLink from '../../common/ButtonOrLink';
+import ButtonOrLink from '../../common/ButtonOrLink.tsx';
 
 // TODO: combine with NavMenuItem
 
