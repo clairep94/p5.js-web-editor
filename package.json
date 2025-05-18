@@ -13,6 +13,7 @@
     "build:server": "cross-env NODE_ENV=production webpack --config webpack/config.server.js",
     "build:examples": "cross-env NODE_ENV=production webpack --config webpack/config.examples.js",
     "test": "NODE_ENV=test jest",
+    "test:watch": "NODE_ENV=test jest --watch",
     "test:ci": "npm run lint && npm run test",
     "fetch-examples": "cross-env NODE_ENV=development node ./server/scripts/fetch-examples.js",
     "fetch-examples-gg": "cross-env NODE_ENV=development node ./server/scripts/fetch-examples-gg.js",
@@ -25,11 +26,13 @@
     "heroku-postbuild": "touch .env; npm run build",
     "storybook:build:css": "sass client/styles/main.scss client/styles/storybook.css",
     "storybook": "npm run storybook:build:css && storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "typecheck": "npx tsc --noEmit",
+    "typecheck:client": "npx tsc --noEmit -p ./client/tsconfig.json"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged"
+      "pre-commit": "npm run typecheck:client && lint-staged"
     }
   },
   "lint-staged": {
@@ -96,6 +99,7 @@
     "@babel/plugin-transform-react-inline-elements": "^7.14.5",
     "@babel/preset-env": "^7.14.7",
     "@babel/preset-react": "^7.14.5",
+    "@babel/preset-typescript": "^7.27.1",
     "@storybook/addon-actions": "^7.6.8",
     "@storybook/addon-docs": "^7.6.8",
     "@storybook/addon-essentials": "^7.6.8",
@@ -110,6 +114,9 @@
     "@svgr/webpack": "^6.2.1",
     "@testing-library/jest-dom": "^5.15.0",
     "@testing-library/react": "^12.1.2",
+    "@types/node": "^22.15.18",
+    "@types/react": "^19.1.4",
+    "@types/react-dom": "^19.1.5",
     "babel-core": "^7.0.0-bridge.0",
     "babel-jest": "^29.7.0",
     "babel-loader": "^8.2.5",
@@ -148,6 +155,7 @@
     "storybook-addon-theme-playground": "^3.1.0",
     "style-loader": "^3.3.1",
     "terser-webpack-plugin": "^5.3.1",
+    "typescript": "^5.8.3",
     "webpack-cli": "^4.9.2",
     "webpack-manifest-plugin": "^5.0.0",
     "webpack-node-externals": "^3.0.0"

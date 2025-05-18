@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import CopyableInput from './CopyableInput';
-// import getConfig from '../../../utils/getConfig';
+// import getConfig from '../../../utils/getConfig.ts';
 
 const ShareModal = () => {
   const { t } = useTranslation();

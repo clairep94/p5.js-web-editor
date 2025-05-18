@@ -9,7 +9,7 @@ import * as IdeActions from '../actions/ide';
 import TableDropdown from '../../../components/Dropdown/TableDropdown';
 import MenuItem from '../../../components/Dropdown/MenuItem';
 import dates from '../../../utils/formatDate';
-import getConfig from '../../../utils/getConfig';
+import getConfig from '../../../utils/getConfig.ts';
 
 const ROOT_URL = getConfig('API_URL');
 

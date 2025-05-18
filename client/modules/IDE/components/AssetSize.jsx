@@ -2,9 +2,9 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import prettyBytes from 'pretty-bytes';
 
-import getConfig from '../../../utils/getConfig';
+import getConfig from '../../../utils/getConfig.ts';
 
-const limit = getConfig('UPLOAD_LIMIT') || 250000000;
+const limit = getConfig('UPLOAD_LIMIT', { parseType: 'number' }) || 250000000;
 const MAX_SIZE_B = limit;
 
 const formatPercent = (percent) => {
