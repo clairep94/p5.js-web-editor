@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, history } from '../test-utils';
-import ButtonOrLink from './ButtonOrLink';
+import ButtonOrLink from './ButtonOrLink.tsx';
 
 describe('ButtonOrLink', () => {
   const clickHandler = jest.fn();
@@ -32,5 +32,15 @@ describe('ButtonOrLink', () => {
     fireEvent.click(link);
 
     await waitFor(() => expect(history.location.pathname).toEqual('/about'));
+  });
+
+  it('can render any child components', () => {
+    const MockChild = () => <div data-testid="mock-child">Mock Child</div>;
+    render(
+      <ButtonOrLink>
+        <MockChild />
+      </ButtonOrLink>
+    );
+    expect(screen.getByTestId('mock-child')).toBeInTheDocument();
   });
 });
