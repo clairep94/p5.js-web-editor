@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, history } from '../test-utils';
-import ButtonOrLink from './ButtonOrLink';
+import ButtonOrLink from './ButtonOrLink.tsx';
 
 describe('ButtonOrLink', () => {
   const clickHandler = jest.fn();
@@ -42,5 +42,5 @@ describe('ButtonOrLink', () => {
       </ButtonOrLink>
     );
     expect(screen.getByTestId('mock-child')).toBeInTheDocument();
-  })
+  });
 });
