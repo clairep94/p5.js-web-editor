@@ -37,6 +37,8 @@
     }],
     "class-methods-use-this": 0,
     "react/jsx-no-bind": [2, {"allowBind": true, "allowArrowFunctions": true}],
+    "react/prop-types": "off",
+    "react/jsx-filename-extension": ["error", { "extensions": [".js", ".jsx", ".ts", ".tsx"] }],
     "no-return-assign": [2, "except-parens"],
     "jsx-a11y/anchor-is-valid": [
       "error",
@@ -96,13 +98,6 @@
       // "plugins": ["@typescript-eslint"], // fix this later, this can't be added due to eslint version peer-dependency
       "rules": {
         "no-undef": "off"
-      }
-    },
-    {
-      "files": ["*.tsx"],
-      "rules": {
-        "react/prop-types": "off",
-        "react/jsx-filename-extension": ["error", { "extensions": [".js", ".jsx", ".ts", ".tsx"] }]
       }
     }
   ]

@@ -15,7 +15,7 @@ import { Link } from 'react-router-dom';
  *   Can be plain text or a React element.
  */
 type ButtonOrLinkProps = {
-  href?: string,
+  href?: string | undefined,
   children: ReactNode
 } & Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'href'> &
   Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href'>;
