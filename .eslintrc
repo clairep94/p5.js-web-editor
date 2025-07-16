@@ -26,6 +26,7 @@
         "tsx": "never"
       }
     ],
+    "import/prefer-default-export": "off",
     "comma-dangle": 0,  // not sure why airbnb turned this on. gross!
     "indent": 0,
     "no-console": 0,
@@ -107,7 +108,8 @@
     {
       "files": ["*.stories.@(js|jsx|ts|tsx)"],
       "rules": {
-        "import/no-extraneous-dependencies": "off"
+        "import/no-extraneous-dependencies": "off",
+        "import/prefer-default-export": "off"
       }
     }
   ]
