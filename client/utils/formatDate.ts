@@ -4,10 +4,12 @@ import format from 'date-fns/format';
 import isValid from 'date-fns/isValid';
 import parseISO from 'date-fns/parseISO';
 import i18next from 'i18next';
-
 import { currentDateLocale } from '../i18n';
 
-function parse(maybeDate) {
+/**
+ * Parses a date input into a valid Date object or returns null.
+ */
+function parse(maybeDate: Date | string) {
   const date = maybeDate instanceof Date ? maybeDate : parseISO(maybeDate);
 
   if (isValid(date)) {
@@ -18,14 +20,14 @@ function parse(maybeDate) {
 }
 
 export default {
-  distanceInWordsToNow(date) {
+  distanceInWordsToNow(date: Date | string): string {
     const parsed = parse(date);
 
     if (parsed) {
       const now = new Date();
-      const diffInMs = differenceInMilliseconds(now, parsed);
+      const diffInMs = Math.abs(differenceInMilliseconds(now, parsed));
 
-      if (Math.abs(diffInMs < 10000)) {
+      if (diffInMs < 10000) {
         return i18next.t('formatDate.JustNow');
       } else if (diffInMs < 20000) {
         return i18next.t('formatDate.15Seconds');
@@ -44,7 +46,7 @@ export default {
 
     return '';
   },
-  format(date, { showTime = true } = {}) {
+  format(date: Date | string, { showTime = true } = {}) {
     const parsed = parse(date);
     const formatType = showTime ? 'PPpp' : 'PP';
 
