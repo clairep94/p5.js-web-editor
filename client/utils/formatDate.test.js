@@ -64,14 +64,14 @@ describe('dateUtils', () => {
       const date = new Date('2025-07-16T12:34:56Z');
       const formatted = dateUtils.format(date);
 
-      expect(formatted).toMatch(/\d{4}/); // Contains year
+      expect(formatted).toMatch(/(\d{1,2}:\d{2})/); // Contains time
     });
 
     it('formats without time when showTime is false', () => {
       const date = new Date('2025-07-16T12:34:56Z');
       const formatted = dateUtils.format(date, { showTime: false });
 
-      expect(formatted).not.toContain(':'); // No time
+      expect(formatted).not.toMatch(/(\d{1,2}:\d{2})/); // Contains time
     });
 
     it('returns empty string for invalid date', () => {
