@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
 import getConfig from './getConfig';
 
-const ROOT_URL: string = getConfig('API_URL') ?? '/editor';
+const ROOT_URL: string = getConfig('API_URL') ?? '';
 
 /**
  * Configures and returns an Axios instance with the base API URL and credentials enabled
