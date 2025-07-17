@@ -1,20 +1,27 @@
-/* eslint-disable */
 import i18n from 'i18next';
-export const domOnlyProps = ({
-  initialValue,
-  autofill,
-  onUpdate,
-  valid,
-  invalid,
-  dirty,
-  pristine,
-  active,
-  touched,
-  visited,
-  autofilled,
-  error,
-  ...domProps
-}) => domProps;
+import type { InputHTMLAttributes } from 'react';
+
+/* eslint-disable */
+export const domOnlyProps = (
+  props: any
+): InputHTMLAttributes<HTMLInputElement> => {
+  const {
+    initialValue,
+    autofill,
+    onUpdate,
+    valid,
+    invalid,
+    dirty,
+    pristine,
+    active,
+    touched,
+    visited,
+    autofilled,
+    error,
+    ...domProps
+  } = props;
+  return domProps;
+};
 /* eslint-enable */
 
 /* eslint-disable */
