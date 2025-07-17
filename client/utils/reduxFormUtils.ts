@@ -2,6 +2,11 @@ import i18n from 'i18next';
 import type { InputHTMLAttributes } from 'react';
 
 /* eslint-disable */
+/**
+ * Strips non-DOM props from a form field and returns only valid DOM props.
+ * @param {any} props - Props passed into a form field component.
+ * @returns {InputHTMLAttributes<HTMLInputElement>} - Clean DOM-compatible props.
+ */
 export const domOnlyProps = (
   props: any
 ): InputHTMLAttributes<HTMLInputElement> => {
@@ -64,6 +69,11 @@ type GenericFormErrors =  {
   [key: string]: string
 }
 
+/**
+ * Validates username and email fields and transforms the error param
+ * @param formProps 
+ * @param errors 
+ */
 function validateNameEmail(
   formProps: { username?: string, email?: string },
   errors: GenericFormErrors
@@ -86,6 +96,11 @@ function validateNameEmail(
   }
 }
 
+/**
+ * Validates the password and confirm password, and transforms the error param
+ * @param formProps 
+ * @param errors 
+ */
 function validatePasswords(
   formProps: {
     password?: string,
@@ -111,6 +126,10 @@ function validatePasswords(
   }
 }
 
+/**
+ * @param formProps 
+ * @returns Object containing validation errors for each field in the settings form
+ */
 export function validateSettings(formProps: SettingsForm): FormErrors<SettingsForm> {
   const errors: FormErrors<SettingsForm> = {};
 
@@ -131,6 +150,10 @@ export function validateSettings(formProps: SettingsForm): FormErrors<SettingsFo
   return errors;
 }
 
+/**
+ * @param formProps 
+ * @returns Object containing validation errors for each field in the login form
+ */
 export function validateLogin(formProps: LoginForm): FormErrors<LoginForm> {
   const errors: FormErrors<LoginForm> = {};
   if (!formProps.email && !formProps.username) {
@@ -142,12 +165,20 @@ export function validateLogin(formProps: LoginForm): FormErrors<LoginForm> {
   return errors;
 }
 
+/**
+ * @param formProps 
+ * @returns Object containing validation errors for each field in the new password form
+ */
 export function validateNewPassword(formProps: NewPasswordForm): FormErrors<NewPasswordForm> {
   const errors = {};
   validatePasswords(formProps, errors);
   return errors;
 }
 
+/**
+ * @param formProps 
+ * @returns Object containing validation errors for each field in the signup form
+ */
 export function validateSignup(formProps: SignupForm): FormErrors<SignupForm> {
   const errors = {};
 
@@ -157,6 +188,10 @@ export function validateSignup(formProps: SignupForm): FormErrors<SignupForm> {
   return errors;
 }
 
+/**
+ * @param formProps 
+ * @returns Object containing validation errors for each field in the reset password form
+ */
 export function validateResetPassword(formProps: ResetPasswordForm): FormErrors<ResetPasswordForm> {
   const errors: FormErrors<ResetPasswordForm> = {};
   if (!formProps.email) {
