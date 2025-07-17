@@ -53,12 +53,20 @@ export function registerFrame(
   };
 }
 
+/**
+ * Notify the currently registered listener (if any) with a `message`
+ * @param message 
+ */
 function notifyListener(message: Message): void {
   if (listener) listener(message);
 }
 
+/**
+ * Notify each registered frame with a `message`
+ * @param message 
+ */
 function notifyFrames(message: Message) {
-  const rawMessage = JSON.parse(JSON.stringify(message));
+  const rawMessage = JSON.parse(JSON.stringify(message)); // deep copy to avoid mutation
 
   Object.values(frames).forEach((frameObj) => {
     const { frame, origin } = frameObj;
@@ -93,12 +101,15 @@ export function listen(callback: (message: Message) => void): () => void {
   };
 }
 
-function eventListener(e: MessageEvent): void {
+/**
+ * Internal handler for `message` events.
+ * Validates message shape and forwards to the registered listener.
+ * @param e - The MessageEvent from the browser.
+ */
+function eventListener(e: MessageEvent) {
   const { data } = e;
 
-  // should also store origin of parent? idk
-  // if (data && e.origin === origin) {
-  if (data) {
+  if (data && typeof data === 'object' && 'type' in data) {
     notifyListener(data as Message);
   }
 }
