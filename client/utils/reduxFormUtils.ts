@@ -21,7 +21,14 @@ export const domOnlyProps = ({
 const EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/i;
 /* eslint-enable */
 
-function validateNameEmail(formProps, errors) {
+type GenericFormErrors = {
+  [key: string]: string
+};
+
+function validateNameEmail(
+  formProps: { username?: string, email?: string },
+  errors: { username?: string, email?: string }
+) {
   if (!formProps.username) {
     errors.username = i18n.t('ReduxFormUtils.errorEmptyUsername');
   } else if (!formProps.username.match(/^.{1,20}$/)) {
@@ -40,8 +47,13 @@ function validateNameEmail(formProps, errors) {
   }
 }
 
-export function validateSettings(formProps) {
-  const errors = {};
+export function validateSettings(formProps: {
+  username?: string,
+  email?: string,
+  currentPassword?: string,
+  newPassword?: string
+}) {
+  const errors: GenericFormErrors = {};
 
   validateNameEmail(formProps, errors);
 
@@ -60,8 +72,16 @@ export function validateSettings(formProps) {
   return errors;
 }
 
-export function validateLogin(formProps) {
-  const errors = {};
+export function validateLogin(formProps: {
+  username?: string,
+  email?: string,
+  password?: string
+}): {
+  username?: string,
+  email?: string,
+  password?: string
+} {
+  const errors: GenericFormErrors = {};
   if (!formProps.email && !formProps.username) {
     errors.email = i18n.t('ReduxFormUtils.errorEmptyEmailorUserName');
   }
@@ -71,7 +91,13 @@ export function validateLogin(formProps) {
   return errors;
 }
 
-function validatePasswords(formProps, errors) {
+function validatePasswords(
+  formProps: {
+    password?: string,
+    confirmPassword?: string
+  },
+  errors: GenericFormErrors
+) {
   if (!formProps.password) {
     errors.password = i18n.t('ReduxFormUtils.errorEmptyPassword');
   }
@@ -90,13 +116,29 @@ function validatePasswords(formProps, errors) {
   }
 }
 
-export function validateNewPassword(formProps) {
+export function validateNewPassword(formProps: {
+  password?: string,
+  confirmPassword?: string
+}): {
+  password?: string,
+  confirmPassword?: string
+} {
   const errors = {};
   validatePasswords(formProps, errors);
   return errors;
 }
 
-export function validateSignup(formProps) {
+export function validateSignup(formProps: {
+  email?: string,
+  username?: string,
+  password?: string,
+  confirmPassword?: string
+}): {
+  email?: string,
+  username?: string,
+  password?: string,
+  confirmPassword?: string
+} {
   const errors = {};
 
   validateNameEmail(formProps, errors);
@@ -104,8 +146,13 @@ export function validateSignup(formProps) {
 
   return errors;
 }
-export function validateResetPassword(formProps) {
-  const errors = {};
+
+export function validateResetPassword(formProps: {
+  email?: string
+}): {
+  email?: string
+} {
+  const errors: { email?: string } = {};
   if (!formProps.email) {
     errors.email = i18n.t('ReduxFormUtils.errorEmptyEmail');
   } else if (
