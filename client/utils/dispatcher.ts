@@ -1,7 +1,9 @@
 // Inspired by
 // https://github.com/codesandbox/codesandbox-client/blob/master/packages/codesandbox-api/src/dispatcher/index.ts
 
-const frames = {};
+const frames: {
+  [key: number]: { frame: Window | null, origin: string | null | undefined }
+} = {};
 let frameIndex = 1;
 let listener = null;
 
@@ -14,7 +16,10 @@ export const MessageTypes = {
   EXECUTE: 'EXECUTE'
 };
 
-export function registerFrame(newFrame, newOrigin) {
+export function registerFrame(
+  newFrame: Window | null,
+  newOrigin: string | null | undefined
+) {
   const frameId = frameIndex;
   frameIndex += 1;
   frames[frameId] = { frame: newFrame, origin: newOrigin };
@@ -27,10 +32,11 @@ function notifyListener(message) {
   if (listener) listener(message);
 }
 
-function notifyFrames(message) {
+function notifyFrames(message: any) {
   const rawMessage = JSON.parse(JSON.stringify(message));
-  Object.keys(frames).forEach((frameId) => {
-    const { frame, origin } = frames[frameId];
+
+  Object.values(frames).forEach((frameObj) => {
+    const { frame, origin } = frameObj;
     if (frame && frame.postMessage) {
       frame.postMessage(rawMessage, origin);
     }
@@ -56,7 +62,7 @@ export function listen(callback) {
   };
 }
 
-function eventListener(e) {
+function eventListener(e: MessageEvent) {
   const { data } = e;
 
   // should also store origin of parent? idk
