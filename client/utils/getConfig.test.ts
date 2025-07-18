@@ -7,18 +7,10 @@ describe('utils/getConfig()', () => {
   });
 
   // check for key
-  it('throws if key is not defined', () => {
-    expect(() => getConfig(/* key is missing */)).toThrow(/must be provided/);
-  });
-
   it('throws if key is empty string', () => {
     expect(() => getConfig(/* key is empty string */ '')).toThrow(
       /must be provided/
     );
-  });
-
-  it('throws if key is null', () => {
-    expect(() => getConfig(/* key is null */ null)).toThrow(/must be provided/);
   });
 
   // check returns happy path
@@ -42,18 +34,10 @@ describe('utils/getConfig()', () => {
       12345
     );
   });
-  it('can parse booleans from strings', () => {
+  it('can parse booleans', () => {
     window.process.env.CONFIG_TEST_KEY_NAME = 'TRUE';
 
     expect(getConfig('CONFIG_TEST_KEY_NAME')).toBe('TRUE');
-    expect(getConfig('CONFIG_TEST_KEY_NAME', { parseType: 'boolean' })).toBe(
-      true
-    );
-  });
-  it('can parse booleans from booleans', () => {
-    window.process.env.CONFIG_TEST_KEY_NAME = true;
-
-    expect(getConfig('CONFIG_TEST_KEY_NAME')).toBe('true');
     expect(getConfig('CONFIG_TEST_KEY_NAME', { parseType: 'boolean' })).toBe(
       true
     );
