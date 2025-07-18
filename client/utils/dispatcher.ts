@@ -38,7 +38,7 @@ let listener: ((message: Message) => void) | null = null;
 /**
  * Registers a frame to receive future dispatched messages.
  * @param newFrame - The Window object of the frame to register.
- * @param newOrigin - The expected origin to use when posting messages to this frame.
+ * @param newOrigin - The expected origin to use when posting messages to this frame. If this is nullish, it will be registered as ''
  * @returns A cleanup function that unregisters the frame.
  */
 export function registerFrame(
