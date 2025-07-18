@@ -234,7 +234,7 @@ p5.prototype.registerMethod('afterSetup', p5.prototype.ensureAccessibleCanvas);`
   const previewScripts = sketchDoc.createElement('script');
   previewScripts.src = `${
     window.location.origin
-  }${getConfig('PREVIEW_SCRIPTS_URL', { returnEmptyIfMissing: true })}`;
+  }${getConfig('PREVIEW_SCRIPTS_URL', { nullishString: true })}`;
   previewScripts.setAttribute('crossorigin', '');
   sketchDoc.head.appendChild(previewScripts);
 
@@ -246,7 +246,7 @@ p5.prototype.registerMethod('afterSetup', p5.prototype.ensureAccessibleCanvas);`
     window.objectUrls = ${JSON.stringify(objectUrls)};
     window.objectPaths = ${JSON.stringify(objectPaths)};
     window.editorOrigin = '${getConfig('EDITOR_URL', {
-      returnEmptyIfMissing: true
+      nullishString: true
     })}';
   `;
   addLoopProtect(sketchDoc);

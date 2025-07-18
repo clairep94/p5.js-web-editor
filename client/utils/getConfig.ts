@@ -16,7 +16,7 @@ function isTestEnvironment(): boolean {
 
 type GetConfigOptions = {
   warn?: boolean,
-  returnEmptyIfMissing?: boolean,
+  nullishString?: boolean,
   parseType?: 'number' | 'boolean' | 'string'
 };
 
@@ -47,7 +47,7 @@ function parseBoolean(str: string): boolean | undefined {
  * @param key - The environment variable key to fetch.
  * @param options - Optional settings:
  *   - `warn`: whether to warn if the value is missing (default true unless in test).
- *   - `returnEmptyIfMissing`: if true, returns '' instead of undefined when missing.
+ *   - `nullishString`: if true, returns '' instead of undefined when missing.
  *   - `parseType`: parse the variable from string to a specified type.
  *
  * @returns String value of the env var, or ''/undefined if missing.
@@ -62,7 +62,7 @@ function getConfig(
 
   const {
     warn = !isTestEnvironment(),
-    returnEmptyIfMissing = false,
+    nullishString = false,
     parseType = 'string'
   } = options;
 
@@ -72,7 +72,7 @@ function getConfig(
     if (warn) {
       console.warn(`getConfig("${key}") returned null or undefined`);
     }
-    return returnEmptyIfMissing && parseType === 'string' ? '' : undefined;
+    return nullishString && parseType === 'string' ? '' : undefined;
   }
 
   switch (parseType) {

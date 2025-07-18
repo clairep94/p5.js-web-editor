@@ -6,8 +6,8 @@ import { handleCreateFile } from './files';
 export const s3BucketHttps =
   getConfig('S3_BUCKET_URL_BASE') ||
   `https://s3-${getConfig('AWS_REGION', {
-    returnEmptyIfMissing: true
-  })}.amazonaws.com/${getConfig('S3_BUCKET', { returnEmptyIfMissing: true })}/`;
+    nullishString: true
+  })}.amazonaws.com/${getConfig('S3_BUCKET', { nullishString: true })}/`;
 const MAX_LOCAL_FILE_SIZE = 80000; // bytes, aka 80 KB
 
 function isS3Upload(file) {
