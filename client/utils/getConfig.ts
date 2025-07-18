@@ -21,23 +21,32 @@ type GetConfigOptions = {
 };
 
 /**
- * Parses a string into a number. Returns undefined if parsing fails.
+ * Parses a string into a number. Returns original string if parsing fails.
  */
-function parseNumber(str: string): number | undefined {
+function parseNumber(str: string, warn: boolean): number | string {
   const num = Number(str);
-  return Number.isNaN(num) ? undefined : num;
+  if (Number.isNaN(num)) {
+    if (warn) {
+      console.warn(`expected a number, got ${str}`);
+    }
+    return str;
+  }
+  return num;
 }
 
 /**
- * Parses a string into a boolean. Returns undefined if not a valid boolean string.
+ * Parses a string into a boolean. Returns original string if not a valid boolean string.
  * Accepts 'true' or 'false' (case-insensitive).
  */
-function parseBoolean(str: string): boolean | undefined {
+function parseBoolean(str: string, warn: boolean): boolean | string {
   const lower = str.toLowerCase();
   if (lower === 'true') return true;
   if (lower === 'false') return false;
-  // eslint-disable-next-line consistent-return
-  return undefined;
+
+  if (warn) {
+    console.warn(`expected a boolean, got ${str}`);
+  }
+  return str;
 }
 
 /**
@@ -77,9 +86,9 @@ function getConfig(
 
   switch (parseType) {
     case 'number':
-      return parseNumber(value);
+      return parseNumber(value, warn);
     case 'boolean':
-      return parseBoolean(value);
+      return parseBoolean(value, warn);
     case 'string':
     default:
       return value;
