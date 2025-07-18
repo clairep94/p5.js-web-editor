@@ -9,7 +9,7 @@ import FileUploader from './FileUploader';
 import { getreachedTotalSizeLimit } from '../selectors/users';
 import Modal from './Modal';
 
-const limit = getConfig('UPLOAD_LIMIT') || 250000000;
+const limit = getConfig('UPLOAD_LIMIT', { parseType: 'number' }) ?? 250000000;
 const limitText = prettyBytes(limit);
 
 const UploadFileModal = () => {

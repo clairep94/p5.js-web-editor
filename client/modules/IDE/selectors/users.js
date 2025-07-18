@@ -6,7 +6,7 @@ const getTotalSize = (state) => state.user.totalSize;
 const getAssetsTotalSize = (state) => state.assets.totalSize;
 export const getSketchOwner = (state) => state.project.owner;
 const getUserId = (state) => state.user.id;
-const limit = getConfig('UPLOAD_LIMIT') || 250000000;
+const limit = getConfig('UPLOAD_LIMIT', { parseType: 'number' }) ?? 250000000;
 
 export const getCanUploadMedia = createSelector(
   getAuthenticated,

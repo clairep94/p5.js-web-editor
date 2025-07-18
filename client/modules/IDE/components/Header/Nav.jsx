@@ -81,7 +81,7 @@ LeftLayout.defaultProps = {
 };
 
 const UserMenu = () => {
-  const isLoginEnabled = getConfig('LOGIN_ENABLED');
+  const isLoginEnabled = getConfig('LOGIN_ENABLED', { parseType: 'boolean' });
   const isAuthenticated = useSelector(getAuthenticated);
 
   if (isLoginEnabled && isAuthenticated) {
@@ -177,7 +177,7 @@ const ProjectMenu = () => {
           id="file-save"
           isDisabled={
             !user.authenticated ||
-            !getConfig('LOGIN_ENABLED') ||
+            !getConfig('LOGIN_ENABLED', { parseType: 'boolean' }) ||
             (project?.owner && !isUserOwner)
           }
           onClick={() => saveSketch(cmRef.current)}
@@ -216,7 +216,7 @@ const ProjectMenu = () => {
         <MenubarItem
           id="file-add-to-collection"
           isDisabled={
-            !getConfig('UI_COLLECTIONS_ENABLED') ||
+            !getConfig('UI_COLLECTIONS_ENABLED', { parseType: 'boolean' }) ||
             !user.authenticated ||
             isUnsaved
           }
@@ -226,7 +226,7 @@ const ProjectMenu = () => {
         </MenubarItem>
         <MenubarItem
           id="file-examples"
-          isDisabled={!getConfig('EXAMPLES_ENABLED')}
+          isDisabled={!getConfig('EXAMPLES_ENABLED', { parseType: 'boolean' })}
           href="/p5/sketches"
         >
           {t('Nav.File.Examples')}
@@ -285,7 +285,9 @@ const ProjectMenu = () => {
           {t('Nav.Help.About')}
         </MenubarItem>
       </MenubarSubmenu>
-      {getConfig('TRANSLATIONS_ENABLED') && <LanguageMenu />}
+      {getConfig('TRANSLATIONS_ENABLED', { parseType: 'boolean' }) && (
+        <LanguageMenu />
+      )}
     </ul>
   );
 };
@@ -370,7 +372,9 @@ const AuthenticatedUserMenu = () => {
         <MenubarItem
           id="account-collections"
           href={`/${username}/collections`}
-          isDisabled={!getConfig('UI_COLLECTIONS_ENABLED')}
+          isDisabled={
+            !getConfig('UI_COLLECTIONS_ENABLED', { parseType: 'boolean' })
+          }
         >
           {t('Nav.Auth.MyCollections')}
         </MenubarItem>

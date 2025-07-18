@@ -1,7 +1,7 @@
 /**
  * Internal function to retrieve env vars, with no error handling.
  * @param key - The environment variable key to fetch.
- * @returns Value of env variable or undefined if not found.
+ * @returns String value of env variable or undefined if not found.
  */
 function _getConfig(key: string): string | undefined {
   const env: Record<string, string | undefined> =
@@ -16,8 +16,29 @@ function isTestEnvironment(): boolean {
 
 type GetConfigOptions = {
   warn?: boolean,
-  returnEmptyIfMissing?: boolean
+  returnEmptyIfMissing?: boolean,
+  parseType?: 'number' | 'boolean' | 'string'
 };
+
+/**
+ * Parses a string into a number. Returns undefined if parsing fails.
+ */
+function parseNumber(str: string): number | undefined {
+  const num = Number(str);
+  return Number.isNaN(num) ? undefined : num;
+}
+
+/**
+ * Parses a string into a boolean. Returns undefined if not a valid boolean string.
+ * Accepts 'true' or 'false' (case-insensitive).
+ */
+function parseBoolean(str: string): boolean | undefined {
+  const lower = str.toLowerCase();
+  if (lower === 'true') return true;
+  if (lower === 'false') return false;
+  // eslint-disable-next-line consistent-return
+  return undefined;
+}
 
 /**
  * Returns a string config value from environment variables.
@@ -27,18 +48,23 @@ type GetConfigOptions = {
  * @param options - Optional settings:
  *   - `warn`: whether to warn if the value is missing (default true unless in test).
  *   - `returnEmptyIfMissing`: if true, returns '' instead of undefined when missing.
+ *   - `parseType`: parse the variable from string to a specified type.
  *
  * @returns String value of the env var, or ''/undefined if missing.
  */
 function getConfig(
   key: string,
   options: GetConfigOptions = {}
-): string | undefined {
+): string | number | boolean | undefined {
   if (!key) {
     throw new Error('"key" must be provided to getConfig()');
   }
 
-  const { warn = !isTestEnvironment(), returnEmptyIfMissing = false } = options;
+  const {
+    warn = !isTestEnvironment(),
+    returnEmptyIfMissing = false,
+    parseType = 'string'
+  } = options;
 
   const value = _getConfig(key);
 
@@ -46,10 +72,18 @@ function getConfig(
     if (warn) {
       console.warn(`getConfig("${key}") returned null or undefined`);
     }
-    return returnEmptyIfMissing ? '' : undefined;
+    return returnEmptyIfMissing && parseType === 'string' ? '' : undefined;
   }
 
-  return value;
+  switch (parseType) {
+    case 'number':
+      return parseNumber(value);
+    case 'boolean':
+      return parseBoolean(value);
+    case 'string':
+    default:
+      return value;
+  }
 }
 
 export default getConfig;
