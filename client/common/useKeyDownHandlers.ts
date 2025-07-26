@@ -1,6 +1,6 @@
 import { mapKeys } from 'lodash';
-import PropTypes from 'prop-types';
 import { useCallback, useEffect, useRef } from 'react';
+import { isMac } from '../utils/device';
 
 /**
  * Function to call upon keydown
@@ -36,8 +36,7 @@ export default function useKeyDownHandlers(keyHandlers: KeydownHandlerMap) {
     (e: KeyboardEvent) => {
       if (!e.key) return;
 
-      const isMac = navigator.userAgent.toLowerCase().indexOf('mac') !== -1;
-      const isCtrl = isMac ? e.metaKey : e.ctrlKey;
+      const isCtrl = isMac() ? e.metaKey : e.ctrlKey;
 
       if (e.shiftKey && isCtrl) {
         handlers.current[
