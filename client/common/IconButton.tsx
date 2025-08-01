@@ -1,5 +1,4 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React, { ComponentType } from 'react';
 import styled from 'styled-components';
 import Button from './Button';
 import { remSize } from '../theme';
@@ -12,8 +11,18 @@ const ButtonWrapper = styled(Button)`
   }
 `;
 
-const IconButton = (props) => {
-  const { icon, ...otherProps } = props;
+type IconProps = {
+  'aria-label'?: string
+};
+
+type IconButtonProps = Omit<
+  React.ComponentProps<typeof Button>,
+  'iconBefore' | 'iconOnly' | 'display' | 'focusable'
+> & {
+  icon?: ComponentType<IconProps> | null
+};
+
+const IconButton = ({ icon = null, ...otherProps }: IconButtonProps) => {
   const Icon = icon;
 
   return (
@@ -25,14 +34,6 @@ const IconButton = (props) => {
       {...otherProps}
     />
   );
-};
-
-IconButton.propTypes = {
-  icon: PropTypes.func
-};
-
-IconButton.defaultProps = {
-  icon: null
 };
 
 export default IconButton;
