@@ -22,18 +22,14 @@ type IconButtonProps = Omit<
   icon?: ComponentType<IconProps> | null
 };
 
-const IconButton = ({ icon = null, ...otherProps }: IconButtonProps) => {
-  const Icon = icon;
-
-  return (
-    <ButtonWrapper
-      iconBefore={icon && <Icon />}
-      iconOnly
-      display={Button.displays.inline}
-      focusable="false"
-      {...otherProps}
-    />
-  );
-};
+const IconButton = ({ icon: Icon, ...otherProps }: IconButtonProps) => (
+  <ButtonWrapper
+    iconBefore={Icon ? <Icon /> : undefined}
+    iconOnly
+    display={Button.displays.inline}
+    focusable="false"
+    {...otherProps}
+  />
+);
 
 export default IconButton;
