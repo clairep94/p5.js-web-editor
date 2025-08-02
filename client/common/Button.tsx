@@ -205,7 +205,7 @@ const Button = ({
       {iconAfter}
     </>
   );
-  const StyledComponent: React.ElementType<any> = iconOnly ? StyledInlineButton : StyledButton;
+  const StyledComponent: React.ElementType = iconOnly ? StyledInlineButton : StyledButton;
 
   if (href) {
     return (
