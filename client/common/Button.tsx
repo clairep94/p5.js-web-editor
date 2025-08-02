@@ -5,88 +5,87 @@ import { remSize, prop } from '../theme';
 
 const kinds = {
   primary: 'primary',
-  secondary:'secondary'
-// eslint-disable-next-line prettier/prettier
+  secondary: 'secondary'
 } as const;
 
-type Kind = keyof typeof kinds
+type Kind = keyof typeof kinds;
 
 const displays = {
   block: 'block',
   inline: 'inline'
 } as const;
 
-type Display = keyof typeof displays
+type Display = keyof typeof displays;
 
 type StyledButtonProps = {
-  kind: Kind,
-  display: Display
-}
+  kind: Kind;
+  display: Display;
+};
 
 const buttonTypes = {
   button: 'button',
   submit: 'submit'
 } as const;
 
-type ButtonType = keyof typeof buttonTypes
+type ButtonType = keyof typeof buttonTypes;
 
 type SharedButtonProps = {
-    /**
+  /**
    * The visible part of the button, telling the user what
    * the action is
    */
-    children?: React.ReactNode,
-    /**
+  children?: React.ReactNode;
+  /**
       If the button can be activated or not
     */
-    disabled?: boolean,
-    /**
-     * The display type of the button—inline or block
-     */
-    display?: Display,
-    /**
-     * SVG icon to place after child content
-     */
-    iconAfter?: React.ReactNode,
-    /**
-     * SVG icon to place before child content
-     */
-    iconBefore?: React.ReactNode,
-    /**
-     * If the button content is only an SVG icon
-     */
-    iconOnly?: boolean,
-    /**
-     * The kind of button - determines how it appears visually
-     */
-    kind?: Kind,
-    /**
-     * Specifying an href will use an <a> to link to the URL
-     */
-    href?: string | null,
-    /**
-     * An ARIA Label used for accessibility
-     */
-    'aria-label'?: string | null,
-    /**
-     * Specifying a to URL will use a react-router Link
-     */
-    to?: string | null,
-    /**
-     * If using a button, then type is defines the type of button
-     */
-    type?: ButtonType,
-    /**
-     * Allows for IconButton to pass `focusable="false"` as a prop for SVGs.
-     * See @types/react > interface SVGAttributes<T> extends AriaAttributes, DOMAttributes<T> 
-     */
-    focusable?: boolean | 'true' | 'false'
-}
+  disabled?: boolean;
+  /**
+   * The display type of the button—inline or block
+   */
+  display?: Display;
+  /**
+   * SVG icon to place after child content
+   */
+  iconAfter?: React.ReactNode;
+  /**
+   * SVG icon to place before child content
+   */
+  iconBefore?: React.ReactNode;
+  /**
+   * If the button content is only an SVG icon
+   */
+  iconOnly?: boolean;
+  /**
+   * The kind of button - determines how it appears visually
+   */
+  kind?: Kind;
+  /**
+   * Specifying an href will use an <a> to link to the URL
+   */
+  href?: string | null;
+  /**
+   * An ARIA Label used for accessibility
+   */
+  'aria-label'?: string | null;
+  /**
+   * Specifying a to URL will use a react-router Link
+   */
+  to?: string | null;
+  /**
+   * If using a button, then type is defines the type of button
+   */
+  type?: ButtonType;
+  /**
+   * Allows for IconButton to pass `focusable="false"` as a prop for SVGs.
+   * See @types/react > interface SVGAttributes<T> extends AriaAttributes, DOMAttributes<T>
+   */
+  focusable?: boolean | 'true' | 'false';
+};
 
 export type ButtonProps = SharedButtonProps &
-React.ButtonHTMLAttributes<HTMLButtonElement> &
-React.AnchorHTMLAttributes<HTMLAnchorElement> &
-Partial<LinkProps>;
+  React.ButtonHTMLAttributes<HTMLButtonElement> &
+  React.AnchorHTMLAttributes<HTMLAnchorElement> &
+  Partial<LinkProps>;
 
 // The '&&&' will increase the specificity of the
 // component's CSS so that it overrides the more
@@ -205,7 +204,9 @@ const Button = ({
       {iconAfter}
     </>
   );
-  const StyledComponent: React.ElementType = iconOnly ? StyledInlineButton : StyledButton;
+  const StyledComponent: React.ElementType = iconOnly
+    ? StyledInlineButton
+    : StyledButton;
 
   if (href) {
     return (

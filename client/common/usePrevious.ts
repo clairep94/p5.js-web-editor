@@ -7,7 +7,6 @@ import { useEffect, useRef } from 'react';
  * @returns The previous value before the current render, or undefined if none.
  */
 export default function usePrevious(value: number): number | undefined {
-  // eslint-disable-next-line prettier/prettier
   const ref = useRef<number>();
 
   useEffect(() => {

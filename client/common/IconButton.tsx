@@ -12,14 +12,14 @@ const ButtonWrapper = styled(Button)`
 `;
 
 export type IconProps = {
-  'aria-label'?: string
+  'aria-label'?: string;
 };
 
 export type IconButtonProps = Omit<
   ButtonProps,
   'iconBefore' | 'display' | 'focusable'
 > & {
-  icon?: ComponentType<IconProps> | null
+  icon?: ComponentType<IconProps> | null;
 };
 
 const IconButton = ({ icon: Icon, ...otherProps }: IconButtonProps) => (
