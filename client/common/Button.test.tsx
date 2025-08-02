@@ -1,5 +1,4 @@
 import React from 'react';
-import { BrowserRouter } from 'react-router-dom';
 import { render, screen, fireEvent } from '../test-utils';
 import Button from './Button';
 
@@ -23,10 +22,11 @@ describe('Button', () => {
     expect(link).toHaveAttribute('href', '/dashboard');
   });
 
-  it('renders as a <button> by default', () => {
+  it('renders as a <button> with a type of "button" by default', () => {
     render(<Button>Click Me</Button>);
     const el = screen.getByRole('button');
     expect(el.tagName.toLowerCase()).toBe('button');
+    expect(el).toHaveAttribute('type', 'button');
   });
 
   // Children & Icons
