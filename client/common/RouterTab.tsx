@@ -1,7 +1,7 @@
 import React, { ReactNode } from 'react';
 import { NavLink } from 'react-router-dom';
 
-type TabProps = {
+export type TabProps = {
   children: ReactNode,
   to: string
 };

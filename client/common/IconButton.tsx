@@ -11,11 +11,11 @@ const ButtonWrapper = styled(Button)`
   }
 `;
 
-type IconProps = {
+export type IconProps = {
   'aria-label'?: string
 };
 
-type IconButtonProps = Omit<
+export type IconButtonProps = Omit<
   React.ComponentProps<typeof Button>,
   'iconBefore' | 'iconOnly' | 'display' | 'focusable'
 > & {
