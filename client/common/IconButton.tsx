@@ -17,7 +17,7 @@ export type IconProps = {
 
 export type IconButtonProps = Omit<
   ButtonProps,
-  'iconBefore' | 'iconOnly' | 'display' | 'focusable'
+  'iconBefore' | 'display' | 'focusable'
 > & {
   icon?: ComponentType<IconProps> | null
 };
