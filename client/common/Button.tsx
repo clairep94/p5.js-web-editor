@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Link, LinkProps } from 'react-router-dom';
 import { remSize, prop } from '../theme';
@@ -23,6 +22,71 @@ type StyledButtonProps = {
   kind: Kind,
   display: Display
 }
+
+const buttonTypes = {
+  button: 'button',
+  submit: 'submit'
+} as const;
+
+type ButtonType = keyof typeof buttonTypes
+
+type SharedButtonProps = {
+    /**
+   * The visible part of the button, telling the user what
+   * the action is
+   */
+    children?: React.ReactNode,
+    /**
+      If the button can be activated or not
+    */
+    disabled?: boolean,
+    /**
+     * The display type of the button—inline or block
+     */
+    display?: Display,
+    /**
+     * SVG icon to place after child content
+     */
+    iconAfter?: React.ReactNode,
+    /**
+     * SVG icon to place before child content
+     */
+    iconBefore?: React.ReactNode,
+    /**
+     * If the button content is only an SVG icon
+     */
+    iconOnly?: boolean,
+    /**
+     * The kind of button - determines how it appears visually
+     */
+    kind?: Kind,
+    /**
+     * Specifying an href will use an <a> to link to the URL
+     */
+    href?: string | null,
+    /**
+     * An ARIA Label used for accessibility
+     */
+    'aria-label'?: string | null,
+    /**
+     * Specifying a to URL will use a react-router Link
+     */
+    to?: string | null,
+    /**
+     * If using a button, then type is defines the type of button
+     */
+    type?: ButtonType,
+    /**
+     * Allows for IconButton to pass `focusable="false"` as a prop for SVGs.
+     * See @types/react > interface SVGAttributes<T> extends AriaAttributes, DOMAttributes<T> 
+     */
+    focusable?: boolean | 'true' | 'false'
+}
+
+export type ButtonProps = SharedButtonProps &
+React.ButtonHTMLAttributes<HTMLButtonElement> &
+React.AnchorHTMLAttributes<HTMLAnchorElement> &
+Partial<LinkProps>;
 
 // The '&&&' will increase the specificity of the
 // component's CSS so that it overrides the more
@@ -117,73 +181,19 @@ const StyledInlineButton = styled.button`
   }
 `;
 
-const buttonTypes = {
-  button: 'button',
-  submit: 'submit'
-} as const;
-
-type ButtonType = keyof typeof buttonTypes
-export type ButtonProps = {
-  /**
-   * The visible part of the button, telling the user what
-   * the action is
-   */
-  children?: React.ReactNode,
-  /**
-    If the button can be activated or not
-  */
-  disabled?: boolean,
-  /**
-   * The display type of the button—inline or block
-   */
-  display?: Display,
-  /**
-   * SVG icon to place after child content
-   */
-  iconAfter?: React.ReactNode,
-  /**
-   * SVG icon to place before child content
-   */
-  iconBefore?: React.ReactNode,
-  /**
-   * If the button content is only an SVG icon
-   */
-  iconOnly?: boolean,
-  /**
-   * The kind of button - determines how it appears visually
-   */
-  kind?: Kind,
-  /**
-   * Specifying an href will use an <a> to link to the URL
-   */
-  href?: string | null,
-  /**
-   * An ARIA Label used for accessibility
-   */
-  'aria-label'?: string | null,
-  /**
-   * Specifying a to URL will use a react-router Link
-   */
-  to?: string | null,
-  /**
-   * If using a button, then type is defines the type of button
-   */
-  type?: ButtonType,
-}
-
 /**
  * A Button performs an primary action
  */
 const Button = ({
   children = null,
   display = displays.block,
-  href = null,
+  href,
   kind = kinds.primary,
   iconBefore = null,
   iconAfter = null,
   iconOnly = false,
-  'aria-label': ariaLabel = null,
-  to = null,
+  'aria-label': ariaLabel,
+  to,
   type = buttonTypes.button,
   ...props
 }: ButtonProps) => {
