@@ -2,20 +2,16 @@ import { mapKeys } from 'lodash';
 import { useCallback, useEffect, useRef } from 'react';
 import { isMac } from '../utils/device';
 
-/**
- * Function to call upon keydown
- */
+/** Function to call upon keydown */
 export type KeydownHandler = (e: KeyboardEvent) => void;
-/**
- * An object mapping from keys like 'ctrl-s' or 'ctrl-shift-1' to handlers.
- */
+/** An object mapping from keys like 'ctrl-s' or 'ctrl-shift-1' to handlers. */
 export type KeydownHandlerMap = Record<string, KeydownHandler>;
 
 /**
  * Attaches keydown handlers to the global document.
  * Handles Mac/PC switching of Ctrl to Cmd.
- *
- * @param keyHandlers - an object which maps from the key to its event handler. The object keys are a combination of the key and prefixes `ctrl-` `shift-` (ie. 'ctrl-f', 'ctrl-shift-f') and the values are the function to call when that specific key is pressed.
+ * @param keyHandlers - an object which maps from the key to its event handler. The object keys are a combination of the key and prefixes `ctrl-` `shift-`
+ * (ie. 'ctrl-f', 'ctrl-shift-f') and the values are the function to call when that specific key is pressed.
  */
 export default function useKeyDownHandlers(keyHandlers: KeydownHandlerMap) {
   /**
