@@ -201,7 +201,7 @@ const Button = ({
   const content = (
     <>
       {iconBefore}
-      {hasChildren && <span>{children}</span>}
+      {hasChildren && !iconOnly && <span>{children}</span>}
       {iconAfter}
     </>
   );
