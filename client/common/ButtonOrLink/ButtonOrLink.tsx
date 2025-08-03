@@ -1,26 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-
-/**
- * Accepts all the props of an HTML <a> or <button> tag.
- */
-export type ButtonOrLinkProps = {
-  /**
-   * Can be internal or external ('http'- or 'https'-).
-   */
-  href?: string;
-  isDisabled?: boolean;
-  /**
-   * Content of the button/link.
-   * Can be either a string or a complex element.
-   */
-  children: React.ReactNode;
-  onClick?: (
-    e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>
-  ) => void;
-};
-
-export type Ref = HTMLAnchorElement | HTMLButtonElement;
+import type { ButtonOrLinkProps, Ref } from './ButtonOrLink.types';
 
 /**
  * Helper for switching between `<button>`, `<a>`, and `<Link>`
@@ -28,17 +8,8 @@ export type Ref = HTMLAnchorElement | HTMLButtonElement;
  *   - Internal links will use react-router.
  *   - External links should start with 'http' or 'https' and will open in a new window.
  */
-const ButtonOrLink = React.forwardRef(
-  (
-    {
-      href,
-      children,
-      isDisabled = false,
-      onClick,
-      ...props
-    }: ButtonOrLinkProps,
-    ref: React.Ref<Ref>
-  ) => {
+const ButtonOrLink = React.forwardRef<Ref, ButtonOrLinkProps>(
+  ({ href, children, isDisabled = false, onClick, ...props }, ref) => {
     const handleClick = (
       e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>
     ) => {
