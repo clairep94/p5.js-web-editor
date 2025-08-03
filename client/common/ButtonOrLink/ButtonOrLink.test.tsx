@@ -1,6 +1,6 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor, history } from '../test-utils';
-import ButtonOrLink from './ButtonOrLink';
+import { render, screen, fireEvent, waitFor, history } from '../../test-utils';
+import ButtonOrLink from './index';
 
 describe('ButtonOrLink', () => {
   const clickHandler = jest.fn();
