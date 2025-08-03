@@ -1,10 +1,7 @@
-import React, { ReactNode } from 'react';
+import React from 'react';
 import { NavLink } from 'react-router-dom';
+import type { TabProps } from './RouterTab.types';
 
-export type TabProps = {
-  children: ReactNode;
-  to: string;
-};
 /**
  * Wraps the react-router `NavLink` with dashboard-header__tab styling.
  */

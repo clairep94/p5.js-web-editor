@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor, history } from '../test-utils';
+import { render, screen, fireEvent, waitFor, history } from '../../test-utils';
 import Tab from './RouterTab';
 
 const mockPath = '/projects';
