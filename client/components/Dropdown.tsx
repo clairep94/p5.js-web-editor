@@ -1,22 +1,20 @@
-import React from 'react';
-import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { remSize, prop } from '../theme';
-import IconButton from '../common/IconButton';
 
-export const DropdownWrapper = styled.ul`
+export type DropdownWrapperProps = {
+  align?: 'left' | 'right';
+};
+
+export const DropdownWrapper = styled.ul<DropdownWrapperProps>`
   background-color: ${prop('Modal.background')};
   border: 1px solid ${prop('Modal.border')};
   box-shadow: 0 0 18px 0 ${prop('shadowColor')};
   color: ${prop('primaryTextColor')};
 
   position: absolute;
-  right: ${(props) => (props.right ? 0 : 'initial')};
-  left: ${(props) => (props.left ? 0 : 'initial')};
-
   ${(props) => props.align === 'right' && 'right: 0;'}
   ${(props) => props.align === 'left' && 'left: 0;'}
-
+  ${(props) => !props.align && 'left: 0;'}
 
   text-align: left;
   width: ${remSize(180)};
@@ -69,42 +67,3 @@ export const DropdownWrapper = styled.ul`
     }
   }
 `;
-
-// TODO: Add Icon to the left of the items in the menu
-// const MaybeIcon = (Element, label) => Element && <Element aria-label={label} />;
-
-const Dropdown = ({ items, align }) => (
-  <DropdownWrapper align={align}>
-    {/* className="nav__items-left" */}
-    {items &&
-      items.map(({ title, icon, href, action }) => (
-        <li key={`nav-${title && title.toLowerCase()}`}>
-          {/* {MaybeIcon(icon, `Navigate to ${title}`)} */}
-          {href ? (
-            <IconButton to={href}>{title}</IconButton>
-          ) : (
-            <IconButton onClick={() => action()}>{title}</IconButton>
-          )}
-        </li>
-      ))}
-  </DropdownWrapper>
-);
-
-Dropdown.propTypes = {
-  align: PropTypes.oneOf(['left', 'right']),
-  items: PropTypes.arrayOf(
-    PropTypes.shape({
-      action: PropTypes.func,
-      icon: PropTypes.func,
-      href: PropTypes.string,
-      title: PropTypes.string
-    })
-  )
-};
-
-Dropdown.defaultProps = {
-  items: [],
-  align: null
-};
-
-export default Dropdown;
