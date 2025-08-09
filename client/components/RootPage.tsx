@@ -2,13 +2,10 @@ import styled from 'styled-components';
 import { prop } from '../theme';
 
 type RootPageProps = {
-  fixedHeight?: string
+  fixedHeight?: string;
 };
 
-const RootPage =
-  styled.div <
-  RootPageProps >
-  `
+const RootPage = styled.div<RootPageProps>`
   min-height: 100vh;
   height: ${({ fixedHeight }) => fixedHeight || '100vh'};
   display: flex;
