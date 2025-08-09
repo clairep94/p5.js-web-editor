@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -6,7 +5,12 @@ import { useTranslation } from 'react-i18next';
 import LogoIcon from '../images/p5js-logo-small.svg';
 import CodeIcon from '../images/code.svg';
 
-const PreviewNav = ({ owner, project }) => {
+type PreviewNavProps = {
+  owner: { username: string };
+  project: { name: string; id: string };
+};
+
+const PreviewNav = ({ owner, project }: PreviewNavProps) => {
   const { t } = useTranslation();
   return (
     <nav className="nav preview-nav">
@@ -46,16 +50,6 @@ const PreviewNav = ({ owner, project }) => {
       </div>
     </nav>
   );
-};
-
-PreviewNav.propTypes = {
-  owner: PropTypes.shape({
-    username: PropTypes.string.isRequired
-  }).isRequired,
-  project: PropTypes.shape({
-    name: PropTypes.string.isRequired,
-    id: PropTypes.string.isRequired
-  }).isRequired
 };
 
 export default PreviewNav;
