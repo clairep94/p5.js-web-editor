@@ -1,20 +1,37 @@
-import PropTypes from 'prop-types';
 import React, { forwardRef, useCallback, useRef, useState } from 'react';
 import useModalClose from '../../common/useModalClose';
 import DownArrowIcon from '../../images/down-filled-triangle.svg';
 import { DropdownWrapper } from './DropdownWrapper';
+import type { DropdownWrapperProps } from './DropdownWrapper';
 
-// TODO: enable arrow keys to navigate options from list
+type DropdownMenuProps = DropdownWrapperProps & {
+  /**
+   * Provide <MenuItem> elements as children to control the contents of the menu.
+   */
+  children: React.ReactNode;
+  /**
+   * Can optionally override the contents of the button which opens the menu.
+   * Defaults to <DownArrowIcon>
+   */
+  anchor?: React.ReactNode;
+  'aria-label'?: string;
+  className?: string;
+  classes?: {
+    button?: string;
+    list?: string;
+  };
+  maxHeight?: string;
+};
 
-const DropdownMenu = forwardRef(
+const DropdownMenu = forwardRef<HTMLDivElement, DropdownMenuProps>(
   (
     {
       children,
       anchor,
       'aria-label': ariaLabel,
-      align,
-      className,
-      classes,
+      align = 'right',
+      className = '',
+      classes = {},
       maxHeight
     },
     ref
@@ -50,7 +67,7 @@ const DropdownMenu = forwardRef(
         <button
           className={classes.button}
           aria-label={ariaLabel}
-          tabIndex="0"
+          tabIndex={0}
           onClick={toggle}
           onBlur={handleBlur}
           onFocus={handleFocus}
@@ -67,7 +84,7 @@ const DropdownMenu = forwardRef(
             }}
             onBlur={handleBlur}
             onFocus={handleFocus}
-            style={maxHeight && { maxHeight, overflowY: 'auto' }}
+            style={maxHeight ? { maxHeight, overflowY: 'auto' } : undefined}
           >
             {children}
           </DropdownWrapper>
@@ -76,33 +93,5 @@ const DropdownMenu = forwardRef(
     );
   }
 );
-
-DropdownMenu.propTypes = {
-  /**
-   * Provide <MenuItem> elements as children to control the contents of the menu.
-   */
-  children: PropTypes.node.isRequired,
-  /**
-   * Can optionally override the contents of the button which opens the menu.
-   * Defaults to <DownArrowIcon>
-   */
-  anchor: PropTypes.node,
-  'aria-label': PropTypes.string.isRequired,
-  align: PropTypes.oneOf(['left', 'right']),
-  className: PropTypes.string,
-  classes: PropTypes.shape({
-    button: PropTypes.string,
-    list: PropTypes.string
-  }),
-  maxHeight: PropTypes.string
-};
-
-DropdownMenu.defaultProps = {
-  anchor: null,
-  align: 'right',
-  className: '',
-  classes: {},
-  maxHeight: undefined
-};
 
 export default DropdownMenu;
