@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '../test-utils';
-import SkipLink from './SkipLink';
+import { SkipLink } from './SkipLink';
 
 describe('SkipLink', () => {
   const defaultProps = {
