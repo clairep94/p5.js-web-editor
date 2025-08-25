@@ -8,10 +8,10 @@ import classNames from 'classnames';
 import { ParentMenuContext } from '../../../../components/Menubar/contexts';
 import Menubar from '../../../../components/Menubar/Menubar';
 import { useMenuProps } from '../../../../components/Menubar/MenubarSubmenu';
-import ButtonOrLink from '../../../../common/ButtonOrLink';
+import { ButtonOrLink } from '../../../../common/ButtonOrLink';
 import { prop, remSize } from '../../../../theme';
 import AsteriskIcon from '../../../../images/p5-asterisk.svg';
-import IconButton from '../../../../common/IconButton';
+import { IconButton } from '../../../../common/IconButton';
 import {
   AccountIcon,
   AddIcon,
@@ -73,6 +73,13 @@ const Title = styled.div`
   * {
     padding: 0;
     margin: 0;
+  }
+
+  > section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
   }
 
   > h5 {
@@ -237,21 +244,21 @@ const MobileNav = () => {
   }
 
   const title = useMemo(resolveTitle, [pageName, project.name]);
-
+  const userIsOwner = user?.username === project.owner?.username;
   const Logo = AsteriskIcon;
+
+  const showOwner = project?.owner && title === project.name && !userIsOwner;
+
   return (
     <Nav>
       <LogoContainer>
         <Logo />
       </LogoContainer>
       <Title>
-        <h1>{title === project.name ? <ProjectName /> : title}</h1>
-        {project?.owner && title === project.name && (
-          <Link to={`/${project.owner.username}/sketches`}>
-            by {project?.owner?.username}
-          </Link>
-        )}
+        <h1>{title === project?.name ? <ProjectName /> : title}</h1>
+        {showOwner && <h5>by {project?.owner?.username}</h5>}
       </Title>
+
       {/* check if the user is in login page */}
       {pageName === 'login' || pageName === 'signup' ? (
         // showing the CrossIcon

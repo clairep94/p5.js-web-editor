@@ -5,5 +5,10 @@
     "module": "ESNext",
     "lib": ["DOM", "ESNext"],
     "jsx": "react",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"], // client folder
+      "@server/*": ["../server/*"] // server folder
+    }
   },
 }
