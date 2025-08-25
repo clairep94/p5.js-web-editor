@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { render, screen } from '../test-utils';
+import React from 'react';
+import { render, screen } from '@/test-utils';
 import { usePrevious } from './usePrevious';
 
 function TestComponent({ value }: { value: number }) {

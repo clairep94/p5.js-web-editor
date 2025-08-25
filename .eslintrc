@@ -137,7 +137,8 @@
         "no-underscore-dangle": "warn",
         "react/require-default-props": "off",
         "no-shadow": "off",
-        "@typescript-eslint/no-shadow": "error"
+        "@typescript-eslint/no-shadow": "error",
+        "import/extensions": "off"
       }
     },
     {
