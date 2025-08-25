@@ -4,7 +4,7 @@ import { useModalClose } from '../../common/useModalClose';
 import DownArrowIcon from '../../images/down-filled-triangle.svg';
 import { remSize, prop } from '../../theme';
 
-interface DropdownMenuProps extends StyledDropdownMenuProps {
+export interface DropdownMenuProps extends StyledDropdownMenuProps {
   /**
    * Provide <MenuItem> elements as children to control the contents of the menu.
    */
