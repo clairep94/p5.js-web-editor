@@ -1,25 +1,40 @@
-import PropTypes from 'prop-types';
 import React, { forwardRef, useCallback, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { useModalClose } from '../../common/useModalClose';
 import DownArrowIcon from '../../images/down-filled-triangle.svg';
 import { remSize, prop } from '../../theme';
 
-// TODO: enable arrow keys to navigate options from list
+interface DropdownMenuProps extends StyledDropdownMenuProps {
+  /**
+   * Provide <MenuItem> elements as children to control the contents of the menu.
+   */
+  children: React.ReactNode;
+  /**
+   * Can optionally override the contents of the button which opens the menu.
+   * Defaults to <DownArrowIcon>
+   */
+  anchor?: React.ReactNode;
+  'aria-label': string;
+  className?: string;
+  classes?: {
+    button?: string;
+    list?: string;
+  };
+  maxHeight?: string;
+}
 
-const StyledDropdownMenu = styled.ul`
+interface StyledDropdownMenuProps {
+  align: 'right' | 'left';
+}
+
+const StyledDropdownMenu = styled.ul<StyledDropdownMenuProps>`
   background-color: ${prop('Modal.background')};
   border: 1px solid ${prop('Modal.border')};
   box-shadow: 0 0 18px 0 ${prop('shadowColor')};
   color: ${prop('primaryTextColor')};
 
   position: absolute;
-  right: ${(props) => (props.right ? 0 : 'initial')};
-  left: ${(props) => (props.left ? 0 : 'initial')};
-
-  ${(props) => props.align === 'right' && 'right: 0;'}
-  ${(props) => props.align === 'left' && 'left: 0;'}
-
+  ${(props) => (props.align === 'right' ? 'right: 0;' : 'left: 0;')}
 
   text-align: left;
   width: ${remSize(180)};
@@ -73,15 +88,15 @@ const StyledDropdownMenu = styled.ul`
   }
 `;
 
-const DropdownMenu = forwardRef(
+export const DropdownMenu = forwardRef<HTMLDivElement, DropdownMenuProps>(
   (
     {
       children,
       anchor,
       'aria-label': ariaLabel,
-      align,
-      className,
-      classes,
+      align = 'right',
+      className = '',
+      classes = {},
       maxHeight
     },
     ref
@@ -117,7 +132,7 @@ const DropdownMenu = forwardRef(
         <button
           className={classes.button}
           aria-label={ariaLabel}
-          tabIndex="0"
+          tabIndex={0}
           onClick={toggle}
           onBlur={handleBlur}
           onFocus={handleFocus}
@@ -134,7 +149,7 @@ const DropdownMenu = forwardRef(
             }}
             onBlur={handleBlur}
             onFocus={handleFocus}
-            style={maxHeight && { maxHeight, overflowY: 'auto' }}
+            style={maxHeight ? { maxHeight, overflowY: 'auto' } : undefined}
           >
             {children}
           </StyledDropdownMenu>
@@ -143,33 +158,3 @@ const DropdownMenu = forwardRef(
     );
   }
 );
-
-DropdownMenu.propTypes = {
-  /**
-   * Provide <MenuItem> elements as children to control the contents of the menu.
-   */
-  children: PropTypes.node.isRequired,
-  /**
-   * Can optionally override the contents of the button which opens the menu.
-   * Defaults to <DownArrowIcon>
-   */
-  anchor: PropTypes.node,
-  'aria-label': PropTypes.string.isRequired,
-  align: PropTypes.oneOf(['left', 'right']),
-  className: PropTypes.string,
-  classes: PropTypes.shape({
-    button: PropTypes.string,
-    list: PropTypes.string
-  }),
-  maxHeight: PropTypes.string
-};
-
-DropdownMenu.defaultProps = {
-  anchor: null,
-  align: 'right',
-  className: '',
-  classes: {},
-  maxHeight: undefined
-};
-
-export default DropdownMenu;
