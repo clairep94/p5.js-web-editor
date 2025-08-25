@@ -1,8 +1,8 @@
 import { createContext } from 'react';
 
-export const ParentMenuContext = createContext('none');
+export const ParentMenuContext = createContext<string>('none');
 
-export const MenuOpenContext = createContext('none');
+export const MenuOpenContext = createContext<string>('none');
 
 export const MenubarContext = createContext({
   createMenuHandlers: () => ({}),
