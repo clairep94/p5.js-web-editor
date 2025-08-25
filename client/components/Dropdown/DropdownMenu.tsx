@@ -1,10 +1,9 @@
 import React, { forwardRef, useCallback, useRef, useState } from 'react';
 import useModalClose from '../../common/useModalClose';
 import DownArrowIcon from '../../images/down-filled-triangle.svg';
-import { DropdownWrapper } from './DropdownWrapper';
-import type { DropdownWrapperProps } from './DropdownWrapper';
+import { DropdownWrapper, DropdownWrapperProps } from './DropdownWrapper';
 
-type DropdownMenuProps = DropdownWrapperProps & {
+export interface DropdownMenuProps extends DropdownWrapperProps {
   /**
    * Provide <MenuItem> elements as children to control the contents of the menu.
    */
@@ -21,9 +20,9 @@ type DropdownMenuProps = DropdownWrapperProps & {
     list?: string;
   };
   maxHeight?: string;
-};
+}
 
-const DropdownMenu = forwardRef<HTMLDivElement, DropdownMenuProps>(
+export const DropdownMenu = forwardRef<HTMLDivElement, DropdownMenuProps>(
   (
     {
       children,
@@ -93,5 +92,3 @@ const DropdownMenu = forwardRef<HTMLDivElement, DropdownMenuProps>(
     );
   }
 );
-
-export default DropdownMenu;

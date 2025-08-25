@@ -1,9 +1,9 @@
 import styled from 'styled-components';
 import { remSize, prop } from '../../theme';
 
-export type DropdownWrapperProps = {
+export interface DropdownWrapperProps {
   align?: 'left' | 'right';
-};
+}
 
 export const DropdownWrapper = styled.ul<DropdownWrapperProps>`
   background-color: ${prop('Modal.background')};
