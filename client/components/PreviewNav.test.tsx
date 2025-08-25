@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '../test-utils';
-import PreviewNav from './PreviewNav';
+import { PreviewNav } from './PreviewNav';
 
 describe('PreviewNav', () => {
   const owner = { username: 'alice' };

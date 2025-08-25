@@ -5,12 +5,12 @@ import { useTranslation } from 'react-i18next';
 import LogoIcon from '../images/p5js-logo-small.svg';
 import CodeIcon from '../images/code.svg';
 
-type PreviewNavProps = {
+interface PreviewNavProps {
   owner: { username: string };
   project: { name: string; id: string };
-};
+}
 
-const PreviewNav = ({ owner, project }: PreviewNavProps) => {
+export const PreviewNav = ({ owner, project }: PreviewNavProps) => {
   const { t } = useTranslation();
   return (
     <nav className="nav preview-nav" data-testid="preview-nav">
@@ -62,5 +62,3 @@ const PreviewNav = ({ owner, project }: PreviewNavProps) => {
     </nav>
   );
 };
-
-export default PreviewNav;
