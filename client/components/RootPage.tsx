@@ -1,9 +1,9 @@
 import styled from 'styled-components';
 import { prop } from '../theme';
 
-type RootPageProps = {
+interface RootPageProps {
   fixedHeight?: string;
-};
+}
 
 const RootPage = styled.div<RootPageProps>`
   min-height: 100vh;
