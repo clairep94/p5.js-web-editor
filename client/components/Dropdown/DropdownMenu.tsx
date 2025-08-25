@@ -1,5 +1,5 @@
 import React, { forwardRef, useCallback, useRef, useState } from 'react';
-import useModalClose from '../../common/useModalClose';
+import { useModalClose } from '../../common/useModalClose';
 import DownArrowIcon from '../../images/down-filled-triangle.svg';
 import { DropdownWrapper, DropdownWrapperProps } from './DropdownWrapper';
 

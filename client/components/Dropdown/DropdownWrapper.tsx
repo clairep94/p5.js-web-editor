@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { remSize, prop } from '../../theme';
+import { remSize, prop } from '../theme';
 
 export interface DropdownWrapperProps {
   align?: 'left' | 'right';

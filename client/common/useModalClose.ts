@@ -1,11 +1,5 @@
-import {
-  useEffect,
-  useRef,
-  MutableRefObject,
-  useImperativeHandle,
-  ForwardedRef
-} from 'react';
-import useKeyDownHandlers from './useKeyDownHandlers';
+import { useEffect, useRef, MutableRefObject } from 'react';
+import { useKeyDownHandlers } from './useKeyDownHandlers';
 
 /**
  * Common logic for Modal, Overlay, etc.
@@ -24,36 +18,31 @@ import useKeyDownHandlers from './useKeyDownHandlers';
  * @param passedRef - Optional ref to the modal element. If not provided, one is created internally.
  * @returns A ref to be attached to the modal DOM element
  */
-export default function useModalClose<T extends HTMLElement = HTMLElement>(
+export function useModalClose(
   onClose: () => void,
-  passedRef?: ForwardedRef<T>
-): MutableRefObject<T | null> {
-  const internalRef = useRef<T | null>(null);
-
-  // Sync internalRef.current to passedRef (handles both object and function refs)
-  useImperativeHandle<T | null, T | null>(
-    passedRef,
-    () => internalRef.current,
-    [internalRef.current]
-  );
+  passedRef?: MutableRefObject<HTMLElement | null>
+): MutableRefObject<HTMLElement | null> {
+  const createdRef = useRef<HTMLElement | null>(null);
+  const modalRef = passedRef ?? createdRef;
 
   useEffect(() => {
-    internalRef.current?.focus();
+    modalRef.current?.focus();
 
     function handleClick(e: MouseEvent) {
-      if (
-        internalRef.current &&
-        !internalRef.current.contains(e.target as Node)
-      ) {
+      // ignore clicks on the component itself
+      if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
         onClose();
       }
     }
 
     document.addEventListener('click', handleClick, false);
-    return () => document.removeEventListener('click', handleClick, false);
-  }, [onClose]);
+
+    return () => {
+      document.removeEventListener('click', handleClick, false);
+    };
+  }, [onClose, modalRef]);
 
   useKeyDownHandlers({ escape: onClose });
 
-  return internalRef;
+  return modalRef;
 }
