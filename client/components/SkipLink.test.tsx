@@ -2,12 +2,6 @@ import React from 'react';
 import { render, screen, fireEvent } from '../test-utils';
 import { SkipLink } from './SkipLink';
 
-jest.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string) => key
-  })
-}));
-
 describe('SkipLink', () => {
   const defaultProps = {
     targetId: 'main-content',
