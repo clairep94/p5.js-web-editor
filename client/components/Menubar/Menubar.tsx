@@ -1,14 +1,21 @@
-import PropTypes from 'prop-types';
 import React, {
   useCallback,
   useMemo,
   useRef,
   useState,
-  useEffect
+  useEffect,
+  MouseEvent,
+  KeyboardEvent
 } from 'react';
 import { useModalClose } from '../../common/useModalClose';
 import { MenuOpenContext, MenubarContext } from './contexts';
 import { usePrevious } from '../../common/usePrevious';
+import { KeydownHandlerMap } from '../../common/useKeyDownHandlers';
+
+export interface MenubarProps {
+  children?: React.ReactNode;
+  className?: string;
+}
 
 /**
  * Menubar manages a collection of menu items and their submenus. It provides keyboard navigation,
@@ -25,20 +32,22 @@ import { usePrevious } from '../../common/usePrevious';
  *  </MenubarSubmenu>
  * </Menubar>
  */
+export function Menubar({
+  children,
+  className = 'nav__menubar'
+}: MenubarProps) {
+  const [menuOpen, setMenuOpen] = useState<string>('none');
+  const [activeIndex, setActiveIndex] = useState<number>(0);
+  const prevIndex = usePrevious<number>(activeIndex);
+  const [hasFocus, setHasFocus] = useState<boolean>(false);
 
-function Menubar({ children, className }) {
-  const [menuOpen, setMenuOpen] = useState('none');
-  const [activeIndex, setActiveIndex] = useState(0);
-  const prevIndex = usePrevious(activeIndex);
-  const [hasFocus, setHasFocus] = useState(false);
+  const menuItems = useRef<Set<HTMLElement>>(new Set()).current;
+  const menuItemToId = useRef<Map<HTMLElement, string>>(new Map()).current;
 
-  const menuItems = useRef(new Set()).current;
-  const menuItemToId = useRef(new Map()).current;
-
-  const timerRef = useRef(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const getMenuId = useCallback(
-    (index) => {
+    (index: number): string | undefined => {
       const items = Array.from(menuItems);
       const itemNode = items[index];
       return menuItemToId.get(itemNode);
@@ -52,7 +61,7 @@ function Menubar({ children, className }) {
 
     if (menuOpen !== 'none') {
       const newMenuId = getMenuId(newIndex);
-      setMenuOpen(newMenuId);
+      if (newMenuId) setMenuOpen(newMenuId);
     }
   }, [activeIndex, menuItems, menuOpen, getMenuId]);
 
@@ -62,7 +71,7 @@ function Menubar({ children, className }) {
 
     if (menuOpen !== 'none') {
       const newMenuId = getMenuId(newIndex);
-      setMenuOpen(newMenuId);
+      if (newMenuId) setMenuOpen(newMenuId);
     }
   }, [activeIndex, menuItems, menuOpen, getMenuId]);
 
@@ -83,9 +92,9 @@ function Menubar({ children, className }) {
     activeNode.focus();
   }, [activeIndex, menuItems, menuOpen]);
 
-  const toggleMenuOpen = useCallback((id) => {
+  const toggleMenuOpen = useCallback((id: string) => {
     setMenuOpen((prevState) => (prevState === id ? 'none' : id));
-  });
+  }, []);
 
   const registerTopLevelItem = useCallback(
     (ref, submenuId) => {
@@ -138,7 +147,7 @@ function Menubar({ children, className }) {
     [nodeRef]
   );
 
-  const keyHandlers = {
+  const keyHandlers: KeydownHandlerMap = {
     ArrowLeft: (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -174,7 +183,7 @@ function Menubar({ children, className }) {
     if (activeIndex !== prevIndex) {
       const items = Array.from(menuItems);
       const activeNode = items[activeIndex];
-      const prevNode = items[prevIndex];
+      const prevNode = prevIndex ? items[prevIndex] : undefined;
 
       prevNode?.setAttribute('tabindex', '-1');
       activeNode?.setAttribute('tabindex', '0');
@@ -191,7 +200,7 @@ function Menubar({ children, className }) {
 
   const contextValue = useMemo(
     () => ({
-      createMenuHandlers: (menu) => ({
+      createMenuHandlers: (menu: string) => ({
         onMouseOver: () => {
           setMenuOpen((prevState) => (prevState === 'none' ? 'none' : menu));
         },
@@ -210,8 +219,8 @@ function Menubar({ children, className }) {
         onBlur: handleBlur,
         onFocus: clearHideTimeout
       }),
-      createMenuItemHandlers: (menu) => ({
-        onMouseUp: (e) => {
+      createMenuItemHandlers: (menu: string) => ({
+        onMouseUp: (e: MouseEvent) => {
           if (e.button === 2) {
             return;
           }
@@ -278,15 +287,3 @@ function Menubar({ children, className }) {
     </MenubarContext.Provider>
   );
 }
-
-Menubar.propTypes = {
-  children: PropTypes.node,
-  className: PropTypes.string
-};
-
-Menubar.defaultProps = {
-  children: null,
-  className: 'nav__menubar'
-};
-
-export default Menubar;
