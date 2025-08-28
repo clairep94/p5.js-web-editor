@@ -1,9 +1,9 @@
 import { mapKeys } from 'lodash';
-import { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { isMac } from '../utils/device';
 
 /** Function to call upon keydown */
-export type KeydownHandler = (e: KeyboardEvent) => void;
+export type KeydownHandler = (e: KeyboardEvent | React.KeyboardEvent) => void;
 /** An object mapping from keys like 'ctrl-s' or 'ctrl-shift-1' to handlers. */
 export type KeydownHandlerMap = Record<string, KeydownHandler>;
 

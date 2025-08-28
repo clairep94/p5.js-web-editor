@@ -4,8 +4,7 @@ import React, {
   useRef,
   useState,
   useEffect,
-  MouseEvent,
-  KeyboardEvent
+  MouseEvent
 } from 'react';
 import { useModalClose } from '../../common/useModalClose';
 import { MenuOpenContext, MenubarContext } from './contexts';
@@ -125,7 +124,7 @@ export function Menubar({
     setMenuOpen('none');
   }, [setMenuOpen]);
 
-  const nodeRef = useModalClose(handleClose);
+  const nodeRef = useModalClose<HTMLUListElement>(handleClose);
 
   const handleFocus = useCallback(() => {
     setHasFocus(true);
