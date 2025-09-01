@@ -276,6 +276,8 @@ export function MenubarSubmenu({
     if (activeItem) {
       const activeItemNode = activeItem.firstChild;
 
+      if (!activeItemNode) return;
+
       const isDisabled =
         activeItemNode.getAttribute('aria-disabled') === 'true';
 
