@@ -12,17 +12,15 @@ import { usePrevious } from '../../common/usePrevious';
 import { KeydownHandlerMap } from '../../common/useKeyDownHandlers';
 
 export interface MenubarProps {
+  // Menu items that will be rendered in the menubar
   children?: React.ReactNode;
+  // CSS class name to apply to the menubar
   className?: string;
 }
 
 /**
  * Menubar manages a collection of menu items and their submenus. It provides keyboard navigation,
  * focus and state management, and other accessibility features for the menu items and submenus.
- *
- * @param {React.ReactNode} props.children - Menu items that will be rendered in the menubar
- * @param {string} [props.className='nav__menubar'] - CSS class name to apply to the menubar
- * @returns {JSX.Element}
  *
  * @example
  * <Menubar>

@@ -12,12 +12,15 @@ interface MenubarContextType {
 
   // MenubarItem
   createMenuItemHandlers: (id: string) => Record<string, any>;
-  hasFocus?: boolean;
+  hasFocus: boolean;
 
   // MenubarSubmenu
   setActiveIndex: (index: number) => void;
-  menuItems: Set<HTMLElement>;
-  registerTopLevelItem: (ref: unknown, id: string) => void;
+  menuItems: Set<HTMLButtonElement>;
+  registerTopLevelItem: (
+    ref: React.Ref<HTMLButtonElement>,
+    id: string
+  ) => () => void; // returns unregister fn
 }
 
 export const MenubarContext = createContext<MenubarContextType>({
@@ -27,20 +30,18 @@ export const MenubarContext = createContext<MenubarContextType>({
   setMenuOpen: () => {},
   setActiveIndex: () => {},
   hasFocus: false,
-  menuItems: Set<HTMLElement>,
-  registerTopLevelItem(ref: unknown, id: string): void {
-    throw new Error('Function not implemented.');
-  }
+  menuItems: new Set<HTMLButtonElement>(),
+  registerTopLevelItem: () => () => {}
 });
 
 interface SubmenuContextType {
-  submenuItems: Set<HTMLElement>;
+  submenuItems: Set<HTMLLIElement>;
   setSubmenuActiveIndex: (index: number) => void;
-  registerSubmenuItem: (ref: React.RefObject<HTMLElement>) => () => void;
+  registerSubmenuItem: (ref: React.Ref<HTMLLIElement>) => () => void;
   id: string;
   title: string;
-  first: () => {};
-  last: () => {};
+  first: () => void;
+  last: () => void;
 }
 
 export const SubmenuContext = createContext<SubmenuContextType>({
@@ -49,10 +50,6 @@ export const SubmenuContext = createContext<SubmenuContextType>({
   registerSubmenuItem: () => () => {},
   id: '',
   title: '',
-  first(): {} {
-    throw new Error('Function not implemented.');
-  },
-  last(): {} {
-    throw new Error('Function not implemented.');
-  }
+  first: () => {},
+  last: () => {}
 });

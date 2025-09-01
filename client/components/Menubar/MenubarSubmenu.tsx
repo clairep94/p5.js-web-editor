@@ -84,7 +84,11 @@ const MenubarTrigger = React.forwardRef<HTMLButtonElement, MenubarTriggerProps>(
     const handleMouseEnter = () => {
       if (hasFocus) {
         const items = Array.from(menuItems);
-        const index = items.findIndex((item) => item === ref.current);
+        const index = items.findIndex(
+          (item) =>
+            item ===
+            (ref as React.MutableRefObject<HTMLButtonElement | null>).current
+        );
 
         if (index !== -1) {
           setActiveIndex(index);
@@ -228,7 +232,7 @@ export function MenubarSubmenu({
   const { isOpen, handlers } = useMenuProps(id);
   const [submenuActiveIndex, setSubmenuActiveIndex] = useState(0);
   const { setMenuOpen, toggleMenuOpen } = useContext(MenubarContext);
-  const submenuItems = useRef(new Set()).current;
+  const submenuItems = useRef<Set<HTMLElement>>(new Set()).current;
 
   const buttonRef = useRef(null);
   const listItemRef = useRef(null);
