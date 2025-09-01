@@ -1,7 +1,6 @@
 // https://blog.logrocket.com/building-accessible-menubar-component-react
 
 import classNames from 'classnames';
-import PropTypes from 'prop-types';
 import React, {
   useState,
   useEffect,
@@ -18,11 +17,12 @@ import {
 } from './contexts';
 import TriangleIcon from '../../images/down-filled-triangle.svg';
 
-export function useMenuProps(id) {
+/* -------------------------------------------------------------------------------------------------
+ * useMenuProps
+ * -----------------------------------------------------------------------------------------------*/
+export function useMenuProps(id: string) {
   const activeMenu = useContext(MenuOpenContext);
-
   const isOpen = id === activeMenu;
-
   const { createMenuHandlers } = useContext(MenubarContext);
 
   const handlers = useMemo(() => createMenuHandlers(id), [
@@ -36,7 +36,11 @@ export function useMenuProps(id) {
 /* -------------------------------------------------------------------------------------------------
  * MenubarTrigger
  * -----------------------------------------------------------------------------------------------*/
-
+interface MenubarTriggerProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  role?: string;
+  hasPopup?: 'menu' | 'listbox' | 'true';
+}
 /**
  * MenubarTrigger renders a button that toggles a submenu. It handles keyboard navigation and supports
  * screen readers. It needs to be within a submenu context.
@@ -63,111 +67,107 @@ export function useMenuProps(id) {
  * </li>
  */
 
-const MenubarTrigger = React.forwardRef(({ role, hasPopup, ...props }, ref) => {
-  const {
-    setActiveIndex,
-    menuItems,
-    registerTopLevelItem,
-    hasFocus
-  } = useContext(MenubarContext);
-  const { id, title, first, last } = useContext(SubmenuContext);
-  const { isOpen, handlers } = useMenuProps(id);
+const MenubarTrigger = React.forwardRef<HTMLButtonElement, MenubarTriggerProps>(
+  (
+    { role = 'menuitem', hasPopup = 'menu', ...props }: MenubarTriggerProps,
+    ref
+  ) => {
+    const {
+      setActiveIndex,
+      menuItems,
+      registerTopLevelItem,
+      hasFocus
+    } = useContext(MenubarContext);
+    const { id, title, first, last } = useContext(SubmenuContext);
+    const { isOpen, handlers } = useMenuProps(id);
 
-  const handleMouseEnter = () => {
-    if (hasFocus) {
-      const items = Array.from(menuItems);
-      const index = items.findIndex((item) => item === ref.current);
+    const handleMouseEnter = () => {
+      if (hasFocus) {
+        const items = Array.from(menuItems);
+        const index = items.findIndex((item) => item === ref.current);
 
-      if (index !== -1) {
-        setActiveIndex(index);
+        if (index !== -1) {
+          setActiveIndex(index);
+        }
       }
-    }
-  };
+    };
 
-  const handleKeyDown = (e) => {
-    switch (e.key) {
-      case 'ArrowDown':
-        if (!isOpen) {
-          e.preventDefault();
-          e.stopPropagation();
-          first();
-        }
-        break;
-      case 'ArrowUp':
-        if (!isOpen) {
-          e.preventDefault();
-          e.stopPropagation();
-          last();
-        }
-        break;
-      case 'Enter':
-      case ' ':
-        if (!isOpen) {
-          e.preventDefault();
-          e.stopPropagation();
-          first();
-        }
-        break;
-      default:
-        break;
-    }
-  };
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+      switch (e.key) {
+        case 'ArrowDown':
+          if (!isOpen) {
+            e.preventDefault();
+            e.stopPropagation();
+            first();
+          }
+          break;
+        case 'ArrowUp':
+          if (!isOpen) {
+            e.preventDefault();
+            e.stopPropagation();
+            last();
+          }
+          break;
+        case 'Enter':
+        case ' ':
+          if (!isOpen) {
+            e.preventDefault();
+            e.stopPropagation();
+            first();
+          }
+          break;
+        default:
+          break;
+      }
+    };
 
-  useEffect(() => {
-    const unregister = registerTopLevelItem(ref, id);
-    return unregister;
-  }, [menuItems, registerTopLevelItem]);
+    useEffect(() => {
+      const unregister = registerTopLevelItem(ref, id);
+      return unregister;
+    }, [menuItems, registerTopLevelItem]);
 
-  return (
-    <button
-      {...props}
-      {...handlers}
-      ref={ref}
-      role={role}
-      onMouseEnter={handleMouseEnter}
-      onKeyDown={handleKeyDown}
-      aria-haspopup={hasPopup}
-      aria-expanded={isOpen}
-    >
-      <span className="nav__item-header">{title}</span>
-      <TriangleIcon
-        className="nav__item-header-triangle"
-        focusable="false"
-        aria-hidden="true"
-      />
-    </button>
-  );
-});
-
-MenubarTrigger.propTypes = {
-  role: PropTypes.string,
-  hasPopup: PropTypes.oneOf(['menu', 'listbox', 'true'])
-};
-
-MenubarTrigger.defaultProps = {
-  role: 'menuitem',
-  hasPopup: 'menu'
-};
+    return (
+      <button
+        {...props}
+        {...handlers}
+        ref={ref}
+        role={role}
+        onMouseEnter={handleMouseEnter}
+        onKeyDown={handleKeyDown}
+        aria-haspopup={hasPopup}
+        aria-expanded={isOpen}
+      >
+        <span className="nav__item-header">{title}</span>
+        <TriangleIcon
+          className="nav__item-header-triangle"
+          focusable="false"
+          aria-hidden="true"
+        />
+      </button>
+    );
+  }
+);
 
 /* -------------------------------------------------------------------------------------------------
  * MenubarList
  * -----------------------------------------------------------------------------------------------*/
 
+interface MenubarListProps {
+  // MenubarItems that should be rendered in the list
+  children?: React.ReactNode;
+  // The ARIA role of the list element
+  role?: 'menu' | 'listbox';
+}
+
 /**
  * MenubarList renders the container for menu items in a submenu. It provides context and handles ARIA roles.
- *
- * @param {Object} props
- * @param {React.ReactNode} props.children - MenubarItems that should be rendered in the list
- * @param {string} [props.role='menu'] - The ARIA role of the list element
- * @returns {JSX.Element}
  *
  * @example
  * <MenubarList role={listRole}>
  *  ... <MenubarItem> elements
  * </MenubarList>
  */
-
-function MenubarList({ children, role, ...props }) {
+function MenubarList({ children, role = 'menu', ...props }: MenubarListProps) {
   const { id, title } = useContext(SubmenuContext);
 
   return (
@@ -184,19 +184,17 @@ function MenubarList({ children, role, ...props }) {
   );
 }
 
-MenubarList.propTypes = {
-  children: PropTypes.node,
-  role: PropTypes.oneOf(['menu', 'listbox'])
-};
-
-MenubarList.defaultProps = {
-  children: null,
-  role: 'menu'
-};
-
 /* -------------------------------------------------------------------------------------------------
  * MenubarSubmenu
  * -----------------------------------------------------------------------------------------------*/
+
+export interface MenubarSubmenuProps {
+  id: string;
+  children?: React.ReactNode;
+  title: string;
+  triggerRole?: string;
+  listRole?: 'menu' | 'listbox';
+}
 
 /**
  * MenubarSubmenu manages a triggerable submenu within a menubar. It is a compound component
@@ -219,15 +217,14 @@ MenubarList.defaultProps = {
  *  </MenubarSubmenu>
  * </Menubar>
  */
-
-function MenubarSubmenu({
+export function MenubarSubmenu({
   children,
   id,
   title,
-  triggerRole: customTriggerRole,
-  listRole: customListRole,
+  triggerRole: customTriggerRole = 'menuItem',
+  listRole: customListRole = 'menu',
   ...props
-}) {
+}: MenubarSubmenuProps) {
   const { isOpen, handlers } = useMenuProps(id);
   const [submenuActiveIndex, setSubmenuActiveIndex] = useState(0);
   const { setMenuOpen, toggleMenuOpen } = useContext(MenubarContext);
@@ -442,19 +439,3 @@ function MenubarSubmenu({
     </SubmenuContext.Provider>
   );
 }
-
-MenubarSubmenu.propTypes = {
-  id: PropTypes.string.isRequired,
-  children: PropTypes.node,
-  title: PropTypes.node.isRequired,
-  triggerRole: PropTypes.string,
-  listRole: PropTypes.string
-};
-
-MenubarSubmenu.defaultProps = {
-  children: null,
-  triggerRole: 'menuitem',
-  listRole: 'menu'
-};
-
-export default MenubarSubmenu;

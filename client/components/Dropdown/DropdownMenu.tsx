@@ -108,7 +108,7 @@ export const DropdownMenu = forwardRef<HTMLDivElement, DropdownMenuProps>(
 
     const close = useCallback(() => setIsOpen(false), [setIsOpen]);
 
-    const anchorRef = useModalClose(close, ref);
+    const anchorRef = useModalClose<HTMLDivElement>(close, ref);
 
     const toggle = useCallback(() => {
       setIsOpen((prevState) => !prevState);

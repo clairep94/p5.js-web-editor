@@ -3,6 +3,7 @@ import React from 'react';
 import { reduxRender } from '../../../../test-utils';
 
 import Nav from './Nav';
+import { MenubarSubmenu } from '../../../../components/Menubar/MenubarSubmenu';
 
 jest.mock('../../../../utils/generateRandomName');
 
@@ -16,25 +17,35 @@ jest.mock('../../../../components/Menubar/Menubar', () => ({
 }));
 
 // mock MenubarSubmenu
-jest.mock('../../../../components/Menubar/MenubarSubmenu', () => {
-  function MenubarSubmenu({ children, title }) {
-    return (
-      <li className="nav__item">
-        <span role="menuitem">{title}</span>
-        <ul role="menu" aria-label={`${title} menu`}>
-          {children}
-        </ul>
-      </li>
-    );
-  }
+jest.mock('../../../../components/Menubar/MenubarSubmenu', () => ({
+  MenubarSubmenu: ({ children, title }) => (
+    <li className="nav__item">
+      <span role="menuitem">{title}</span>
+      <ul role="menu" aria-label={`${title} menu`}>
+        {children}
+      </ul>
+    </li>
+  )
+}));
+// jest.mock('../../../../components/Menubar/MenubarSubmenu', () => {
+//   function MenubarSubmenu({ children, title }) {
+//     return (
+//       <li className="nav__item">
+//         <span role="menuitem">{title}</span>
+//         <ul role="menu" aria-label={`${title} menu`}>
+//           {children}
+//         </ul>
+//       </li>
+//     );
+//   }
 
-  MenubarSubmenu.useMenuProps = () => ({
-    isOpen: false,
-    handlers: {}
-  });
+//   MenubarSubmenu.useMenuProps = () => ({
+//     isOpen: false,
+//     handlers: {}
+//   });
 
-  return MenubarSubmenu;
-});
+//   return MenubarSubmenu;
+// });
 
 // mock MenubarItem
 jest.mock('../../../../components/Menubar/MenubarItem', () => ({
