@@ -14,7 +14,7 @@ import sorting from './modules/IDE/reducers/sorting';
 import loading from './modules/IDE/reducers/loading';
 import collections from './modules/IDE/reducers/collections';
 
-const rootReducer = combineReducers({
+export const rootReducer = combineReducers({
   ide,
   files,
   preferences,
@@ -30,5 +30,3 @@ const rootReducer = combineReducers({
   loading,
   collections
 });
-
-export default rootReducer;

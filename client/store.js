@@ -1,7 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import listenerMiddleware from './middleware';
 import DevTools from './modules/App/components/DevTools';
-import rootReducer from './reducers';
+import { rootReducer } from './reducers';
 import { clearState, loadState } from './persistState';
 import { getConfig } from './utils/getConfig';
 
