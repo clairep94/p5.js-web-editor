@@ -2,7 +2,46 @@ import i18next from 'i18next';
 import { apiClient } from '../../../utils/apiClient';
 import * as ActionTypes from '../../../constants';
 
-function updatePreferences(formParams, dispatch) {
+// Not included in Preferences Form to post to BE
+type IdePreferencesTabIndex = number;
+type IdeAllAccessibleOutput = boolean;
+
+// Included in Preferences Form to post to BE
+type IdeFontSize = number;
+type IdeLineNumber = boolean;
+type IdeAutoCloseBracketQuotes = boolean;
+type IdeAutoCompleteHinter = boolean;
+type IdeAutoSave = boolean;
+type IdeLineWrap = boolean;
+type IdeLintWarning = boolean;
+type IdeTextOutput = boolean;
+type IdeGridOutput = boolean;
+enum IdeTheme {
+  LIGHT = 'light',
+  DARK = 'dark',
+  CONTRAST = 'contrast'
+}
+type IdeAutoRefresh = boolean;
+type IdeLanguage = string;
+
+export interface PreferencesFormParam {
+  preferences: Partial<{
+    fontSize: IdeFontSize;
+    lineNumbers: IdeLineNumber;
+    autocloseBracketsQuotes: IdeAutoCloseBracketQuotes;
+    autocompleteHinter: IdeAutoCompleteHinter;
+    autosave: IdeAutoSave;
+    linewrap: IdeLineWrap;
+    lintWarning: IdeLintWarning;
+    textOutput: IdeTextOutput;
+    gridOutput: IdeGridOutput;
+    theme: IdeTheme;
+    autorefresh: IdeAutoRefresh;
+    language: IdeLanguage;
+  }>;
+}
+
+function updatePreferences(formParams: PreferencesFormParam, dispatch) {
   apiClient
     .put('/preferences', formParams)
     .then(() => {})
@@ -14,14 +53,14 @@ function updatePreferences(formParams, dispatch) {
     });
 }
 
-export function setPreferencesTab(value: number) {
+export function setPreferencesTab(value: IdePreferencesTabIndex) {
   return {
     type: ActionTypes.SET_PREFERENCES_TAB,
     value
   };
 }
 
-export function setFontSize(value: number) {
+export function setFontSize(value: IdeFontSize) {
   return (dispatch, getState) => {
     // eslint-disable-line
     dispatch({
@@ -40,7 +79,7 @@ export function setFontSize(value: number) {
   };
 }
 
-export function setLineNumbers(value: boolean) {
+export function setLineNumbers(value: IdeLineNumber) {
   return (dispatch, getState) => {
     dispatch({
       type: ActionTypes.SET_LINE_NUMBERS,
@@ -58,7 +97,7 @@ export function setLineNumbers(value: boolean) {
   };
 }
 
-export function setAutocloseBracketsQuotes(value: boolean) {
+export function setAutocloseBracketsQuotes(value: IdeAutoCloseBracketQuotes) {
   return (dispatch, getState) => {
     dispatch({
       type: ActionTypes.SET_AUTOCLOSE_BRACKETS_QUOTES,
@@ -76,7 +115,7 @@ export function setAutocloseBracketsQuotes(value: boolean) {
   };
 }
 
-export function setAutocompleteHinter(valu: boolean) {
+export function setAutocompleteHinter(value: IdeAutoCompleteHinter) {
   return (dispatch, getState) => {
     dispatch({
       type: ActionTypes.SET_AUTOCOMPLETE_HINTER,
@@ -94,7 +133,7 @@ export function setAutocompleteHinter(valu: boolean) {
   };
 }
 
-export function setAutosave(value: boolean) {
+export function setAutosave(value: IdeAutoSave) {
   return (dispatch, getState) => {
     dispatch({
       type: ActionTypes.SET_AUTOSAVE,
@@ -112,7 +151,7 @@ export function setAutosave(value: boolean) {
   };
 }
 
-export function setLinewrap(value: boolean) {
+export function setLinewrap(value: IdeLineWrap) {
   return (dispatch, getState) => {
     dispatch({
       type: ActionTypes.SET_LINEWRAP,
@@ -130,7 +169,7 @@ export function setLinewrap(value: boolean) {
   };
 }
 
-export function setLintWarning(value: boolean) {
+export function setLintWarning(value: IdeLintWarning) {
   return (dispatch, getState) => {
     dispatch({
       type: ActionTypes.SET_LINT_WARNING,
@@ -148,7 +187,7 @@ export function setLintWarning(value: boolean) {
   };
 }
 
-export function setTextOutput(value: boolean) {
+export function setTextOutput(value: IdeTextOutput) {
   return (dispatch, getState) => {
     dispatch({
       type: ActionTypes.SET_TEXT_OUTPUT,
@@ -166,7 +205,7 @@ export function setTextOutput(value: boolean) {
   };
 }
 
-export function setGridOutput(value: boolean) {
+export function setGridOutput(value: IdeGridOutput) {
   return (dispatch, getState) => {
     dispatch({
       type: ActionTypes.SET_GRID_OUTPUT,
@@ -184,13 +223,7 @@ export function setGridOutput(value: boolean) {
   };
 }
 
-export enum AppThemes {
-  LIGHT = 'light',
-  DARK = 'dark',
-  CONTRAST = 'contrast'
-}
-
-export function setTheme(value: AppThemes) {
+export function setTheme(value: IdeTheme) {
   return (dispatch, getState) => {
     dispatch({
       type: ActionTypes.SET_THEME,
@@ -208,7 +241,7 @@ export function setTheme(value: AppThemes) {
   };
 }
 
-export function setAutorefresh(value: boolean) {
+export function setAutorefresh(value: IdeAutoRefresh) {
   return (dispatch, getState) => {
     dispatch({
       type: ActionTypes.SET_AUTOREFRESH,
@@ -226,14 +259,17 @@ export function setAutorefresh(value: boolean) {
   };
 }
 
-export function setAllAccessibleOutput(value: boolean) {
+export function setAllAccessibleOutput(value: IdeAllAccessibleOutput) {
   return (dispatch) => {
     dispatch(setTextOutput(value));
     dispatch(setGridOutput(value));
   };
 }
 
-export function setLanguage(value: string, { persistPreference = true } = {}) {
+export function setLanguage(
+  value: IdeLanguage,
+  { persistPreference = true } = {}
+) {
   return (dispatch, getState) => {
     i18next.changeLanguage(value);
     dispatch({
