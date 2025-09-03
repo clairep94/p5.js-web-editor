@@ -1,11 +1,12 @@
-/*
-  Saves and loads a snapshot of the Redux store
-  state to session storage
-*/
+/**
+ * Saves and loads a snapshot of the Redux store
+ * state to session storage
+ */
 const key = 'p5js-editor';
-const storage = sessionStorage;
+const storage: Storage = sessionStorage;
 
-export const saveState = (state) => {
+// Use a generic type for state so consumers can specify the shape
+export const saveState = <T>(state: T): void => {
   try {
     storage.setItem(key, JSON.stringify(state));
   } catch (error) {
@@ -13,15 +14,18 @@ export const saveState = (state) => {
   }
 };
 
-export const loadState = () => {
+// Returns the stored state or null if not found
+export const loadState = <T>(): T | null => {
   try {
-    return JSON.parse(storage.getItem(key));
+    const item = storage.getItem(key);
+    if (!item) return null;
+    return JSON.parse(item) as T;
   } catch (error) {
     console.warn('Failed to retrieve initialize state from storage:', error);
     return null;
   }
 };
 
-export const clearState = () => {
+export const clearState = (): void => {
   storage.removeItem(key);
 };
