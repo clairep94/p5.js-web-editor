@@ -4,7 +4,7 @@ import React from 'react';
 import Routing from './routes';
 
 import { reduxRender, act, waitFor, screen, within } from './test-utils';
-import configureStore from './store';
+import { configureStore } from './store';
 import * as Actions from './modules/User/actions';
 import { userResponse } from './testData/testServerResponses';
 

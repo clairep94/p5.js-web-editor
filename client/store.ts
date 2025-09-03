@@ -1,4 +1,4 @@
-import { configureStore } from '@reduxjs/toolkit';
+import { configureStore as _configureStore } from '@reduxjs/toolkit';
 import listenerMiddleware from './middleware';
 import DevTools from './modules/App/components/DevTools';
 import { rootReducer } from './reducers';
@@ -15,11 +15,11 @@ export function showReduxDevTools() {
   );
 }
 
-export default function setupStore(initialState) {
+export function configureStore(initialState) {
   const savedState = loadState();
   clearState();
 
-  const store = configureStore({
+  const store = _configureStore({
     reducer: rootReducer,
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({
