@@ -1,5 +1,5 @@
 import { configureStore as _configureStore } from '@reduxjs/toolkit';
-import listenerMiddleware from './middleware';
+import { listenerMiddleware } from './middleware';
 import DevTools from './modules/App/components/DevTools';
 import { rootReducer } from './reducers';
 import { clearState, loadState } from './persistState';
