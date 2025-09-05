@@ -1,3 +1,5 @@
+/* eslint-disable no-unneeded-ternary */
+import { Request, Response } from 'express';
 import { get404Sketch } from './404Page';
 
 export function renderIndex() {
@@ -75,7 +77,7 @@ export function renderIndex() {
   `;
 }
 
-export function renderProjectIndex(username, projectName) {
+export function renderProjectIndex(username: string, projectName: string) {
   const assetsManifest =
     process.env.webpackAssets && JSON.parse(process.env.webpackAssets);
   return `
@@ -156,7 +158,11 @@ export function renderProjectIndex(username, projectName) {
  * @param {import('express').e.Response} res
  * @param {boolean} [exists]
  */
-export default async function sendHtml(req, res, exists = true) {
+export async function sendHtml(
+  req: Request,
+  res: Response,
+  exists: boolean = true
+) {
   if (!exists) {
     res.status(404);
     const html = await get404Sketch();
