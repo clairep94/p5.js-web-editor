@@ -1,4 +1,4 @@
-import { MailTemplate } from '../types/mail.type';
+import { AccountConsolidationMailTemplate } from '../types/mail.type';
 
 export const consolidationMailLayout = ({
   domain,
@@ -13,7 +13,7 @@ export const consolidationMailLayout = ({
   resetPasswordText,
   noteText,
   meta
-}: MailTemplate) =>
+}: AccountConsolidationMailTemplate) =>
   `
 <mjml>
   <mj-head>

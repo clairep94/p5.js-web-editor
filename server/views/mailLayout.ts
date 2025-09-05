@@ -1,4 +1,6 @@
-export default ({
+import { MailTemplate } from '../types/mail.type';
+
+export const mailLayout = ({
   domain,
   headingText,
   greetingText,
@@ -8,7 +10,7 @@ export default ({
   directLinkText,
   noteText,
   meta
-}) =>
+}: MailTemplate) =>
   `
 <mjml>
   <mj-head>
