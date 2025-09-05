@@ -1,7 +1,8 @@
 import User from '../models/user';
 import Project from '../models/project';
+import { ProjectFile } from '../types/project.type';
 
-const insertErrorMessage = (htmlFile) => {
+const insertErrorMessage = (htmlFile: string) => {
   const html = htmlFile.split('</head>');
   const metaDescription = 'A web editor for p5.js, a JavaScript library with the goal of making coding accessible to artists, designers, educators, and beginners.'; // eslint-disable-line
   html[0] = `
@@ -84,7 +85,10 @@ export const get404Sketch = async () => {
       return errorMessage;
     }
 
-    const projects = await Project.find({ user: p5User._id }).exec();
+    const projects = await Project.find({
+      // eslint-disable-next-line no-underscore-dangle
+      user: p5User._id
+    }).exec();
 
     if (!projects.length) {
       return errorMessage;
@@ -94,33 +98,36 @@ export const get404Sketch = async () => {
     const sketch = projects[randomIndex];
 
     // Get sketch files
-    let htmlFile = sketch.files.find((file) => file.name.match(/.*\.html$/i))
-      .content;
-    const jsFiles = sketch.files.filter((file) => file.name.match(/.*\.js$/i));
-    const cssFiles = sketch.files.filter((file) =>
+    let htmlFile = sketch.files.find((file: ProjectFile) =>
+      file.name.match(/.*\.html$/i)
+    ).content;
+    const jsFiles = sketch.files.filter((file: ProjectFile) =>
+      file.name.match(/.*\.js$/i)
+    );
+    const cssFiles = sketch.files.filter((file: ProjectFile) =>
       file.name.match(/.*\.css$/i)
     );
-    const linkedFiles = sketch.files.filter((file) => file.url);
+    const linkedFiles = sketch.files.filter((file: ProjectFile) => file.url);
 
     const instanceMode = jsFiles
-      .find((file) => file.name === 'sketch.js')
+      .find((file: ProjectFile) => file.name === 'sketch.js')
       .content.includes('Instance Mode');
 
-    jsFiles.forEach((file) => {
+    jsFiles.forEach((file: ProjectFile) => {
       // Add js files as script tags
       const html = htmlFile.split('</body>');
       html[0] = `${html[0]}<script>${file.content}</script>`;
       htmlFile = html.join('</body>');
     });
 
-    cssFiles.forEach((file) => {
+    cssFiles.forEach((file: ProjectFile) => {
       // Add css files as style tags
       const html = htmlFile.split('</head>');
       html[0] = `${html[0]}<style>${file.content}</style>`;
       htmlFile = html.join('</head>');
     });
 
-    linkedFiles.forEach((file) => {
+    linkedFiles.forEach((file: ProjectFile) => {
       // Add linked files as link tags
       const html = htmlFile.split('<head>');
       html[1] = `<link href=${file.url}>${html[1]}`;
@@ -153,5 +160,3 @@ export const get404Sketch = async () => {
     throw err;
   }
 };
-
-export default get404Sketch;
