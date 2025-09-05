@@ -1,4 +1,19 @@
-export default ({
+interface consolidationMailLayoutProps {
+  domain: string;
+  headingText: string;
+  greetingText: string;
+  messageText: string;
+  username: string;
+  email: string;
+  message2Text: string;
+  resetPasswordLink: string;
+  directLinkText: string;
+  resetPasswordText: string;
+  noteText: string;
+  meta: { keywords: string; description: string };
+}
+
+export const consolidationMailLayout = ({
   domain,
   headingText,
   greetingText,
@@ -11,7 +26,7 @@ export default ({
   resetPasswordText,
   noteText,
   meta
-}) =>
+}: consolidationMailLayoutProps) =>
   `
 <mjml>
   <mj-head>
