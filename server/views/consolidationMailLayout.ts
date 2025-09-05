@@ -1,17 +1,4 @@
-interface consolidationMailLayoutProps {
-  domain: string;
-  headingText: string;
-  greetingText: string;
-  messageText: string;
-  username: string;
-  email: string;
-  message2Text: string;
-  resetPasswordLink: string;
-  directLinkText: string;
-  resetPasswordText: string;
-  noteText: string;
-  meta: { keywords: string; description: string };
-}
+import { MailTemplate } from '../types/mail.type';
 
 export const consolidationMailLayout = ({
   domain,
@@ -26,7 +13,7 @@ export const consolidationMailLayout = ({
   resetPasswordText,
   noteText,
   meta
-}: consolidationMailLayoutProps) =>
+}: MailTemplate) =>
   `
 <mjml>
   <mj-head>
