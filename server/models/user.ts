@@ -1,5 +1,10 @@
-import mongoose from 'mongoose';
+/* eslint-disable no-underscore-dangle */
+import mongoose, { Document, Schema, Model, Types } from 'mongoose';
 import bcrypt from 'bcryptjs';
+import {
+  ApiKey,
+  MongooseDocumentTimestamp as DocumentTimestamp
+} from '../../types';
 
 const EmailConfirmationStates = {
   Verified: 'verified',
@@ -7,9 +12,14 @@ const EmailConfirmationStates = {
   Resent: 'resent'
 };
 
-const { Schema } = mongoose;
+interface ApiKeyDocument
+  extends ApiKey,
+    Document<Types.ObjectId>,
+    DocumentTimestamp {
+  id: string;
+}
 
-const apiKeySchema = new Schema(
+const apiKeySchema = new Schema<ApiKeyDocument>(
   {
     label: { type: String, default: 'API Key' },
     lastUsedAt: { type: Date },
@@ -27,7 +37,7 @@ apiKeySchema.virtual('id').get(function getApiKeyId() {
  * should never be exposed to the client. So we only return
  * a safe list of fields when toObject and toJSON are called.
  */
-function apiKeyMetadata(doc, ret, options) {
+function apiKeyMetadata(doc: ApiKeyDocument): Partial<ApiKeyDocument> {
   return {
     id: doc.id,
     label: doc.label,
