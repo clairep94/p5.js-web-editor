@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema, Model, Types } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
 export interface DocumentTimestamp {
   updatedAt?: Date;
