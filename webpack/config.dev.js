@@ -30,7 +30,7 @@ module.exports = {
   },
   resolve: {
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
-    modules: ['client', 'node_modules'],
+    mmodules: ['client', 'server', 'node_modules'],
     fallback: {
       os: require.resolve('os-browserify/browser')
     }

@@ -9,7 +9,8 @@ import slugify from 'slugify';
 import Project from '../models/project';
 import User from '../models/user';
 import { resolvePathToFile } from '../utils/filePath';
-import { generateFileSystemSafeName } from '../utils/generateFileSystemSafeName';
+// eslint-disable-next-line import/extensions
+import { generateFileSystemSafeName } from '../utils/generateFileSystemSafeName.ts';
 
 export {
   default as createProject,
