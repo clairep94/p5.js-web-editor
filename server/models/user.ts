@@ -1,9 +1,11 @@
 /* eslint-disable no-underscore-dangle */
-import mongoose, { Document, Schema, Model, Types } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import {
   ApiKey,
-  MongooseDocumentTimestamp as DocumentTimestamp
+  DocumentWithTimestampAndVirtualId,
+  User,
+  CookieConsent
 } from '../../types';
 
 const EmailConfirmationStates = {
@@ -12,12 +14,9 @@ const EmailConfirmationStates = {
   Resent: 'resent'
 };
 
-interface ApiKeyDocument
+export interface ApiKeyDocument
   extends ApiKey,
-    Document<Types.ObjectId>,
-    DocumentTimestamp {
-  id: string;
-}
+    DocumentWithTimestampAndVirtualId {}
 
 const apiKeySchema = new Schema<ApiKeyDocument>(
   {
@@ -55,7 +54,9 @@ apiKeySchema.set('toJSON', {
   transform: apiKeyMetadata
 });
 
-const userSchema = new Schema(
+export interface UserDocument extends User, DocumentWithTimestampAndVirtualId {}
+
+const userSchema = new Schema<UserDocument>(
   {
     name: { type: String, default: '' },
     username: { type: String, required: true, unique: true },
@@ -89,13 +90,13 @@ const userSchema = new Schema(
     totalSize: { type: Number, default: 0 },
     cookieConsent: {
       type: String,
-      enum: ['none', 'essential', 'all'],
-      default: 'none'
+      enum: Object.values(CookieConsent),
+      default: CookieConsent.NONE
     },
     banned: { type: Boolean, default: false },
     lastLoginTimestamp: { type: Date }
   },
-  { timestamps: true, usePushEach: true }
+  { timestamps: true }
 );
 
 /**
@@ -110,6 +111,10 @@ userSchema.pre('save', function checkPassword(next) {
   bcrypt.genSalt(10, (err, salt) => {
     if (err) {
       next(err);
+      return;
+    }
+    if (!user.password) {
+      next(new Error('Password is missing'));
       return;
     }
     bcrypt.hash(user.password, salt, (innerErr, hash) => {
@@ -137,7 +142,7 @@ userSchema.pre('save', function checkApiKey(next) {
   let pendingTasks = 0;
   let nextCalled = false;
 
-  const done = (err) => {
+  const done = (err?: mongoose.CallbackError) => {
     if (nextCalled) return;
     if (err) {
       nextCalled = true;
@@ -189,7 +194,7 @@ userSchema.set('toJSON', {
  * @return {Promise<boolean>}
  */
 userSchema.methods.comparePassword = async function comparePassword(
-  candidatePassword
+  candidatePassword: string
 ) {
   if (!this.password) {
     return false;
@@ -207,8 +212,8 @@ userSchema.methods.comparePassword = async function comparePassword(
  * Helper method for validating a user's api key
  */
 userSchema.methods.findMatchingKey = async function findMatchingKey(
-  candidateKey
-) {
+  candidateKey: string
+): Promise<{ isMatch: boolean; keyDocument: UserDocument | null }> {
   let keyObj = { isMatch: false, keyDocument: null };
   /* eslint-disable no-restricted-syntax */
   for (const k of this.apiKeys) {
@@ -237,7 +242,9 @@ userSchema.methods.findMatchingKey = async function findMatchingKey(
  * @callback [cb] - Optional error-first callback that passes User document
  * @return {Object} - Returns User Object fulfilled by User document
  */
-userSchema.statics.findByEmail = async function findByEmail(email) {
+userSchema.statics.findByEmail = async function findByEmail(
+  email: string | string[]
+): Promise<UserDocument[]> {
   const user = this;
   const query = Array.isArray(email) ? { email: { $in: email } } : { email };
 
@@ -257,7 +264,9 @@ userSchema.statics.findByEmail = async function findByEmail(email) {
  * @param {string[]} emails - Array of email strings
  * @return {Promise<Object>} - Returns Promise fulfilled by User document
  */
-userSchema.statics.findAllByEmails = async function findAllByEmails(emails) {
+userSchema.statics.findAllByEmails = async function findAllByEmails(
+  emails: string[]
+): Promise<UserDocument[] | null> {
   const user = this;
   const query = {
     email: { $in: emails }
@@ -281,19 +290,15 @@ userSchema.statics.findAllByEmails = async function findAllByEmails(emails) {
  * @return {Object} - Returns User Object fulfilled by User document
  */
 userSchema.statics.findByUsername = async function findByUsername(
-  username,
-  options
-) {
+  username: string,
+  options: { caseInsensitive: boolean }
+): Promise<UserDocument | null> {
   const user = this;
   const query = {
     username
   };
 
-  if (
-    arguments.length === 2 &&
-    typeof options === 'object' &&
-    options.caseInsensitive
-  ) {
+  if (options?.caseInsensitive) {
     const foundUser = await user
       .findOne(query)
       .collation({ locale: 'en', strength: 2 })
@@ -320,9 +325,9 @@ userSchema.statics.findByUsername = async function findByUsername(
  * @return {Object} - Returns User Object fulfilled by User document
  */
 userSchema.statics.findByEmailOrUsername = async function findByEmailOrUsername(
-  value,
-  options
-) {
+  value: string,
+  options: { caseInsensitive: boolean; valueType: 'email' | 'username' }
+): Promise<UserDocument | null> {
   const user = this;
   const isEmail =
     options && options.valueType
@@ -362,9 +367,9 @@ userSchema.statics.findByEmailOrUsername = async function findByEmailOrUsername(
  * @return {Object} - Returns User Object fulfilled by User document
  */
 userSchema.statics.findByEmailAndUsername = async function findByEmailAndUsername(
-  email,
-  username
-) {
+  email: string,
+  username: string
+): Promise<UserDocument | null> {
   const user = this;
   const query = {
     $or: [{ email }, { username }]
