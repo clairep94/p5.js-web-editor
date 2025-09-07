@@ -3,6 +3,7 @@ import { Response } from 'express';
 import { UserDocument, PublicUserDocument } from '../../types';
 import { User } from '../../models/user';
 
+/** Sanitised user response without sensitive data */
 export function userResponse(
   user: UserDocument | PublicUserDocument
 ): PublicUserDocument {
