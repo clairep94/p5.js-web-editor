@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 
-import User from '../models/user';
+import { User } from '../models/user';
 import mail from '../utils/mail';
 import { renderEmailConfirmation, renderResetPassword } from '../views/mail';
 

@@ -376,4 +376,8 @@ userSchema.statics.findByEmailAndUsername = async function findByEmailAndUsernam
 userSchema.index({ username: 1 }, { collation: { locale: 'en', strength: 2 } });
 userSchema.index({ email: 1 }, { collation: { locale: 'en', strength: 2 } });
 
-export default mongoose.models.User || mongoose.model('User', userSchema);
+export const User =
+  (mongoose.models.User as UserModel) ||
+  mongoose.model<UserDocument, UserModel>('User', userSchema);
+
+// User.EmailConfirmation = EmailConfirmationStates;

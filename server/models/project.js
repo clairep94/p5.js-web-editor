@@ -3,7 +3,7 @@ import shortid from 'shortid';
 import slugify from 'slugify';
 
 // Register User model as it's referenced by Project
-import './user';
+import { User } from './user';
 
 const { Schema } = mongoose;
 
