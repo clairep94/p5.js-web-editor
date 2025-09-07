@@ -1,19 +1,27 @@
 import crypto from 'crypto';
-
+import { Request, Response } from 'express';
 import { User } from '../models/user';
+import {
+  CookieConsentOptions,
+  UserDocument,
+  UserPreferences,
+  PublicUserDocument
+} from '../types';
 import mail from '../utils/mail';
 import { renderEmailConfirmation, renderResetPassword } from '../views/mail';
 
 export * from './user.controller/apiKey';
 
-export function userResponse(user) {
+export function userResponse(
+  user: UserDocument | PublicUserDocument
+): PublicUserDocument {
   return {
     email: user.email,
     username: user.username,
     preferences: user.preferences,
     apiKeys: user.apiKeys,
     verified: user.verified,
-    id: user._id,
+    id: '_id' in user ? String(user._id) : user.id,
     totalSize: user.totalSize,
     github: user.github,
     google: user.google,
@@ -26,7 +34,7 @@ export function userResponse(user) {
  * Note: can be done synchronously - https://nodejs.org/api/crypto.html#cryptorandombytessize-callback
  * @return Promise<string>
  */
-async function generateToken() {
+async function generateToken(): Promise<string | undefined> {
   return new Promise((resolve, reject) => {
     crypto.randomBytes(20, (err, buf) => {
       if (err) {
@@ -39,7 +47,17 @@ async function generateToken() {
   });
 }
 
-export async function createUser(req, res) {
+// ===== CREATE USER =====
+export interface CreateUserRequestBody {
+  username: string;
+  email: string;
+  password: string;
+}
+interface CreateUserRequest extends Request<{}, {}, CreateUserRequestBody> {
+  user: PublicUserDocument;
+  logIn: (user: any, callback: (err?: any) => void) => void;
+}
+export async function createUser(req: CreateUserRequest, res: Response) {
   try {
     const { username, email, password } = req.body;
     const emailLowerCase = email.toLowerCase();
@@ -66,7 +84,7 @@ export async function createUser(req, res) {
 
     await user.save();
 
-    req.logIn(user, async (loginErr) => {
+    req.logIn(user, async (loginErr: any) => {
       if (loginErr) {
         console.error(loginErr);
         res.status(500).json({ error: 'Failed to log in user.' });
@@ -96,10 +114,29 @@ export async function createUser(req, res) {
   }
 }
 
-export async function duplicateUserCheck(req, res) {
+// ===== DUPLICATE USER CHECK =====
+export interface DuplicateUserCheckQuery {
+  // eslint-disable-next-line camelcase
+  check_type: 'email' | 'string';
+  email: string;
+  username: string;
+}
+interface DuplicateUserCheckRequest
+  extends Request<{}, {}, {}, DuplicateUserCheckQuery> {
+  user: PublicUserDocument;
+  logIn: (user: any, callback: (err?: any) => void) => void;
+}
+
+export async function duplicateUserCheck(
+  req: DuplicateUserCheckRequest,
+  res: Response
+) {
   const checkType = req.query.check_type;
-  const value = req.query[checkType];
-  const options = { caseInsensitive: true, valueType: checkType };
+  const value = req.query[checkType as 'email' | 'username'];
+  const options = {
+    caseInsensitive: true,
+    valueType: checkType as 'email' | 'username'
+  };
   const user = await User.findByEmailOrUsername(value, options);
   if (user) {
     return res.json({
@@ -114,7 +151,18 @@ export async function duplicateUserCheck(req, res) {
   });
 }
 
-export async function updatePreferences(req, res) {
+// ===== UPDATE USER PREFERENCES =====
+export interface UpdateUserPreferencesRequestBody {
+  preferences: Partial<UserPreferences>;
+}
+interface UpdateUserPreferencesRequest
+  extends Request<{}, {}, UpdateUserPreferencesRequestBody> {
+  user: PublicUserDocument;
+}
+export async function updatePreferences(
+  req: UpdateUserPreferencesRequest,
+  res: Response
+) {
   try {
     const user = await User.findById(req.user.id).exec();
     if (!user) {
@@ -130,7 +178,18 @@ export async function updatePreferences(req, res) {
   }
 }
 
-export async function resetPasswordInitiate(req, res) {
+// ===== RESET PASSWORD INITIATE =====
+export interface ResetPasswordInitiateRequestBody {
+  email: string;
+}
+interface ResetPasswordInitiateRequest
+  extends Request<{}, {}, ResetPasswordInitiateRequestBody> {
+  user: PublicUserDocument;
+}
+export async function resetPasswordInitiate(
+  req: ResetPasswordInitiateRequest,
+  res: Response
+) {
   try {
     const token = await generateToken();
     const user = await User.findByEmail(req.body.email);
@@ -167,7 +226,18 @@ export async function resetPasswordInitiate(req, res) {
   }
 }
 
-export async function validateResetPasswordToken(req, res) {
+// ===== RESET PASSWORD INITIATE =====
+export interface ValidateResetPasswordTokenRequestParams {
+  token: string;
+}
+interface ValidateResetPasswordTokenRequest
+  extends Request<ValidateResetPasswordTokenRequestParams> {
+  user: PublicUserDocument;
+}
+export async function validateResetPasswordToken(
+  req: ValidateResetPasswordTokenRequest,
+  res: Response
+) {
   const user = await User.findOne({
     resetPasswordToken: req.params.token,
     resetPasswordExpires: { $gt: Date.now() }
@@ -182,7 +252,14 @@ export async function validateResetPasswordToken(req, res) {
   res.json({ success: true });
 }
 
-export async function emailVerificationInitiate(req, res) {
+// ===== EMAIL VERIFICATION INITIATE =====
+interface EmailVerificationInitiateRequest extends Request {
+  user: UserDocument;
+}
+export async function emailVerificationInitiate(
+  req: EmailVerificationInitiateRequest,
+  res: Response
+) {
   try {
     const token = await generateToken();
     const user = await User.findById(req.user.id).exec();
@@ -220,7 +297,16 @@ export async function emailVerificationInitiate(req, res) {
   }
 }
 
-export async function verifyEmail(req, res) {
+// ===== VERIFY EMAIL =====
+export interface VerifyEmailRequestQuery {
+  t: string;
+}
+interface VerifyEmailRequest
+  extends Request<{}, {}, {}, VerifyEmailRequestQuery> {
+  user: PublicUserDocument;
+  logIn: (user: any, callback: (err?: any) => void) => void;
+}
+export async function verifyEmail(req: VerifyEmailRequest, res: Response) {
   const token = req.query.t;
   const user = await User.findOne({
     verifiedToken: token,
@@ -240,7 +326,22 @@ export async function verifyEmail(req, res) {
   res.json({ success: true });
 }
 
-export async function updatePassword(req, res) {
+// ===== UPDATE PASSWORD =====
+export interface UpdatePasswordRequestParams {
+  token: string;
+}
+export interface UpdatePasswordRequestBody {
+  password: string;
+}
+interface UpdatePasswordRequest
+  extends Request<UpdatePasswordRequestParams, {}, UpdatePasswordRequestBody> {
+  user: PublicUserDocument;
+  logIn: (user: any, callback: (err?: any) => void) => void;
+}
+export async function updatePassword(
+  req: UpdatePasswordRequest,
+  res: Response
+) {
   const user = await User.findOne({
     resetPasswordToken: req.params.token,
     resetPasswordExpires: { $gt: Date.now() }
@@ -258,7 +359,7 @@ export async function updatePassword(req, res) {
   user.resetPasswordExpires = undefined;
 
   await user.save();
-  req.logIn(user, (loginErr) => res.json(userResponse(req.user)));
+  req.logIn(user, (loginErr: any) => res.json(userResponse(req.user)));
   // eventually send email that the password has been reset
 }
 
@@ -266,7 +367,7 @@ export async function updatePassword(req, res) {
  * @param {string} username
  * @return {Promise<boolean>}
  */
-export async function userExists(username) {
+export async function userExists(username: string) {
   const user = await User.findByUsername(username);
   return user != null;
 }
@@ -277,7 +378,7 @@ export async function userExists(username) {
  * @param res
  * @param user
  */
-export async function saveUser(res, user) {
+export async function saveUser(res: Response, user: UserDocument) {
   try {
     await user.save();
     res.json(userResponse(user));
@@ -286,7 +387,21 @@ export async function saveUser(res, user) {
   }
 }
 
-export async function updateSettings(req, res) {
+// ===== UPDATE USER PREFERENCES ======
+export interface UpdateUserSettingsRequestBody {
+  username: string;
+  newPassword: string;
+  currentPassword: string;
+  email: string;
+}
+interface UpdateUserSettingsRequest
+  extends Request<{}, {}, UpdateUserSettingsRequestBody> {
+  user: PublicUserDocument;
+}
+export async function updateSettings(
+  req: UpdateUserSettingsRequest,
+  res: Response
+) {
   try {
     const user = await User.findById(req.user.id);
     if (!user) {
@@ -343,7 +458,11 @@ export async function updateSettings(req, res) {
   }
 }
 
-export async function unlinkGithub(req, res) {
+// ===== UNLINK GITHUB ======
+interface UnlinkGithubRequest extends Request {
+  user: UserDocument;
+}
+export async function unlinkGithub(req: UnlinkGithubRequest, res: Response) {
   if (req.user) {
     req.user.github = undefined;
     req.user.tokens = req.user.tokens.filter(
@@ -358,11 +477,15 @@ export async function unlinkGithub(req, res) {
   });
 }
 
-export async function unlinkGoogle(req, res) {
+// ===== UNLINK GITHUB ======
+interface UnlinkGoogleRequest extends Request {
+  user: UserDocument;
+}
+export async function unlinkGoogle(req: UnlinkGoogleRequest, res: Response) {
   if (req.user) {
     req.user.google = undefined;
     req.user.tokens = req.user.tokens.filter(
-      (token) => token.kind !== 'google'
+      (token: { kind: string }) => token.kind !== 'google'
     );
     await saveUser(res, req.user);
     return;
@@ -373,7 +496,18 @@ export async function unlinkGoogle(req, res) {
   });
 }
 
-export async function updateCookieConsent(req, res) {
+// ===== UPDATE COOKIE CONSENT ======
+export interface UpdateCookieConsentRequestBody {
+  cookieConsent: CookieConsentOptions;
+}
+interface UpdateCookieConsentRequest
+  extends Request<{}, {}, UpdateCookieConsentRequestBody> {
+  user: UserDocument;
+}
+export async function updateCookieConsent(
+  req: UpdateCookieConsentRequest,
+  res: Response
+) {
   try {
     const user = await User.findById(req.user.id).exec();
     if (!user) {
