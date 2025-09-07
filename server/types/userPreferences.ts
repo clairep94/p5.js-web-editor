@@ -1,4 +1,4 @@
-export enum AppTheme {
+export enum AppThemeOptions {
   LIGHT = 'light',
   DARK = 'dark',
   CONTRAST = 'contrast'
@@ -14,14 +14,14 @@ export interface UserPreferences {
   lintWarning: boolean;
   textOutput: boolean;
   gridOutput: boolean;
-  theme: AppTheme;
+  theme: AppThemeOptions;
   autorefresh: boolean;
   language: string;
   autocloseBracketsQuotes: boolean;
   autocompleteHinter: boolean;
 }
 
-export enum CookieConsent {
+export enum CookieConsentOptions {
   NONE = 'none',
   ESSENTIAL = 'essential',
   ALL = 'all'

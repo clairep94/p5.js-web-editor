@@ -1,22 +1,13 @@
 /* eslint-disable no-underscore-dangle */
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Schema, Model } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import {
-  ApiKey,
-  DocumentWithTimestampAndVirtualId,
-  User,
-  CookieConsent
-} from '../../types';
-
-const EmailConfirmationStates = {
-  Verified: 'verified',
-  Sent: 'sent',
-  Resent: 'resent'
-};
-
-export interface ApiKeyDocument
-  extends ApiKey,
-    DocumentWithTimestampAndVirtualId {}
+  ApiKeyDocument,
+  UserDocument,
+  UserModel,
+  EmailConfirmationStates,
+  CookieConsentOptions
+} from '../types';
 
 const apiKeySchema = new Schema<ApiKeyDocument>(
   {
@@ -54,9 +45,7 @@ apiKeySchema.set('toJSON', {
   transform: apiKeyMetadata
 });
 
-export interface UserDocument extends User, DocumentWithTimestampAndVirtualId {}
-
-const userSchema = new Schema<UserDocument>(
+const userSchema = new Schema<UserDocument, UserModel>(
   {
     name: { type: String, default: '' },
     username: { type: String, required: true, unique: true },
@@ -90,8 +79,8 @@ const userSchema = new Schema<UserDocument>(
     totalSize: { type: Number, default: 0 },
     cookieConsent: {
       type: String,
-      enum: Object.values(CookieConsent),
-      default: CookieConsent.NONE
+      enum: Object.values(CookieConsentOptions),
+      default: CookieConsentOptions.NONE
     },
     banned: { type: Boolean, default: false },
     lastLoginTimestamp: { type: Date }
@@ -244,7 +233,7 @@ userSchema.methods.findMatchingKey = async function findMatchingKey(
  */
 userSchema.statics.findByEmail = async function findByEmail(
   email: string | string[]
-): Promise<UserDocument[]> {
+): Promise<UserDocument | null> {
   const user = this;
   const query = Array.isArray(email) ? { email: { $in: email } } : { email };
 
@@ -382,7 +371,7 @@ userSchema.statics.findByEmailAndUsername = async function findByEmailAndUsernam
   return foundUser;
 };
 
-userSchema.statics.EmailConfirmation = EmailConfirmationStates;
+// userSchema.statics.EmailConfirmation = EmailConfirmationStates;
 
 userSchema.index({ username: 1 }, { collation: { locale: 'en', strength: 2 } });
 userSchema.index({ email: 1 }, { collation: { locale: 'en', strength: 2 } });
