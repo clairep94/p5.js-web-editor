@@ -1,11 +1,10 @@
 /* eslint-disable no-underscore-dangle */
-import mongoose, { Schema, Model } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import {
   ApiKeyDocument,
   UserDocument,
   UserModel,
-  EmailConfirmationStates,
   CookieConsentOptions
 } from '../types';
 

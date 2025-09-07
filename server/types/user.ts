@@ -9,14 +9,14 @@ export interface UserInterface {
   username: string;
   password?: string;
   resetPasswordToken?: string;
-  resetPasswordExpires?: Date;
+  resetPasswordExpires?: number;
   verified?: string;
-  verifiedToken?: string;
-  verifiedTokenExpires?: Date;
+  verifiedToken?: string | null;
+  verifiedTokenExpires?: number | null;
   github?: string;
   google?: string;
-  email?: string;
-  tokens?: any[];
+  email: string;
+  tokens: { kind: string }[];
   apiKeys: ApiKeyDocument[];
   preferences: UserPreferences;
   totalSize: number;
@@ -25,9 +25,30 @@ export interface UserInterface {
   lastLoginTimestamp?: Date;
 }
 
+/** Sanitised version of the user document without sensitive info */
+export interface PublicUserDocument
+  extends Pick<
+    UserDocument,
+    | 'email'
+    | 'username'
+    | 'preferences'
+    | 'apiKeys'
+    | 'verified'
+    | 'id'
+    | 'totalSize'
+    | 'github'
+    | 'google'
+    | 'cookieConsent'
+  > {}
+
 export interface UserDocument
   extends UserInterface,
-    DocumentWithTimestampAndVirtualId {}
+    DocumentWithTimestampAndVirtualId {
+  comparePassword(candidatePassword: string): Promise<boolean>;
+  findMatchingKey(
+    candidateKey: string
+  ): Promise<{ isMatch: boolean; keyDocument: UserDocument | null }>;
+}
 
 export interface UserModel extends Model<UserDocument> {
   findByEmail(email: string | string[]): Promise<UserDocument | null>;

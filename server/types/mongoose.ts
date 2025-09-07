@@ -1,4 +1,4 @@
-import { Document, Types } from 'mongoose';
+import mongoose, { Document, Types } from 'mongoose';
 
 export interface DocumentTimestamp {
   updatedAt?: Date;
@@ -6,7 +6,7 @@ export interface DocumentTimestamp {
 }
 
 export interface VirtualId {
-  id: string;
+  id: string | mongoose.ObjectId;
 }
 
 /** Mongoose document with virtual id and timestamps enabled */
