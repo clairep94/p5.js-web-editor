@@ -44,5 +44,5 @@ export interface UserModel extends Model<UserDocument> {
     email: string,
     username: string
   ): Promise<UserDocument | null>;
-  EmailConfirmation: EmailConfirmationStates;
+  EmailConfirmation: typeof EmailConfirmationStates;
 }
