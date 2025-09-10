@@ -1,13 +1,19 @@
-import PropTypes from 'prop-types';
 import React, { useEffect, useContext, useRef } from 'react';
 import { MenubarContext, SubmenuContext, ParentMenuContext } from './contexts';
-import { ButtonOrLink } from '../../common/ButtonOrLink';
+import { ButtonOrLink, ButtonOrLinkProps } from '../../common/ButtonOrLink';
+
+export interface MenubarItemProps extends ButtonOrLinkProps {
+  selected?: boolean;
+  /**
+   * Provides a way to deal with optional items.
+   */
+  role?: 'menuitem' | 'option';
+}
 
 /**
  * MenubarItem wraps a button or link in an accessible list item that
  * integrates with keyboard navigation and other submenu behaviors.
  *
- * TO DO: how to document props passed through spread operator?
  * @component
  * @param {object} props
  * @param {string} [props.className='nav__dropdown-item'] - CSS class name to apply to the list item
@@ -35,15 +41,14 @@ import { ButtonOrLink } from '../../common/ButtonOrLink';
  *   {languageKeyToLabel(key)}
  * </MenubarItem>
  */
-
-function MenubarItem({
-  className,
+export function MenubarItem({
+  className = 'nav__dropdown-item',
   id,
-  role: customRole,
-  isDisabled,
-  selected,
+  role: customRole = 'menuitem',
+  isDisabled = false,
+  selected = false,
   ...rest
-}) {
+}: MenubarItemProps) {
   const { createMenuItemHandlers, hasFocus } = useContext(MenubarContext);
   const {
     setSubmenuActiveIndex,
@@ -94,25 +99,3 @@ function MenubarItem({
     </li>
   );
 }
-
-MenubarItem.propTypes = {
-  ...ButtonOrLink.propTypes,
-  className: PropTypes.string,
-  id: PropTypes.string,
-  /**
-   * Provides a way to deal with optional items.
-   */
-  role: PropTypes.oneOf(['menuitem', 'option']),
-  isDisabled: PropTypes.bool,
-  selected: PropTypes.bool
-};
-
-MenubarItem.defaultProps = {
-  className: 'nav__dropdown-item',
-  id: undefined,
-  role: 'menuitem',
-  isDisabled: false,
-  selected: false
-};
-
-export default MenubarItem;

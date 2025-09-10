@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { prop, remSize } from '../../theme';
-import DropdownMenu from './DropdownMenu';
+import { DropdownMenu, DropdownMenuProps } from './DropdownMenu';
 
 import DownFilledTriangleIcon from '../../images/down-filled-triangle.svg';
 import MoreIconSvg from '../../images/more.svg';
@@ -20,7 +20,9 @@ const TableDropdownIcon = () => {
   );
 };
 
-const TableDropdown = styled(DropdownMenu).attrs({
+export interface TableDropdownProps extends DropdownMenuProps {}
+
+export const TableDropdown = styled(DropdownMenu).attrs<TableDropdownProps>({
   align: 'right',
   anchor: <TableDropdownIcon />
 })`
@@ -42,5 +44,3 @@ const TableDropdown = styled(DropdownMenu).attrs({
     right: calc(100% - 26px);
   }
 `;
-
-export default TableDropdown;
