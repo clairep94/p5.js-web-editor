@@ -7,12 +7,13 @@ import {
   ResetPasswordEmailOptions,
   ResetPasswordEmailTemplate,
   ConfirmEmailEmailOptions,
-  ConfirmEmailEmailTemplate
+  ConfirmEmailEmailTemplate,
+  RenderedMailerData
 } from '../types/email';
 
 export const renderAccountConsolidation = (
   data: AccountConsolidationEmailOptions
-) => {
+): RenderedMailerData => {
   const subject = 'p5.js Web Editor Account Consolidation';
   const templateOptions: AccountConsolidationEmailTemplate = {
     domain: data.body.domain,
@@ -50,7 +51,9 @@ export const renderAccountConsolidation = (
   return Object.assign({}, data, { html, subject });
 };
 
-export const renderResetPassword = (data: ResetPasswordEmailOptions) => {
+export const renderResetPassword = (
+  data: ResetPasswordEmailOptions
+): RenderedMailerData => {
   const subject = 'p5.js Web Editor Password Reset';
   const templateOptions: ResetPasswordEmailTemplate = {
     domain: data.body.domain,
@@ -81,7 +84,9 @@ export const renderResetPassword = (data: ResetPasswordEmailOptions) => {
   return Object.assign({}, data, { html, subject });
 };
 
-export const renderEmailConfirmation = (data: ConfirmEmailEmailOptions) => {
+export const renderEmailConfirmation = (
+  data: ConfirmEmailEmailOptions
+): RenderedMailerData => {
   const subject = 'p5.js Email Verification';
   const templateOptions: ConfirmEmailEmailTemplate = {
     domain: data.body.domain,

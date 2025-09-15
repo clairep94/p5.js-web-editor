@@ -4,6 +4,11 @@
 
 import nodemailer from 'nodemailer';
 import mg from 'nodemailer-mailgun-transport';
+import { RenderedMailerData } from '../types/email';
+
+if (!process.env.MAILGUN_KEY) {
+  throw new Error('Mailgun key missing');
+}
 
 const auth = {
   api_key: process.env.MAILGUN_KEY,
@@ -11,6 +16,10 @@ const auth = {
 };
 
 class Mail {
+  client: nodemailer.Transporter;
+
+  sendOptions: Pick<nodemailer.SendMailOptions, 'from'>;
+
   constructor() {
     this.client = nodemailer.createTransport(mg({ auth }));
     this.sendOptions = {
@@ -18,7 +27,7 @@ class Mail {
     };
   }
 
-  async sendMail(mailOptions) {
+  async sendMail(mailOptions: nodemailer.SendMailOptions) {
     try {
       const response = await this.client.sendMail(mailOptions);
       return response;
@@ -28,7 +37,7 @@ class Mail {
     }
   }
 
-  async send(data) {
+  async send(data: RenderedMailerData) {
     const mailOptions = {
       from: this.sendOptions.from,
       to: data.to,

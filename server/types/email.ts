@@ -1,27 +1,35 @@
-import type { SendMailOptions } from 'nodemailer';
+/** Rendered mail data for the mailer service, without the 'from' property, which will be automatically added */
+export interface RenderedMailerData {
+  to: string;
+  subject: string;
+  html?: string;
+}
 
 // -------- EMAIL OPTIONS --------
-/** Node mailer options for the account consolidation email */
-export interface AccountConsolidationEmailOptions extends SendMailOptions {
+/** Options to generate the account consolidation email */
+export interface AccountConsolidationEmailOptions {
   body: {
     domain: string;
     username: string;
     email: string;
   };
+  to: string;
 }
-/** Node mailer options for the reset password email */
-export interface ResetPasswordEmailOptions extends SendMailOptions {
+/** Options to generate the reset password email */
+export interface ResetPasswordEmailOptions {
   body: {
     domain: string;
     link: string;
   };
+  to: string;
 }
-/** Node mailer options for the confirm email email */
-export interface ConfirmEmailEmailOptions extends SendMailOptions {
+/** Options to generate the confirm email email */
+export interface ConfirmEmailEmailOptions {
   body: {
     domain: string;
     link: string;
   };
+  to: string;
 }
 
 // -------- EMAIL RENDERING TEMPLATES --------
