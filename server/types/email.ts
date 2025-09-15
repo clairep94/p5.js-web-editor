@@ -38,8 +38,8 @@ export interface BaseEmailTemplate {
     description: string;
   };
 }
-/** Primary button on emails, which contains text and a link */
-export interface EmailPrimaryButton {
+/** Template for an email with a primary button, which contains text and a link */
+export interface EmailWithPrimaryButtonTemplate extends BaseEmailTemplate {
   link: string;
   buttonText: string;
 }
@@ -52,10 +52,6 @@ export interface AccountConsolidationEmailTemplate extends BaseEmailTemplate {
   resetPasswordText: string;
 }
 /** Template for rendering the confirm email email */
-export interface ConfirmEmailEmailTemplate
-  extends BaseEmailTemplate,
-    EmailPrimaryButton {}
+export type ConfirmEmailEmailTemplate = EmailWithPrimaryButtonTemplate;
 /** Template for rendering the reset password email */
-export interface ResetPasswordEmailTemplate
-  extends BaseEmailTemplate,
-    EmailPrimaryButton {}
+export type ResetPasswordEmailTemplate = EmailWithPrimaryButtonTemplate;
