@@ -1,5 +1,6 @@
 import { EmailWithPrimaryButtonTemplate } from '../types/email';
 
+/** Returns mjml for a standard email with a primary action button */
 export const mailLayout = ({
   domain,
   headingText,

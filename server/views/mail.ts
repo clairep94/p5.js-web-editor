@@ -1,6 +1,6 @@
 import renderMjml from '../utils/renderMjml';
 import { mailLayout } from './mailLayout';
-import consolidationMailLayout from './consolidationMailLayout';
+import { consolidationMailLayout } from './consolidationMailLayout';
 import {
   AccountConsolidationEmailOptions,
   AccountConsolidationEmailTemplate,
