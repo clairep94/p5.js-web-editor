@@ -1,6 +1,7 @@
 import mjml2html from 'mjml';
 
-export default (template) => {
+/** Parse template string containing mjml tags into html */
+export const renderMjml = (template: string) => {
   try {
     const output = mjml2html(template);
     return output.html;
