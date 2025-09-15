@@ -1,7 +1,3 @@
-/**
- * Mail service wrapping around mailgun
- */
-
 import nodemailer from 'nodemailer';
 import mg from 'nodemailer-mailgun-transport';
 import { RenderedMailerData } from '../types/email';
@@ -15,6 +11,7 @@ const auth = {
   domain: process.env.MAILGUN_DOMAIN
 };
 
+/** Mail service class wrapping around mailgun */
 class Mail {
   client: nodemailer.Transporter;
 
@@ -38,7 +35,7 @@ class Mail {
   }
 
   async send(data: RenderedMailerData) {
-    const mailOptions = {
+    const mailOptions: nodemailer.SendMailOptions = {
       from: this.sendOptions.from,
       to: data.to,
       subject: data.subject,
@@ -55,4 +52,7 @@ class Mail {
   }
 }
 
-export default new Mail();
+/**
+ * Mail service wrapping around mailgun
+ */
+export const mailerService = new Mail();
