@@ -1,10 +1,20 @@
 import renderMjml from '../utils/renderMjml';
 import mailLayout from './mailLayout';
 import consolidationMailLayout from './consolidationMailLayout';
+import {
+  AccountConsolidationEmailOptions,
+  AccountConsolidationEmailTemplate,
+  ResetPasswordEmailOptions,
+  ResetPasswordEmailTemplate,
+  ConfirmEmailEmailOptions,
+  ConfirmEmailEmailTemplate
+} from '../types/email';
 
-export const renderAccountConsolidation = (data) => {
+export const renderAccountConsolidation = (
+  data: AccountConsolidationEmailOptions
+) => {
   const subject = 'p5.js Web Editor Account Consolidation';
-  const templateOptions = {
+  const templateOptions: AccountConsolidationEmailTemplate = {
     domain: data.body.domain,
     headingText: 'Account Consolidation',
     greetingText: 'Hello,',
@@ -40,9 +50,9 @@ export const renderAccountConsolidation = (data) => {
   return Object.assign({}, data, { html, subject });
 };
 
-export const renderResetPassword = (data) => {
+export const renderResetPassword = (data: ResetPasswordEmailOptions) => {
   const subject = 'p5.js Web Editor Password Reset';
-  const templateOptions = {
+  const templateOptions: ResetPasswordEmailTemplate = {
     domain: data.body.domain,
     headingText: 'Reset your password',
     greetingText: 'Hello,',
@@ -71,9 +81,9 @@ export const renderResetPassword = (data) => {
   return Object.assign({}, data, { html, subject });
 };
 
-export const renderEmailConfirmation = (data) => {
+export const renderEmailConfirmation = (data: ConfirmEmailEmailOptions) => {
   const subject = 'p5.js Email Verification';
-  const templateOptions = {
+  const templateOptions: ConfirmEmailEmailTemplate = {
     domain: data.body.domain,
     headingText: 'Email Verification',
     greetingText: 'Hello,',
