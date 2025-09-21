@@ -1,15 +1,14 @@
-import mongoose from 'mongoose';
+/* eslint-disable no-underscore-dangle */
+import mongoose, { Schema } from 'mongoose';
 import bcrypt from 'bcryptjs';
+import {
+  ApiKeyDocument,
+  UserDocument,
+  UserModel,
+  CookieConsentOptions
+} from '../types';
 
-const EmailConfirmationStates = {
-  Verified: 'verified',
-  Sent: 'sent',
-  Resent: 'resent'
-};
-
-const { Schema } = mongoose;
-
-const apiKeySchema = new Schema(
+const apiKeySchema = new Schema<ApiKeyDocument>(
   {
     label: { type: String, default: 'API Key' },
     lastUsedAt: { type: Date },
@@ -27,7 +26,7 @@ apiKeySchema.virtual('id').get(function getApiKeyId() {
  * should never be exposed to the client. So we only return
  * a safe list of fields when toObject and toJSON are called.
  */
-function apiKeyMetadata(doc, ret, options) {
+function apiKeyMetadata(doc: ApiKeyDocument): Partial<ApiKeyDocument> {
   return {
     id: doc.id,
     label: doc.label,
@@ -45,7 +44,7 @@ apiKeySchema.set('toJSON', {
   transform: apiKeyMetadata
 });
 
-const userSchema = new Schema(
+const userSchema = new Schema<UserDocument, UserModel>(
   {
     name: { type: String, default: '' },
     username: { type: String, required: true, unique: true },
@@ -79,13 +78,13 @@ const userSchema = new Schema(
     totalSize: { type: Number, default: 0 },
     cookieConsent: {
       type: String,
-      enum: ['none', 'essential', 'all'],
-      default: 'none'
+      enum: Object.values(CookieConsentOptions),
+      default: CookieConsentOptions.NONE
     },
     banned: { type: Boolean, default: false },
     lastLoginTimestamp: { type: Date }
   },
-  { timestamps: true, usePushEach: true }
+  { timestamps: true }
 );
 
 /**
@@ -100,6 +99,10 @@ userSchema.pre('save', function checkPassword(next) {
   bcrypt.genSalt(10, (err, salt) => {
     if (err) {
       next(err);
+      return;
+    }
+    if (!user.password) {
+      next(new Error('Password is missing'));
       return;
     }
     bcrypt.hash(user.password, salt, (innerErr, hash) => {
@@ -127,7 +130,7 @@ userSchema.pre('save', function checkApiKey(next) {
   let pendingTasks = 0;
   let nextCalled = false;
 
-  const done = (err) => {
+  const done = (err?: mongoose.CallbackError) => {
     if (nextCalled) return;
     if (err) {
       nextCalled = true;
@@ -179,7 +182,7 @@ userSchema.set('toJSON', {
  * @return {Promise<boolean>}
  */
 userSchema.methods.comparePassword = async function comparePassword(
-  candidatePassword
+  candidatePassword: string
 ) {
   if (!this.password) {
     return false;
@@ -197,8 +200,8 @@ userSchema.methods.comparePassword = async function comparePassword(
  * Helper method for validating a user's api key
  */
 userSchema.methods.findMatchingKey = async function findMatchingKey(
-  candidateKey
-) {
+  candidateKey: string
+): Promise<{ isMatch: boolean; keyDocument: UserDocument | null }> {
   let keyObj = { isMatch: false, keyDocument: null };
   /* eslint-disable no-restricted-syntax */
   for (const k of this.apiKeys) {
@@ -227,7 +230,9 @@ userSchema.methods.findMatchingKey = async function findMatchingKey(
  * @callback [cb] - Optional error-first callback that passes User document
  * @return {Object} - Returns User Object fulfilled by User document
  */
-userSchema.statics.findByEmail = async function findByEmail(email) {
+userSchema.statics.findByEmail = async function findByEmail(
+  email: string | string[]
+): Promise<UserDocument | null> {
   const user = this;
   const query = Array.isArray(email) ? { email: { $in: email } } : { email };
 
@@ -247,7 +252,9 @@ userSchema.statics.findByEmail = async function findByEmail(email) {
  * @param {string[]} emails - Array of email strings
  * @return {Promise<Object>} - Returns Promise fulfilled by User document
  */
-userSchema.statics.findAllByEmails = async function findAllByEmails(emails) {
+userSchema.statics.findAllByEmails = async function findAllByEmails(
+  emails: string[]
+): Promise<UserDocument[] | null> {
   const user = this;
   const query = {
     email: { $in: emails }
@@ -271,19 +278,15 @@ userSchema.statics.findAllByEmails = async function findAllByEmails(emails) {
  * @return {Object} - Returns User Object fulfilled by User document
  */
 userSchema.statics.findByUsername = async function findByUsername(
-  username,
-  options
-) {
+  username: string,
+  options: { caseInsensitive: boolean }
+): Promise<UserDocument | null> {
   const user = this;
   const query = {
     username
   };
 
-  if (
-    arguments.length === 2 &&
-    typeof options === 'object' &&
-    options.caseInsensitive
-  ) {
+  if (options?.caseInsensitive) {
     const foundUser = await user
       .findOne(query)
       .collation({ locale: 'en', strength: 2 })
@@ -310,9 +313,9 @@ userSchema.statics.findByUsername = async function findByUsername(
  * @return {Object} - Returns User Object fulfilled by User document
  */
 userSchema.statics.findByEmailOrUsername = async function findByEmailOrUsername(
-  value,
-  options
-) {
+  value: string,
+  options: { caseInsensitive: boolean; valueType: 'email' | 'username' }
+): Promise<UserDocument | null> {
   const user = this;
   const isEmail =
     options && options.valueType
@@ -352,9 +355,9 @@ userSchema.statics.findByEmailOrUsername = async function findByEmailOrUsername(
  * @return {Object} - Returns User Object fulfilled by User document
  */
 userSchema.statics.findByEmailAndUsername = async function findByEmailAndUsername(
-  email,
-  username
-) {
+  email: string,
+  username: string
+): Promise<UserDocument | null> {
   const user = this;
   const query = {
     $or: [{ email }, { username }]
@@ -367,9 +370,9 @@ userSchema.statics.findByEmailAndUsername = async function findByEmailAndUsernam
   return foundUser;
 };
 
-userSchema.statics.EmailConfirmation = EmailConfirmationStates;
-
 userSchema.index({ username: 1 }, { collation: { locale: 'en', strength: 2 } });
 userSchema.index({ email: 1 }, { collation: { locale: 'en', strength: 2 } });
 
-export default mongoose.models.User || mongoose.model('User', userSchema);
+export const User =
+  (mongoose.models.User as UserModel) ||
+  mongoose.model<UserDocument, UserModel>('User', userSchema);

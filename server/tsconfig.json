@@ -6,6 +6,6 @@
     "lib": ["ES2022"],
     "types": ["node", "jest"]
   },
-  "include": ["./**/*"],
+  "include": ["./**/*", "../types"],
   "exclude": ["../node_modules", "../client"]
 }
