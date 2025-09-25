@@ -9,5 +9,6 @@ export function renderMjml(template: string): string | undefined {
   } catch (e) {
     console.error(e);
     // fall through to undefined (null is not valid for nodemailer.SendMailOptions.html)
+    return undefined;
   }
 }
