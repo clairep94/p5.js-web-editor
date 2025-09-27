@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { Response } from 'express';
+import { RequestHandler } from 'express';
 import { User } from '../../models/user';
 import { AuthenticatedRequest } from '../../types';
 
@@ -19,7 +19,10 @@ function generateApiKey(): Promise<string> {
   });
 }
 
-export async function createApiKey(req: AuthenticatedRequest, res: Response) {
+export const createApiKey: RequestHandler = async (
+  req: AuthenticatedRequest,
+  res
+) => {
   function sendFailure(code: number, error: string) {
     res.status(code).json({ error });
   }
@@ -64,9 +67,9 @@ export async function createApiKey(req: AuthenticatedRequest, res: Response) {
       res.status(500).json({ error: 'Internal server error' });
     }
   }
-}
+};
 
-export async function removeApiKey(req: AuthenticatedRequest, res: Response) {
+export const removeApiKey: RequestHandler = async (req, res) => {
   function sendFailure(code: number, error: string) {
     res.status(code).json({ error });
   }
@@ -97,4 +100,4 @@ export async function removeApiKey(req: AuthenticatedRequest, res: Response) {
       res.status(500).json({ error: 'Internal server error' });
     }
   }
-}
+};
