@@ -49,6 +49,6 @@ Support for this project has come from [Processing Foundation](https://processin
 Hosting and technical support has come from: 
 <br />
 <br />
-<a href="https://releasehub.com/" target="_blank"><img width="100" src="https://assets.website-files.com/603dd147c5b0a480611bd348/603dd147c5b0a469bc1bd451_logo--dark.svg" /></a>
+<a href="https://releasehub.com/" target="_blank" rel="noopener noreferrer"><img width="100" src="https://assets.website-files.com/603dd147c5b0a480611bd348/603dd147c5b0a469bc1bd451_logo--dark.svg" /></a>
 <br />
-<a href="https://www.browserstack.com/" target="_blank"><img width="100" src="https://user-images.githubusercontent.com/6063380/46976166-ab280a80-d096-11e8-983b-18dd38c8cc9b.png" /></a>
+<a href="https://www.browserstack.com/" target="_blank" rel="noopener noreferrer"><img width="100" src="https://user-images.githubusercontent.com/6063380/46976166-ab280a80-d096-11e8-983b-18dd38c8cc9b.png" /></a>

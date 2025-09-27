@@ -285,7 +285,7 @@ ${
   p5
     ? `<a href="https://p5js.org/reference/p5/${
         typeof p5 === 'string' ? p5 : name
-      }" role="link" onclick="event.stopPropagation()" target="_blank">\
+      }" role="link" onclick="event.stopPropagation()" target="_blank" rel="noopener noreferrer">\
 <span class="hint-hidden">open ${name} reference</span>\
 <span aria-hidden="true">&#10132;</span></a>`
     : `<span class="no-link-placeholder"><span class="hint-hidden">no reference for ${name}</span></span>`

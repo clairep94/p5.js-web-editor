@@ -133,7 +133,7 @@ const About = () => {
             <a
               href="https://github.com/processing/p5.js-web-editor/releases"
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
             >
               {t('About.WebEditor')}: <span>v{packageData?.version}</span>
             </a>
@@ -142,7 +142,7 @@ const About = () => {
             <a
               href="https://github.com/processing/p5.js/releases"
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
             >
               p5.js: <span>v{p5version}</span>
             </a>
