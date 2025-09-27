@@ -1,12 +1,13 @@
 import crypto from 'crypto';
-
+import { Response } from 'express';
 import { User } from '../../models/user';
+import { AuthenticatedRequest } from '../../types';
 
 /**
  * Generates a unique token to be used as a Personal Access Token
  * @returns Promise<String> A promise that resolves to the token, or an Error
  */
-function generateApiKey() {
+function generateApiKey(): Promise<string> {
   return new Promise((resolve, reject) => {
     crypto.randomBytes(20, (err, buf) => {
       if (err) {
@@ -18,8 +19,8 @@ function generateApiKey() {
   });
 }
 
-export async function createApiKey(req, res) {
-  function sendFailure(code, error) {
+export async function createApiKey(req: AuthenticatedRequest, res: Response) {
+  function sendFailure(code: number, error: string) {
     res.status(code).json({ error });
   }
 
@@ -49,7 +50,7 @@ export async function createApiKey(req, res) {
     await user.save();
 
     const apiKeys = user.apiKeys.map((apiKey, index) => {
-      const fields = apiKey.toObject();
+      const fields = apiKey.toObject!();
       const shouldIncludeToken = index === addedApiKeyIndex - 1;
 
       return shouldIncludeToken ? { ...fields, token: keyToBeHashed } : fields;
@@ -57,12 +58,16 @@ export async function createApiKey(req, res) {
 
     res.json({ apiKeys });
   } catch (err) {
-    sendFailure(500, err.message || 'Internal server error');
+    if (err instanceof Error) {
+      res.status(500).json({ error: err.message });
+    } else {
+      res.status(500).json({ error: 'Internal server error' });
+    }
   }
 }
 
-export async function removeApiKey(req, res) {
-  function sendFailure(code, error) {
+export async function removeApiKey(req: AuthenticatedRequest, res: Response) {
+  function sendFailure(code: number, error: string) {
     res.status(code).json({ error });
   }
 
@@ -85,7 +90,11 @@ export async function removeApiKey(req, res) {
     await user.save();
 
     res.status(200).json({ apiKeys: user.apiKeys });
-  } catch (err) {
-    sendFailure(500, err.message || 'Internal server error');
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      res.status(500).json({ error: err.message });
+    } else {
+      res.status(500).json({ error: 'Internal server error' });
+    }
   }
 }
