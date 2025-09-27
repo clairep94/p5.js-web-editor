@@ -13,7 +13,7 @@ export interface Error {
 }
 
 /** Simple response object for express requests with success status and optional message */
-export interface ResponseWithMessageAndSuccess {
+export interface GenericResponseBody {
   success: boolean;
   message?: string;
 }

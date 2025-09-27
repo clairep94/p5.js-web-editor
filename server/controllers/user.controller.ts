@@ -9,7 +9,7 @@ import {
   UserPreferences,
   Error,
   CookieConsentOptions,
-  ResponseWithMessageAndSuccess
+  GenericResponseBody
 } from '../types';
 import { User } from '../models/user';
 import { mailerService } from '../utils/mail';
@@ -24,7 +24,7 @@ export function userResponse(user: UserType | UserDocument): PublicUser {
     preferences: user.preferences,
     apiKeys: user.apiKeys,
     verified: user.verified,
-    id: typeof user === 'User' ? user.id : user._id!.toHexString(),
+    id: user.id,
     totalSize: user.totalSize,
     github: user.github,
     google: user.google,
@@ -50,10 +50,17 @@ async function generateToken(): Promise<string> {
   });
 }
 
+/** POST /signup, UserController.createUser */
+export interface CreateUserRequestBody {
+  username: string;
+  email: string;
+  password: string;
+}
+/** POST /signup, UserController.createUser */
 export const createUser: RequestHandler<
   {},
   PublicUser | Error,
-  { username: string; email: string; password: string }
+  CreateUserRequestBody
 > = async (req, res) => {
   try {
     const { username, email, password } = req.body;
@@ -111,16 +118,21 @@ export const createUser: RequestHandler<
   }
 };
 
+export interface DuplicateUserCheckResponseBody {
+  exists: boolean;
+  message?: string;
+  type: 'email' | 'username';
+}
+export interface DuplicateUserQuery {
+  check_type: 'email' | 'username';
+  email?: string;
+  username?: string;
+}
 export const duplicateUserCheck: RequestHandler<
   {},
-  | {
-      exists: boolean;
-      message?: string;
-      type: 'email' | 'username';
-    }
-  | Error,
+  DuplicateUserCheckResponseBody | Error,
   {},
-  { check_type: 'email' | 'username'; email?: string; username?: string }
+  DuplicateUserQuery
 > = async (req, res) => {
   const checkType = req.query.check_type;
   const value = req.query[checkType];
@@ -145,10 +157,13 @@ export const duplicateUserCheck: RequestHandler<
   });
 };
 
+export interface UpdatePreferencesRequestBody {
+  preferences: UserPreferences;
+}
 export const updatePreferences: RequestHandler<
   {},
   UserPreferences | Error,
-  { preferences: UserPreferences }
+  UpdatePreferencesRequestBody
 > = async (req, res) => {
   try {
     const user = await User.findById(
@@ -167,12 +182,13 @@ export const updatePreferences: RequestHandler<
   }
 };
 
+export interface ResetPasswordInitiateRequestBody {
+  email: string;
+}
 export const resetPasswordInitiate: RequestHandler<
   {},
-  ResponseWithMessageAndSuccess,
-  {
-    email: string;
-  }
+  GenericResponseBody,
+  ResetPasswordInitiateRequestBody
 > = async (req, res) => {
   try {
     const token = await generateToken();
@@ -210,11 +226,12 @@ export const resetPasswordInitiate: RequestHandler<
   }
 };
 
+export interface ValidateResetPasswordTokenRouteParams {
+  token: string;
+}
 export const validateResetPasswordToken: RequestHandler<
-  {
-    token: string;
-  },
-  ResponseWithMessageAndSuccess
+  ValidateResetPasswordTokenRouteParams,
+  GenericResponseBody
 > = async (req, res) => {
   const user = await User.findOne({
     resetPasswordToken: req.params.token,
@@ -232,7 +249,7 @@ export const validateResetPasswordToken: RequestHandler<
 
 export const emailVerificationInitiate: RequestHandler<
   {},
-  Error | PublicUser
+  PublicUser | Error
 > = async (req, res) => {
   try {
     const token = await generateToken();
@@ -279,9 +296,12 @@ export const emailVerificationInitiate: RequestHandler<
   }
 };
 
+export interface VerifyEmailRouteParams {
+  t: string;
+}
 export const verifyEmail: RequestHandler<
-  { t: string },
-  ResponseWithMessageAndSuccess
+  VerifyEmailRouteParams,
+  GenericResponseBody
 > = async (req, res) => {
   const token = req.query.t;
   const user = await User.findOne({
@@ -302,10 +322,16 @@ export const verifyEmail: RequestHandler<
   res.json({ success: true });
 };
 
+export interface UpdatePasswordRouteParams {
+  token: string;
+}
+export interface UpdatePasswordRequestBody {
+  password: string;
+}
 export const updatePassword: RequestHandler<
-  { token: string },
-  ResponseWithMessageAndSuccess,
-  { password: string }
+  UpdatePasswordRouteParams,
+  GenericResponseBody,
+  UpdatePasswordRequestBody
 > = async (req, res) => {
   const user = await User.findOne({
     resetPasswordToken: req.params.token,
@@ -357,15 +383,16 @@ export async function saveUser(
   }
 }
 
+export interface UpdateSettingsRequestBody {
+  username: string;
+  newPassword: string;
+  currentPassword: string;
+  email: string;
+}
 export const updateSettings: RequestHandler<
   {},
   void | Error,
-  {
-    username: string;
-    newPassword: string;
-    currentPassword: string;
-    email: string;
-  }
+  UpdateSettingsRequestBody
 > = async (req, res) => {
   try {
     const { user: requestUser } = req as AuthenticatedRequest;
@@ -452,10 +479,13 @@ export const unlinkGoogle: RequestHandler = async (req, res) => {
   });
 };
 
+export interface UpdateCookieConsentResponse {
+  cookieConsent: CookieConsentOptions;
+}
 export const updateCookieConsent: RequestHandler<
   {},
   PublicUser | Error,
-  { cookieConsent: CookieConsentOptions }
+  UpdateCookieConsentResponse
 > = async (req, res) => {
   try {
     const { user: requestUser } = req as AuthenticatedRequest;
