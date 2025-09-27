@@ -7,7 +7,9 @@ import {
   UserDocument,
   User as UserType,
   UserPreferences,
-  Error
+  Error,
+  CookieConsentOptions,
+  ResponseWithMessageAndSuccess
 } from '../types';
 import { User } from '../models/user';
 import { mailerService } from '../utils/mail';
@@ -117,7 +119,7 @@ export const duplicateUserCheck: RequestHandler<
       type: 'email' | 'username';
     }
   | Error,
-  any,
+  {},
   { check_type: 'email' | 'username'; email?: string; username?: string }
 > = async (req, res) => {
   const checkType = req.query.check_type;
@@ -125,7 +127,7 @@ export const duplicateUserCheck: RequestHandler<
   if (!value) {
     return res.status(500).json({
       error:
-        'Invalid combination duplicate user check type and email or username'
+        'Invalid combination for duplicate user check-type and value of email or username'
     });
   }
   const options = { caseInsensitive: true, valueType: checkType };
@@ -167,10 +169,7 @@ export const updatePreferences: RequestHandler<
 
 export const resetPasswordInitiate: RequestHandler<
   {},
-  {
-    success: boolean;
-    message?: string;
-  },
+  ResponseWithMessageAndSuccess,
   {
     email: string;
   }
@@ -211,7 +210,12 @@ export const resetPasswordInitiate: RequestHandler<
   }
 };
 
-export const validateResetPasswordToken: RequestHandler = async (req, res) => {
+export const validateResetPasswordToken: RequestHandler<
+  {
+    token: string;
+  },
+  ResponseWithMessageAndSuccess
+> = async (req, res) => {
   const user = await User.findOne({
     resetPasswordToken: req.params.token,
     resetPasswordExpires: { $gt: Date.now() }
@@ -226,12 +230,21 @@ export const validateResetPasswordToken: RequestHandler = async (req, res) => {
   res.json({ success: true });
 };
 
-export const emailVerificationInitiate: RequestHandler = async (req, res) => {
+export const emailVerificationInitiate: RequestHandler<
+  {},
+  Error | PublicUser
+> = async (req, res) => {
   try {
     const token = await generateToken();
-    const user = await User.findById(
-      (req as AuthenticatedRequest).user.id
-    ).exec();
+
+    const { user: requestUser } = req as AuthenticatedRequest;
+    if (!requestUser) {
+      res.status(404).json({
+        error: 'You must be logged in to complete this action.'
+      });
+    }
+
+    const user = await User.findById(requestUser.id).exec();
     if (!user) {
       res.status(404).json({ error: 'User not found' });
       return;
@@ -266,7 +279,10 @@ export const emailVerificationInitiate: RequestHandler = async (req, res) => {
   }
 };
 
-export const verifyEmail: RequestHandler = async (req, res) => {
+export const verifyEmail: RequestHandler<
+  { t: string },
+  ResponseWithMessageAndSuccess
+> = async (req, res) => {
   const token = req.query.t;
   const user = await User.findOne({
     verifiedToken: token,
@@ -286,7 +302,11 @@ export const verifyEmail: RequestHandler = async (req, res) => {
   res.json({ success: true });
 };
 
-export const updatePassword: RequestHandler = async (req, res) => {
+export const updatePassword: RequestHandler<
+  { token: string },
+  ResponseWithMessageAndSuccess,
+  { password: string }
+> = async (req, res) => {
   const user = await User.findOne({
     resetPasswordToken: req.params.token,
     resetPasswordExpires: { $gt: Date.now() }
@@ -337,9 +357,19 @@ export async function saveUser(
   }
 }
 
-export const updateSettings: RequestHandler = async (req, res) => {
+export const updateSettings: RequestHandler<
+  {},
+  void | Error,
+  {
+    username: string;
+    newPassword: string;
+    currentPassword: string;
+    email: string;
+  }
+> = async (req, res) => {
   try {
-    const user = await User.findById((req as AuthenticatedRequest).user.id);
+    const { user: requestUser } = req as AuthenticatedRequest;
+    const user = await User.findById(requestUser.id);
     if (!user) {
       res.status(404).json({ error: 'User not found' });
       return;
@@ -396,11 +426,10 @@ export const updateSettings: RequestHandler = async (req, res) => {
 
 export const unlinkGithub: RequestHandler = async (req, res) => {
   if (req.user) {
-    (req as AuthenticatedRequest).user.github = undefined;
-    (req as AuthenticatedRequest).user.tokens = (req as AuthenticatedRequest).user.tokens.filter(
-      (token) => token.kind !== 'github'
-    );
-    await saveUser(res, (req as AuthenticatedRequest).user);
+    const { user } = req as AuthenticatedRequest;
+    user.github = undefined;
+    user.tokens = user.tokens.filter((token) => token.kind !== 'github');
+    await saveUser(res, user);
     return;
   }
   res.status(404).json({
@@ -411,11 +440,10 @@ export const unlinkGithub: RequestHandler = async (req, res) => {
 
 export const unlinkGoogle: RequestHandler = async (req, res) => {
   if (req.user) {
-    (req as AuthenticatedRequest).user.google = undefined;
-    (req as AuthenticatedRequest).user.tokens = (req as AuthenticatedRequest).user.tokens.filter(
-      (token) => token.kind !== 'google'
-    );
-    await saveUser(res, (req as AuthenticatedRequest).user);
+    const { user } = req as AuthenticatedRequest;
+    user.google = undefined;
+    user.tokens = user.tokens.filter((token) => token.kind !== 'google');
+    await saveUser(res, user);
     return;
   }
   res.status(404).json({
@@ -424,11 +452,14 @@ export const unlinkGoogle: RequestHandler = async (req, res) => {
   });
 };
 
-export const updateCookieConsent: RequestHandler = async (req, res) => {
+export const updateCookieConsent: RequestHandler<
+  {},
+  PublicUser | Error,
+  { cookieConsent: CookieConsentOptions }
+> = async (req, res) => {
   try {
-    const user = await User.findById(
-      (req as AuthenticatedRequest).user.id
-    ).exec();
+    const { user: requestUser } = req as AuthenticatedRequest;
+    const user = await User.findById(requestUser.id).exec();
     if (!user) {
       res.status(404).json({ error: 'User not found' });
       return;
