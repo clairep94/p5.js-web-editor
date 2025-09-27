@@ -3,8 +3,9 @@ import crypto from 'crypto';
 import { RequestHandler, Response } from 'express';
 import {
   AuthenticatedRequest,
-  PublicUserDocument,
+  PublicUser,
   UserDocument,
+  User as UserType,
   UserPreferences,
   Error
 } from '../types';
@@ -14,14 +15,14 @@ import { renderEmailConfirmation, renderResetPassword } from '../views/mail';
 
 export * from './user.controller/apiKey';
 
-export function userResponse(user: UserDocument): PublicUserDocument {
+export function userResponse(user: UserType | UserDocument): PublicUser {
   return {
     email: user.email,
     username: user.username,
     preferences: user.preferences,
     apiKeys: user.apiKeys,
     verified: user.verified,
-    id: user.id ?? user._id.toHexString(),
+    id: typeof user === 'User' ? user.id : user._id!.toHexString(),
     totalSize: user.totalSize,
     github: user.github,
     google: user.google,
@@ -49,7 +50,7 @@ async function generateToken(): Promise<string> {
 
 export const createUser: RequestHandler<
   {},
-  PublicUserDocument | Error,
+  PublicUser | Error,
   { username: string; email: string; password: string }
 > = async (req, res) => {
   try {
@@ -91,7 +92,7 @@ export const createUser: RequestHandler<
           domain: `${protocol}://${req.headers.host}`,
           link: `${protocol}://${req.headers.host}/verify?t=${token}`
         },
-        to: req.user.email
+        to: (req as AuthenticatedRequest).user.email
       });
 
       try {
@@ -228,7 +229,9 @@ export const validateResetPasswordToken: RequestHandler = async (req, res) => {
 export const emailVerificationInitiate: RequestHandler = async (req, res) => {
   try {
     const token = await generateToken();
-    const user = await User.findById(req.user.id).exec();
+    const user = await User.findById(
+      (req as AuthenticatedRequest).user.id
+    ).exec();
     if (!user) {
       res.status(404).json({ error: 'User not found' });
       return;
@@ -257,7 +260,7 @@ export const emailVerificationInitiate: RequestHandler = async (req, res) => {
     user.verifiedTokenExpires = EMAIL_VERIFY_TOKEN_EXPIRY_TIME; // 24 hours
     await user.save();
 
-    res.json(userResponse(req.user));
+    res.json(userResponse((req as AuthenticatedRequest).user));
   } catch (err) {
     res.status(500).json({ error: err });
   }
@@ -301,7 +304,9 @@ export const updatePassword: RequestHandler = async (req, res) => {
   user.resetPasswordExpires = undefined;
 
   await user.save();
-  req.logIn(user, (loginErr) => res.json(userResponse(req.user)));
+  req.logIn(user, (loginErr) =>
+    res.json(userResponse((req as AuthenticatedRequest).user))
+  );
   // eventually send email that the password has been reset
 };
 
@@ -334,7 +339,7 @@ export async function saveUser(
 
 export const updateSettings: RequestHandler = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    const user = await User.findById((req as AuthenticatedRequest).user.id);
     if (!user) {
       res.status(404).json({ error: 'User not found' });
       return;
@@ -391,11 +396,11 @@ export const updateSettings: RequestHandler = async (req, res) => {
 
 export const unlinkGithub: RequestHandler = async (req, res) => {
   if (req.user) {
-    req.user.github = undefined;
-    req.user.tokens = req.user.tokens.filter(
+    (req as AuthenticatedRequest).user.github = undefined;
+    (req as AuthenticatedRequest).user.tokens = (req as AuthenticatedRequest).user.tokens.filter(
       (token) => token.kind !== 'github'
     );
-    await saveUser(res, req.user);
+    await saveUser(res, (req as AuthenticatedRequest).user);
     return;
   }
   res.status(404).json({
@@ -406,11 +411,11 @@ export const unlinkGithub: RequestHandler = async (req, res) => {
 
 export const unlinkGoogle: RequestHandler = async (req, res) => {
   if (req.user) {
-    req.user.google = undefined;
-    req.user.tokens = req.user.tokens.filter(
+    (req as AuthenticatedRequest).user.google = undefined;
+    (req as AuthenticatedRequest).user.tokens = (req as AuthenticatedRequest).user.tokens.filter(
       (token) => token.kind !== 'google'
     );
-    await saveUser(res, req.user);
+    await saveUser(res, (req as AuthenticatedRequest).user);
     return;
   }
   res.status(404).json({
@@ -421,7 +426,9 @@ export const unlinkGoogle: RequestHandler = async (req, res) => {
 
 export const updateCookieConsent: RequestHandler = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).exec();
+    const user = await User.findById(
+      (req as AuthenticatedRequest).user.id
+    ).exec();
     if (!user) {
       res.status(404).json({ error: 'User not found' });
       return;
