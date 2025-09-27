@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { RequestHandler } from 'express';
+import { RequestHandler, Request } from 'express';
 import { User } from '../../models/user';
 import { AuthenticatedRequest } from '../../types';
 
@@ -19,16 +19,13 @@ function generateApiKey(): Promise<string> {
   });
 }
 
-export const createApiKey: RequestHandler = async (
-  req: AuthenticatedRequest,
-  res
-) => {
+export const createApiKey: RequestHandler = async (req, res) => {
   function sendFailure(code: number, error: string) {
     res.status(code).json({ error });
   }
 
   try {
-    const user = await User.findById(req.user.id);
+    const user = await User.findById((req as AuthenticatedRequest).user.id);
 
     if (!user) {
       sendFailure(404, 'User not found');
@@ -75,7 +72,7 @@ export const removeApiKey: RequestHandler = async (req, res) => {
   }
 
   try {
-    const user = await User.findById(req.user.id);
+    const user = await User.findById((req as AuthenticatedRequest).user.id);
 
     if (!user) {
       sendFailure(404, 'User not found');
