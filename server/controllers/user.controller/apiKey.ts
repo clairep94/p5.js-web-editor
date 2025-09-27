@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { RequestHandler, Request } from 'express';
+import { RequestHandler } from 'express';
 import { User } from '../../models/user';
 import { AuthenticatedRequest } from '../../types';
 

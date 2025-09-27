@@ -5,3 +5,8 @@ import { Request } from 'express';
 export interface AuthenticatedRequest extends Request {
   user: { id: string };
 }
+
+/** Simple error object for express requests */
+export interface Error {
+  error: string | unknown;
+}

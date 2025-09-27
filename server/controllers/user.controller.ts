@@ -1,19 +1,27 @@
+/* eslint-disable camelcase */
 import crypto from 'crypto';
-
+import { RequestHandler, Response } from 'express';
+import {
+  AuthenticatedRequest,
+  PublicUserDocument,
+  UserDocument,
+  UserPreferences,
+  Error
+} from '../types';
 import { User } from '../models/user';
 import { mailerService } from '../utils/mail';
 import { renderEmailConfirmation, renderResetPassword } from '../views/mail';
 
 export * from './user.controller/apiKey';
 
-export function userResponse(user) {
+export function userResponse(user: UserDocument): PublicUserDocument {
   return {
     email: user.email,
     username: user.username,
     preferences: user.preferences,
     apiKeys: user.apiKeys,
     verified: user.verified,
-    id: user._id,
+    id: user.id ?? user._id.toHexString(),
     totalSize: user.totalSize,
     github: user.github,
     google: user.google,
@@ -26,7 +34,7 @@ export function userResponse(user) {
  * Note: can be done synchronously - https://nodejs.org/api/crypto.html#cryptorandombytessize-callback
  * @return Promise<string>
  */
-async function generateToken() {
+async function generateToken(): Promise<string> {
   return new Promise((resolve, reject) => {
     crypto.randomBytes(20, (err, buf) => {
       if (err) {
@@ -39,7 +47,11 @@ async function generateToken() {
   });
 }
 
-export async function createUser(req, res) {
+export const createUser: RequestHandler<
+  {},
+  PublicUserDocument | Error,
+  { username: string; email: string; password: string }
+> = async (req, res) => {
   try {
     const { username, email, password } = req.body;
     const emailLowerCase = email.toLowerCase();
@@ -94,11 +106,27 @@ export async function createUser(req, res) {
     console.error(err);
     res.status(500).json({ error: err });
   }
-}
+};
 
-export async function duplicateUserCheck(req, res) {
+export const duplicateUserCheck: RequestHandler<
+  {},
+  | {
+      exists: boolean;
+      message?: string;
+      type: 'email' | 'username';
+    }
+  | Error,
+  any,
+  { check_type: 'email' | 'username'; email?: string; username?: string }
+> = async (req, res) => {
   const checkType = req.query.check_type;
   const value = req.query[checkType];
+  if (!value) {
+    return res.status(500).json({
+      error:
+        'Invalid combination duplicate user check type and email or username'
+    });
+  }
   const options = { caseInsensitive: true, valueType: checkType };
   const user = await User.findByEmailOrUsername(value, options);
   if (user) {
@@ -112,11 +140,17 @@ export async function duplicateUserCheck(req, res) {
     exists: false,
     type: checkType
   });
-}
+};
 
-export async function updatePreferences(req, res) {
+export const updatePreferences: RequestHandler<
+  {},
+  UserPreferences | Error,
+  { preferences: UserPreferences }
+> = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).exec();
+    const user = await User.findById(
+      (req as AuthenticatedRequest).user.id
+    ).exec();
     if (!user) {
       res.status(404).json({ error: 'User not found' });
       return;
@@ -128,9 +162,18 @@ export async function updatePreferences(req, res) {
   } catch (err) {
     res.status(500).json({ error: err });
   }
-}
+};
 
-export async function resetPasswordInitiate(req, res) {
+export const resetPasswordInitiate: RequestHandler<
+  {},
+  {
+    success: boolean;
+    message?: string;
+  },
+  {
+    email: string;
+  }
+> = async (req, res) => {
   try {
     const token = await generateToken();
     const user = await User.findByEmail(req.body.email);
@@ -165,9 +208,9 @@ export async function resetPasswordInitiate(req, res) {
     console.log(err);
     res.json({ success: false });
   }
-}
+};
 
-export async function validateResetPasswordToken(req, res) {
+export const validateResetPasswordToken: RequestHandler = async (req, res) => {
   const user = await User.findOne({
     resetPasswordToken: req.params.token,
     resetPasswordExpires: { $gt: Date.now() }
@@ -180,9 +223,9 @@ export async function validateResetPasswordToken(req, res) {
     return;
   }
   res.json({ success: true });
-}
+};
 
-export async function emailVerificationInitiate(req, res) {
+export const emailVerificationInitiate: RequestHandler = async (req, res) => {
   try {
     const token = await generateToken();
     const user = await User.findById(req.user.id).exec();
@@ -218,9 +261,9 @@ export async function emailVerificationInitiate(req, res) {
   } catch (err) {
     res.status(500).json({ error: err });
   }
-}
+};
 
-export async function verifyEmail(req, res) {
+export const verifyEmail: RequestHandler = async (req, res) => {
   const token = req.query.t;
   const user = await User.findOne({
     verifiedToken: token,
@@ -238,9 +281,9 @@ export async function verifyEmail(req, res) {
   user.verifiedTokenExpires = null;
   await user.save();
   res.json({ success: true });
-}
+};
 
-export async function updatePassword(req, res) {
+export const updatePassword: RequestHandler = async (req, res) => {
   const user = await User.findOne({
     resetPasswordToken: req.params.token,
     resetPasswordExpires: { $gt: Date.now() }
@@ -260,13 +303,13 @@ export async function updatePassword(req, res) {
   await user.save();
   req.logIn(user, (loginErr) => res.json(userResponse(req.user)));
   // eventually send email that the password has been reset
-}
+};
 
 /**
  * @param {string} username
  * @return {Promise<boolean>}
  */
-export async function userExists(username) {
+export async function userExists(username: string): Promise<boolean> {
   const user = await User.findByUsername(username);
   return user != null;
 }
@@ -277,7 +320,10 @@ export async function userExists(username) {
  * @param res
  * @param user
  */
-export async function saveUser(res, user) {
+export async function saveUser(
+  res: Response,
+  user: UserDocument
+): Promise<void> {
   try {
     await user.save();
     res.json(userResponse(user));
@@ -286,7 +332,7 @@ export async function saveUser(res, user) {
   }
 }
 
-export async function updateSettings(req, res) {
+export const updateSettings: RequestHandler = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
     if (!user) {
@@ -341,9 +387,9 @@ export async function updateSettings(req, res) {
   } catch (err) {
     res.status(500).json({ error: err });
   }
-}
+};
 
-export async function unlinkGithub(req, res) {
+export const unlinkGithub: RequestHandler = async (req, res) => {
   if (req.user) {
     req.user.github = undefined;
     req.user.tokens = req.user.tokens.filter(
@@ -356,9 +402,9 @@ export async function unlinkGithub(req, res) {
     success: false,
     message: 'You must be logged in to complete this action.'
   });
-}
+};
 
-export async function unlinkGoogle(req, res) {
+export const unlinkGoogle: RequestHandler = async (req, res) => {
   if (req.user) {
     req.user.google = undefined;
     req.user.tokens = req.user.tokens.filter(
@@ -371,9 +417,9 @@ export async function unlinkGoogle(req, res) {
     success: false,
     message: 'You must be logged in to complete this action.'
   });
-}
+};
 
-export async function updateCookieConsent(req, res) {
+export const updateCookieConsent: RequestHandler = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).exec();
     if (!user) {
@@ -386,4 +432,4 @@ export async function updateCookieConsent(req, res) {
   } catch (err) {
     res.status(500).json({ error: err });
   }
-}
+};
