@@ -118,11 +118,12 @@ describe('user.helpers', () => {
       await saveUser(response, user);
 
       expect(user.save).toHaveBeenCalled();
+
+      // eslint-disable-next-line no-unused-vars
+      const { password, resetPasswordToken, banned, ...sanitised } = user;
+
       expect(response.json).toHaveBeenCalledWith(
-        expect.objectContaining({
-          email: 'x@y.com',
-          username: 'user1'
-        })
+        expect.objectContaining(sanitised)
       );
     });
 
