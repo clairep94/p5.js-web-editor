@@ -112,7 +112,7 @@ describe('user.helpers', () => {
     it('saves user and responds with sanitized user', async () => {
       const user = {
         ...mockFullUser,
-        save: jest.fn().mockRejectedValue(new Error('db error'))
+        save: jest.fn().mockResolvedValue(undefined)
       };
 
       await saveUser(response, user);
