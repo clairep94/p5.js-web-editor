@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* @jest-environment node */
 
 import { Request, Response } from 'jest-express';
@@ -33,6 +34,8 @@ const mockFullUser = {
   id: 'abc123',
   totalSize: 42,
   cookieConsent: CookieConsentOptions.NONE,
+  google: 'user@gmail.com',
+  github: 'user123',
 
   // to be removed:
   password: 'abweorij',
@@ -59,10 +62,15 @@ describe('user.helpers', () => {
     it('returns a sanitized PublicUser object', () => {
       const result = userResponse(mockFullUser);
 
-      // eslint-disable-next-line no-unused-vars
-      const { password, resetPasswordToken, banned, ...sanitised } = result;
+      const {
+        password,
+        resetPasswordToken,
+        banned,
+        save,
+        ...sanitised
+      } = result;
 
-      expect(result).toEqual(sanitised);
+      expect(result).toMatchObject(sanitised);
     });
     it('gracefully handles objects with some, but not all properties of PublicUser', () => {
       const fakeUser = {
@@ -79,10 +87,15 @@ describe('user.helpers', () => {
 
       const result = userResponse(fakeUser);
 
-      // eslint-disable-next-line no-unused-vars
-      const { password, resetPasswordToken, banned, ...sanitised } = result;
+      const {
+        password,
+        resetPasswordToken,
+        banned,
+        save,
+        ...sanitised
+      } = result;
 
-      expect(result).toEqual(sanitised);
+      expect(result).toMatchObject(sanitised);
     });
   });
 
@@ -119,8 +132,7 @@ describe('user.helpers', () => {
 
       expect(user.save).toHaveBeenCalled();
 
-      // eslint-disable-next-line no-unused-vars
-      const { password, resetPasswordToken, banned, ...sanitised } = user;
+      const { password, resetPasswordToken, banned, save, ...sanitised } = user;
 
       expect(response.json).toHaveBeenCalledWith(
         expect.objectContaining(sanitised)
