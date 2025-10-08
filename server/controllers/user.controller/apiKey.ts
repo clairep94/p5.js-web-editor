@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import { RequestHandler } from 'express';
 import { User } from '../../models/user';
-import { AuthenticatedRequest } from '../../types';
+import type { AuthenticatedRequest, ApiKeyDocument, Error } from '../../types';
 
 /**
  * Generates a unique token to be used as a Personal Access Token
@@ -19,7 +19,12 @@ function generateApiKey(): Promise<string> {
   });
 }
 
-export const createApiKey: RequestHandler = async (req, res) => {
+/** POST /account/api-keys, UserController.createApiKey */
+export const createApiKey: RequestHandler<
+  {},
+  { apiKeys: ApiKeyDocument[] } | Error,
+  { label: string }
+> = async (req, res) => {
   function sendFailure(code: number, error: string) {
     res.status(code).json({ error });
   }
@@ -66,13 +71,21 @@ export const createApiKey: RequestHandler = async (req, res) => {
   }
 };
 
-export const removeApiKey: RequestHandler = async (req, res) => {
+/** DELETE /account/api-keys/:keyId, UserController.removeApiKey */
+export const removeApiKey: RequestHandler<
+  {
+    keyId: string;
+  },
+  { apiKeys: ApiKeyDocument[] } | Error
+> = async (req, res) => {
   function sendFailure(code: number, error: string) {
     res.status(code).json({ error });
   }
 
   try {
-    const user = await User.findById((req as AuthenticatedRequest).user.id);
+    const user = await User.findById(
+      ((req as unknown) as AuthenticatedRequest).user.id
+    );
 
     if (!user) {
       sendFailure(404, 'User not found');
