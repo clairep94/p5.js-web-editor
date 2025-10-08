@@ -4,7 +4,7 @@ import { last } from 'lodash';
 import { Request, Response } from 'jest-express';
 
 import { User } from '../../../models/user';
-import { createApiKey, removeApiKey } from '../apiKey';
+import { createApiKey, removeApiKey } from '../index';
 
 jest.mock('../../../models/user');
 

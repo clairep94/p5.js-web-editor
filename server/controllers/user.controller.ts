@@ -1,45 +1,37 @@
-import crypto from 'crypto';
-
+/* eslint-disable camelcase */
+import { RequestHandler, Response } from 'express';
+import {
+  AuthenticatedRequest,
+  PublicUser,
+  UserDocument,
+  UserPreferences,
+  Error,
+  CookieConsentOptions,
+  GenericResponseBody
+} from '../types';
 import { User } from '../models/user';
 import { mailerService } from '../utils/mail';
 import { renderEmailConfirmation, renderResetPassword } from '../views/mail';
+import {
+  userResponse,
+  generateToken,
+  saveUser
+} from './user.controller/helpers';
 
 export * from './user.controller/apiKey';
 
-export function userResponse(user) {
-  return {
-    email: user.email,
-    username: user.username,
-    preferences: user.preferences,
-    apiKeys: user.apiKeys,
-    verified: user.verified,
-    id: user._id,
-    totalSize: user.totalSize,
-    github: user.github,
-    google: user.google,
-    cookieConsent: user.cookieConsent
-  };
+/** POST /signup, UserController.createUser */
+export interface CreateUserRequestBody {
+  username: string;
+  email: string;
+  password: string;
 }
-
-/**
- * Create a new verification token.
- * Note: can be done synchronously - https://nodejs.org/api/crypto.html#cryptorandombytessize-callback
- * @return Promise<string>
- */
-async function generateToken() {
-  return new Promise((resolve, reject) => {
-    crypto.randomBytes(20, (err, buf) => {
-      if (err) {
-        reject(err);
-      } else {
-        const token = buf.toString('hex');
-        resolve(token);
-      }
-    });
-  });
-}
-
-export async function createUser(req, res) {
+/** POST /signup, UserController.createUser */
+export const createUser: RequestHandler<
+  {},
+  PublicUser | Error,
+  CreateUserRequestBody
+> = async (req, res) => {
   try {
     const { username, email, password } = req.body;
     const emailLowerCase = email.toLowerCase();
@@ -79,7 +71,7 @@ export async function createUser(req, res) {
           domain: `${protocol}://${req.headers.host}`,
           link: `${protocol}://${req.headers.host}/verify?t=${token}`
         },
-        to: req.user.email
+        to: (req as AuthenticatedRequest).user.email
       });
 
       try {
@@ -94,11 +86,32 @@ export async function createUser(req, res) {
     console.error(err);
     res.status(500).json({ error: err });
   }
-}
+};
 
-export async function duplicateUserCheck(req, res) {
+export interface DuplicateUserCheckResponseBody {
+  exists: boolean;
+  message?: string;
+  type: 'email' | 'username';
+}
+export interface DuplicateUserQuery {
+  check_type: 'email' | 'username';
+  email?: string;
+  username?: string;
+}
+export const duplicateUserCheck: RequestHandler<
+  {},
+  DuplicateUserCheckResponseBody | Error,
+  {},
+  DuplicateUserQuery
+> = async (req, res) => {
   const checkType = req.query.check_type;
   const value = req.query[checkType];
+  if (!value) {
+    return res.status(500).json({
+      error:
+        'Invalid combination for duplicate user check-type and value of email or username'
+    });
+  }
   const options = { caseInsensitive: true, valueType: checkType };
   const user = await User.findByEmailOrUsername(value, options);
   if (user) {
@@ -112,11 +125,24 @@ export async function duplicateUserCheck(req, res) {
     exists: false,
     type: checkType
   });
-}
+};
 
-export async function updatePreferences(req, res) {
+export interface UpdatePreferencesRequestBody {
+  preferences: UserPreferences;
+}
+export const updatePreferences: RequestHandler<
+  {},
+  UserPreferences | Error,
+  UpdatePreferencesRequestBody
+> = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).exec();
+    const { user: requestUser } = req as AuthenticatedRequest;
+    if (!requestUser) {
+      res.status(404).json({
+        error: 'You must be logged in to complete this action.'
+      });
+    }
+    const user = await User.findById(requestUser.id).exec();
     if (!user) {
       res.status(404).json({ error: 'User not found' });
       return;
@@ -128,9 +154,16 @@ export async function updatePreferences(req, res) {
   } catch (err) {
     res.status(500).json({ error: err });
   }
-}
+};
 
-export async function resetPasswordInitiate(req, res) {
+export interface ResetPasswordInitiateRequestBody {
+  email: string;
+}
+export const resetPasswordInitiate: RequestHandler<
+  {},
+  GenericResponseBody,
+  ResetPasswordInitiateRequestBody
+> = async (req, res) => {
   try {
     const token = await generateToken();
     const user = await User.findByEmail(req.body.email);
@@ -165,9 +198,15 @@ export async function resetPasswordInitiate(req, res) {
     console.log(err);
     res.json({ success: false });
   }
-}
+};
 
-export async function validateResetPasswordToken(req, res) {
+export interface ValidateResetPasswordTokenRouteParams {
+  token: string;
+}
+export const validateResetPasswordToken: RequestHandler<
+  ValidateResetPasswordTokenRouteParams,
+  GenericResponseBody
+> = async (req, res) => {
   const user = await User.findOne({
     resetPasswordToken: req.params.token,
     resetPasswordExpires: { $gt: Date.now() }
@@ -180,12 +219,23 @@ export async function validateResetPasswordToken(req, res) {
     return;
   }
   res.json({ success: true });
-}
+};
 
-export async function emailVerificationInitiate(req, res) {
+export const emailVerificationInitiate: RequestHandler<
+  {},
+  PublicUser | Error
+> = async (req, res) => {
   try {
     const token = await generateToken();
-    const user = await User.findById(req.user.id).exec();
+
+    const { user: requestUser } = req as AuthenticatedRequest;
+    if (!requestUser) {
+      res.status(404).json({
+        error: 'You must be logged in to complete this action.'
+      });
+    }
+
+    const user = await User.findById(requestUser.id).exec();
     if (!user) {
       res.status(404).json({ error: 'User not found' });
       return;
@@ -214,13 +264,19 @@ export async function emailVerificationInitiate(req, res) {
     user.verifiedTokenExpires = EMAIL_VERIFY_TOKEN_EXPIRY_TIME; // 24 hours
     await user.save();
 
-    res.json(userResponse(req.user));
+    res.json(userResponse((req as AuthenticatedRequest).user));
   } catch (err) {
     res.status(500).json({ error: err });
   }
-}
+};
 
-export async function verifyEmail(req, res) {
+export interface VerifyEmailRouteParams {
+  t: string;
+}
+export const verifyEmail: RequestHandler<
+  VerifyEmailRouteParams,
+  GenericResponseBody
+> = async (req, res) => {
   const token = req.query.t;
   const user = await User.findOne({
     verifiedToken: token,
@@ -238,9 +294,19 @@ export async function verifyEmail(req, res) {
   user.verifiedTokenExpires = null;
   await user.save();
   res.json({ success: true });
-}
+};
 
-export async function updatePassword(req, res) {
+export interface UpdatePasswordRouteParams {
+  token: string;
+}
+export interface UpdatePasswordRequestBody {
+  password: string;
+}
+export const updatePassword: RequestHandler<
+  UpdatePasswordRouteParams,
+  GenericResponseBody | PublicUser,
+  UpdatePasswordRequestBody
+> = async (req, res) => {
   const user = await User.findOne({
     resetPasswordToken: req.params.token,
     resetPasswordExpires: { $gt: Date.now() }
@@ -258,37 +324,32 @@ export async function updatePassword(req, res) {
   user.resetPasswordExpires = undefined;
 
   await user.save();
-  req.logIn(user, (loginErr) => res.json(userResponse(req.user)));
+  req.logIn(user, (loginErr) =>
+    res.json(userResponse(((req as unknown) as AuthenticatedRequest).user))
+  );
   // eventually send email that the password has been reset
-}
+};
 
-/**
- * @param {string} username
- * @return {Promise<boolean>}
- */
-export async function userExists(username) {
-  const user = await User.findByUsername(username);
-  return user != null;
+export interface UpdateSettingsRequestBody {
+  username: string;
+  newPassword: string;
+  currentPassword: string;
+  email: string;
 }
-
-/**
- * Updates the user object and sets the response.
- * Response is the user or a 500 error.
- * @param res
- * @param user
- */
-export async function saveUser(res, user) {
+export const updateSettings: RequestHandler<
+  {},
+  void | Error,
+  UpdateSettingsRequestBody
+> = async (req, res) => {
   try {
-    await user.save();
-    res.json(userResponse(user));
-  } catch (error) {
-    res.status(500).json({ error });
-  }
-}
+    const { user: requestUser } = req as AuthenticatedRequest;
+    if (!requestUser) {
+      res.status(404).json({
+        error: 'You must be logged in to complete this action.'
+      });
+    }
 
-export async function updateSettings(req, res) {
-  try {
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(requestUser.id);
     if (!user) {
       res.status(404).json({ error: 'User not found' });
       return;
@@ -341,41 +402,47 @@ export async function updateSettings(req, res) {
   } catch (err) {
     res.status(500).json({ error: err });
   }
-}
+};
 
-export async function unlinkGithub(req, res) {
+export const unlinkGithub: RequestHandler = async (req, res) => {
   if (req.user) {
-    req.user.github = undefined;
-    req.user.tokens = req.user.tokens.filter(
-      (token) => token.kind !== 'github'
-    );
-    await saveUser(res, req.user);
+    const { user } = req as AuthenticatedRequest;
+    user.github = undefined;
+    user.tokens = user.tokens.filter((token) => token.kind !== 'github');
+    await saveUser(res, user as UserDocument);
     return;
   }
   res.status(404).json({
     success: false,
     message: 'You must be logged in to complete this action.'
   });
-}
+};
 
-export async function unlinkGoogle(req, res) {
+export const unlinkGoogle: RequestHandler = async (req, res) => {
   if (req.user) {
-    req.user.google = undefined;
-    req.user.tokens = req.user.tokens.filter(
-      (token) => token.kind !== 'google'
-    );
-    await saveUser(res, req.user);
+    const { user } = req as AuthenticatedRequest;
+    user.google = undefined;
+    user.tokens = user.tokens.filter((token) => token.kind !== 'google');
+    await saveUser(res, user as UserDocument);
     return;
   }
   res.status(404).json({
     success: false,
     message: 'You must be logged in to complete this action.'
   });
-}
+};
 
-export async function updateCookieConsent(req, res) {
+export interface UpdateCookieConsentResponse {
+  cookieConsent: CookieConsentOptions;
+}
+export const updateCookieConsent: RequestHandler<
+  {},
+  PublicUser | Error,
+  UpdateCookieConsentResponse
+> = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).exec();
+    const { user: requestUser } = req as AuthenticatedRequest;
+    const user = await User.findById(requestUser.id).exec();
     if (!user) {
       res.status(404).json({ error: 'User not found' });
       return;
@@ -386,4 +453,4 @@ export async function updateCookieConsent(req, res) {
   } catch (err) {
     res.status(500).json({ error: err });
   }
-}
+};

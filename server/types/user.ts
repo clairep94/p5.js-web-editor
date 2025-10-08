@@ -18,7 +18,7 @@ export interface IUser extends VirtualId, MongooseTimestamps {
   google?: string;
   email: string;
   tokens: { kind: string }[];
-  apiKeys: ApiKeyDocument[];
+  apiKeys: Types.DocumentArray<ApiKeyDocument>;
   preferences: UserPreferences;
   totalSize: number;
   cookieConsent: CookieConsentOptions;
@@ -30,7 +30,7 @@ export interface IUser extends VirtualId, MongooseTimestamps {
 export interface User extends IUser {}
 
 /** Sanitised version of the user document without sensitive info */
-export interface PublicUserDocument
+export interface PublicUser
   extends Pick<
     UserDocument,
     | 'email'
