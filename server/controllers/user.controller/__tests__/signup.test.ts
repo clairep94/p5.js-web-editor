@@ -1,11 +1,6 @@
 /* @jest-environment node */
 
 import { Request, Response } from 'jest-express';
-jest.mock('../../../utils/mail', () => ({
-  mailerService: {
-    send: jest.fn().mockResolvedValue(true)
-  }
-}));
 
 import * as controller from '../../user.controller';
 import { User } from '../../../models/user';
@@ -16,6 +11,12 @@ import {
 } from '../../../views/mail';
 import { userResponse, generateToken, saveUser } from '../helpers';
 
+jest.mock('../../../utils/mail', () => ({
+  mailerService: {
+    send: jest.fn().mockResolvedValue(true)
+  }
+}));
+
 jest.mock('../../../models/user');
 jest.mock('../../../utils/mail');
 jest.mock('../../../views/mail');
@@ -23,6 +24,7 @@ jest.mock('../helpers');
 
 const mockUserBase = {
   email: 'test@example.com',
+  name: 'bob dylan',
   username: 'tester',
   preferences: {
     fontSize: 12,
@@ -47,16 +49,20 @@ const mockUserBase = {
   cookieConsent: 'none',
   google: 'user@gmail.com',
   github: 'user123',
-  tokens: [{ kind: 'github' }, { kind: 'google' }]
+  tokens: [{ kind: 'github' }, { kind: 'google' }],
+  banned: false
 };
 
 describe('user.controller unit tests', () => {
   let req: Request;
   let res: Response;
+  let next: () => void;
 
   beforeEach(() => {
     req = new Request();
     res = new Response();
+    next = jest.fn();
+
     jest.clearAllMocks();
 
     // default mocks for helpers
@@ -114,7 +120,7 @@ describe('user.controller unit tests', () => {
       };
       req.headers.host = 'example.test';
 
-      await controller.createUser(req as any, res as any);
+      await controller.createUser(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(422);
       expect(res.send).toHaveBeenCalledWith({ error: expect.any(String) });
@@ -144,7 +150,7 @@ describe('user.controller unit tests', () => {
       };
       req.headers.host = 'example.test';
 
-      await controller.createUser(req as any, res as any);
+      await controller.createUser(req, res, next);
 
       expect(newUser.save).toHaveBeenCalled();
       expect(mailerService.send).toHaveBeenCalled();
