@@ -40,7 +40,6 @@ describe('user.controller > auth management > updateSettings (email, username, p
   const OLD_PASSWORD = 'oldpassword';
   const NEW_PASSWORD = 'newpassword';
 
-  // minimum valid request body
   const minimumValidRequest: UpdateSettingsRequestBody = {
     username: OLD_USERNAME,
     email: OLD_EMAIL
@@ -95,11 +94,9 @@ describe('user.controller > auth management > updateSettings (email, username, p
       await updateSettings(request, response, next);
     });
 
-    it('returns 404 and a user-not-found error', async () => {
+    it('returns 404 and a user-not-found error', () => {
       expect(response.status).toHaveBeenCalledWith(404);
-      expect(response.json).toHaveBeenCalledWith({
-        error: 'User not found'
-      });
+      expect(response.json).toHaveBeenCalledWith({ error: 'User not found' });
     });
 
     it('does not save the user', () => {
@@ -115,22 +112,24 @@ describe('user.controller > auth management > updateSettings (email, username, p
           request.setBody(requestBody);
           await updateSettings(request, response, next);
         });
+
         it('saves the user with the correct details exactly once', () => {
           expect(saveUser).toHaveBeenCalledWith(response, { ...startingUser });
           expect(saveUser).toHaveBeenCalledTimes(1);
         });
+
         it('does not send a confirmation email to the user', () => {
           expect(mailerService.send).not.toHaveBeenCalled();
         });
       });
 
-      // duplicate username check happens client-side before this request is made
       describe('when given new username and old email', () => {
         beforeEach(async () => {
           requestBody = { ...minimumValidRequest, username: NEW_USERNAME };
           request.setBody(requestBody);
           await updateSettings(request, response, next);
         });
+
         it('saves the user with the correct details exactly once', () => {
           expect(saveUser).toHaveBeenCalledWith(response, {
             ...startingUser,
@@ -138,6 +137,7 @@ describe('user.controller > auth management > updateSettings (email, username, p
           });
           expect(saveUser).toHaveBeenCalledTimes(1);
         });
+
         it('does not send a confirmation email to the user', () => {
           expect(mailerService.send).not.toHaveBeenCalled();
         });
@@ -149,6 +149,7 @@ describe('user.controller > auth management > updateSettings (email, username, p
           request.setBody(requestBody);
           await updateSettings(request, response, next);
         });
+
         it('saves the user with the correct details & verification token once', () => {
           expect(saveUser).toHaveBeenCalledWith(response, {
             ...startingUser,
@@ -159,6 +160,7 @@ describe('user.controller > auth management > updateSettings (email, username, p
           });
           expect(saveUser).toHaveBeenCalledTimes(1);
         });
+
         it('sends a confirmation email to the user', () => {
           expect(mailerService.send).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -174,6 +176,7 @@ describe('user.controller > auth management > updateSettings (email, username, p
           request.setBody(requestBody);
           await updateSettings(request, response, next);
         });
+
         it('saves the user with the correct details once', () => {
           expect(saveUser).toHaveBeenCalledWith(response, {
             ...startingUser,
@@ -185,6 +188,7 @@ describe('user.controller > auth management > updateSettings (email, username, p
           });
           expect(saveUser).toHaveBeenCalledTimes(1);
         });
+
         it('sends a confirmation email to the user', () => {
           expect(mailerService.send).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -204,6 +208,7 @@ describe('user.controller > auth management > updateSettings (email, username, p
           request.setBody(requestBody);
           await updateSettings(request, response, next);
         });
+
         it('saves the user with the correct details once', () => {
           expect(saveUser).toHaveBeenCalledWith(response, {
             ...startingUser,
@@ -211,6 +216,7 @@ describe('user.controller > auth management > updateSettings (email, username, p
           });
           expect(saveUser).toHaveBeenCalledTimes(1);
         });
+
         it('does not send a confirmation email to the user', () => {
           expect(mailerService.send).not.toHaveBeenCalled();
         });
@@ -227,6 +233,7 @@ describe('user.controller > auth management > updateSettings (email, username, p
           request.setBody(requestBody);
           await updateSettings(request, response, next);
         });
+
         it('saves the user with the correct details once', () => {
           expect(saveUser).toHaveBeenCalledWith(response, {
             ...startingUser,
@@ -235,6 +242,7 @@ describe('user.controller > auth management > updateSettings (email, username, p
           });
           expect(saveUser).toHaveBeenCalledTimes(1);
         });
+
         it('does not send a confirmation email to the user', () => {
           expect(mailerService.send).not.toHaveBeenCalled();
         });
@@ -251,6 +259,7 @@ describe('user.controller > auth management > updateSettings (email, username, p
           request.setBody(requestBody);
           await updateSettings(request, response, next);
         });
+
         it('saves the user with the correct details once', () => {
           expect(saveUser).toHaveBeenCalledWith(response, {
             ...startingUser,
@@ -262,6 +271,7 @@ describe('user.controller > auth management > updateSettings (email, username, p
           });
           expect(saveUser).toHaveBeenCalledTimes(1);
         });
+
         it('sends a confirmation email to the user', () => {
           expect(mailerService.send).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -282,6 +292,7 @@ describe('user.controller > auth management > updateSettings (email, username, p
           request.setBody(requestBody);
           await updateSettings(request, response, next);
         });
+
         it('saves the user with the correct details once', () => {
           expect(saveUser).toHaveBeenCalledWith(response, {
             ...startingUser,
@@ -294,6 +305,7 @@ describe('user.controller > auth management > updateSettings (email, username, p
           });
           expect(saveUser).toHaveBeenCalledTimes(1);
         });
+
         it('sends a confirmation email to the user', () => {
           expect(mailerService.send).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -318,9 +330,10 @@ describe('user.controller > auth management > updateSettings (email, username, p
           });
         });
 
-        it('does not save the user with the new password', () => {
+        it('does not save the user', () => {
           expect(saveUser).not.toHaveBeenCalled();
         });
+
         it('does not send a confirmation email to the user', () => {
           expect(mailerService.send).not.toHaveBeenCalled();
         });
@@ -339,9 +352,10 @@ describe('user.controller > auth management > updateSettings (email, username, p
           });
         });
 
-        it('does not save the user with the new password', () => {
+        it('does not save the user', () => {
           expect(saveUser).not.toHaveBeenCalled();
         });
+
         it('does not send a confirmation email to the user', () => {
           expect(mailerService.send).not.toHaveBeenCalled();
         });
@@ -363,6 +377,7 @@ describe('user.controller > auth management > updateSettings (email, username, p
           });
           expect(saveUser).toHaveBeenCalledTimes(1);
         });
+
         it('does not send a confirmation email to the user', () => {
           expect(mailerService.send).not.toHaveBeenCalled();
         });
@@ -371,10 +386,9 @@ describe('user.controller > auth management > updateSettings (email, username, p
       describe('when given old username, old email, and non-matching current password and a new password', () => {
         beforeEach(async () => {
           testUser.comparePassword = jest.fn().mockResolvedValue(false);
-
           requestBody = {
             ...minimumValidRequest,
-            currentPassword: 'not the same password',
+            currentPassword: 'wrong',
             newPassword: NEW_PASSWORD
           };
           request.setBody(requestBody);
@@ -388,9 +402,10 @@ describe('user.controller > auth management > updateSettings (email, username, p
           });
         });
 
-        it('does not save the user with the new password', () => {
+        it('does not save the user', () => {
           expect(saveUser).not.toHaveBeenCalled();
         });
+
         it('does not send a confirmation email to the user', () => {
           expect(mailerService.send).not.toHaveBeenCalled();
         });
@@ -413,9 +428,10 @@ describe('user.controller > auth management > updateSettings (email, username, p
           });
         });
 
-        it('does not save the user with the new password', () => {
+        it('does not save the user', () => {
           expect(saveUser).not.toHaveBeenCalled();
         });
+
         it('does not send a confirmation email to the user', () => {
           expect(mailerService.send).not.toHaveBeenCalled();
         });
@@ -425,11 +441,12 @@ describe('user.controller > auth management > updateSettings (email, username, p
 
   describe('and when there is any other error', () => {
     beforeEach(async () => {
-      User.findById = jest.fn().mockRejectedValue('db error');
+      (User.findById as jest.Mock).mockRejectedValue('db error');
       requestBody = minimumValidRequest;
       request.setBody(requestBody);
       await updateSettings(request, response, next);
     });
+
     it('returns a 500 error', () => {
       expect(response.status).toHaveBeenCalledWith(500);
       expect(response.json).toHaveBeenCalledWith({ error: 'db error' });
