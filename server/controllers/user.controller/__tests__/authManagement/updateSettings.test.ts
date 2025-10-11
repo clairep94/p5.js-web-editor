@@ -240,7 +240,7 @@ describe('user.controller > auth management > updateSettings (email, username, p
         });
       });
 
-      describe.skip('when given old username, new email, and new password with valid current password', () => {
+      describe('when given old username, new email, and new password with valid current password', () => {
         beforeEach(async () => {
           requestBody = {
             ...minimumValidRequest,
@@ -271,7 +271,7 @@ describe('user.controller > auth management > updateSettings (email, username, p
         });
       });
 
-      describe.skip('when given new username, new email, and new password with valid current password', () => {
+      describe('when given new username, new email, and new password with valid current password', () => {
         beforeEach(async () => {
           requestBody = {
             username: NEW_USERNAME,
@@ -371,8 +371,6 @@ describe('user.controller > auth management > updateSettings (email, username, p
       describe('when given old username, old email, and non-matching current password and a new password', () => {
         beforeEach(async () => {
           testUser.comparePassword = jest.fn().mockResolvedValue(false);
-
-          console.log('given non-matching');
 
           requestBody = {
             ...minimumValidRequest,
