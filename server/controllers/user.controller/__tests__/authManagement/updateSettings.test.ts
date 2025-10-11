@@ -90,6 +90,7 @@ describe('user.controller > auth management > updateSettings (email, username, p
     beforeEach(async () => {
       (User.findById as jest.Mock).mockResolvedValue(null);
       request.user = { id: 'nonexistent-id' };
+      request.body = minimumValidRequest;
 
       await updateSettings(request, response, next);
     });
@@ -261,7 +262,7 @@ describe('user.controller > auth management > updateSettings (email, username, p
           });
           expect(saveUser).toHaveBeenCalledTimes(1);
         });
-        it('does not send a confirmation email to the user', () => {
+        it('sends a confirmation email to the user', () => {
           expect(mailerService.send).toHaveBeenCalledWith(
             expect.objectContaining({
               subject: 'Mock confirm your email'
@@ -293,7 +294,7 @@ describe('user.controller > auth management > updateSettings (email, username, p
           });
           expect(saveUser).toHaveBeenCalledTimes(1);
         });
-        it('does not send a confirmation email to the user', () => {
+        it('sends a confirmation email to the user', () => {
           expect(mailerService.send).toHaveBeenCalledWith(
             expect.objectContaining({
               subject: 'Mock confirm your email'
@@ -304,14 +305,14 @@ describe('user.controller > auth management > updateSettings (email, username, p
     });
 
     describe('unhappy paths', () => {
-      describe.skip('when missing username', () => {
+      describe('when missing username', () => {
         beforeEach(async () => {
           request.setBody({ email: OLD_EMAIL });
           await updateSettings(request, response, next);
         });
 
         it('returns 401 with an "Missing username" message', () => {
-          expect(response.status).toHaveBeenCalledWith(400);
+          expect(response.status).toHaveBeenCalledWith(401);
           expect(response.json).toHaveBeenCalledWith({
             error: 'Username is required.'
           });
@@ -325,14 +326,14 @@ describe('user.controller > auth management > updateSettings (email, username, p
         });
       });
 
-      describe.skip('when missing email', () => {
+      describe('when missing email', () => {
         beforeEach(async () => {
           request.setBody({ username: OLD_USERNAME });
           await updateSettings(request, response, next);
         });
 
         it('returns 401 with an "Missing email" message', () => {
-          expect(response.status).toHaveBeenCalledWith(400);
+          expect(response.status).toHaveBeenCalledWith(401);
           expect(response.json).toHaveBeenCalledWith({
             error: 'Email is required.'
           });
@@ -346,7 +347,7 @@ describe('user.controller > auth management > updateSettings (email, username, p
         });
       });
 
-      describe.skip('when given old username, old email, and matching current password and no new password', () => {
+      describe('when given old username, old email, and matching current password and no new password', () => {
         beforeEach(async () => {
           requestBody = {
             ...minimumValidRequest,
@@ -356,15 +357,11 @@ describe('user.controller > auth management > updateSettings (email, username, p
           await updateSettings(request, response, next);
         });
 
-        it('returns 401 with an "New password is required" message', () => {
-          expect(response.status).toHaveBeenCalledWith(400);
-          expect(response.json).toHaveBeenCalledWith({
-            error: 'New password is required.'
+        it('saves the user with the correct details once', () => {
+          expect(saveUser).toHaveBeenCalledWith(response, {
+            ...startingUser
           });
-        });
-
-        it('does not save the user with the new password', () => {
-          expect(saveUser).not.toHaveBeenCalled();
+          expect(saveUser).toHaveBeenCalledTimes(1);
         });
         it('does not send a confirmation email to the user', () => {
           expect(mailerService.send).not.toHaveBeenCalled();
@@ -374,6 +371,8 @@ describe('user.controller > auth management > updateSettings (email, username, p
       describe('when given old username, old email, and non-matching current password and a new password', () => {
         beforeEach(async () => {
           testUser.comparePassword = jest.fn().mockResolvedValue(false);
+
+          console.log('given non-matching');
 
           requestBody = {
             ...minimumValidRequest,

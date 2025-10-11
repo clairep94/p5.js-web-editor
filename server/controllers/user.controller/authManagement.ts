@@ -149,6 +149,16 @@ export const updateSettings: RequestHandler<
   PublicUserOrError,
   UpdateSettingsRequestBody
 > = async (req, res) => {
+  if (!req.body.username) {
+    res.status(401).json({ error: 'Username is required.' });
+    return;
+  }
+
+  if (!req.body.email) {
+    res.status(401).json({ error: 'Email is required.' });
+    return;
+  }
+
   try {
     const user = await User.findById(req.user!.id);
     if (!user) {
@@ -166,8 +176,6 @@ export const updateSettings: RequestHandler<
         res.status(401).json({ error: 'Current password is not provided.' });
         return;
       }
-    }
-    if (req.body.currentPassword) {
       const isMatch = await user.comparePassword(req.body.currentPassword);
       if (!isMatch) {
         res.status(401).json({ error: 'Current password is invalid.' });
