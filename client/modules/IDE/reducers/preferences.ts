@@ -1,7 +1,13 @@
 import * as ActionTypes from '../../../constants';
 import i18n from '../../../i18n';
+import { UserPreferences, AppThemeOptions } from '../../../../server/types';
 
-export const initialState = {
+interface UserPreferencesClient
+  extends Omit<UserPreferences, 'indentationAmount' | 'isTabIndent'> {
+  tabIndex: number;
+}
+
+export const initialState: UserPreferencesClient = {
   tabIndex: 0,
   fontSize: 18,
   autosave: true,
@@ -10,14 +16,22 @@ export const initialState = {
   lintWarning: false,
   textOutput: false,
   gridOutput: false,
-  theme: 'light',
+  theme: AppThemeOptions.LIGHT,
   autorefresh: false,
   language: i18n.language,
   autocloseBracketsQuotes: true,
   autocompleteHinter: false
 };
 
-const preferences = (state = initialState, action) => {
+const preferences = (
+  state: UserPreferencesClient = initialState,
+  action: {
+    type: keyof ActionTypes;
+    value?: any;
+    preferences?: UserPreferencesClient;
+    language?: UserPreferences['language'];
+  }
+) => {
   switch (action.type) {
     case ActionTypes.OPEN_PREFERENCES:
       return Object.assign({}, state, { tabIndex: 0 });

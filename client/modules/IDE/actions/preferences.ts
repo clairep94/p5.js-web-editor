@@ -1,8 +1,40 @@
 import i18next from 'i18next';
 import { apiClient } from '../../../utils/apiClient';
 import * as ActionTypes from '../../../constants';
+import type {
+  UpdatePreferencesRequestBody,
+  UserPreferences,
+  Error
+} from '../../../../server/types';
 
-function updatePreferences(formParams, dispatch) {
+export interface BaseAction {
+  type: string;
+}
+
+export interface ActionWithValue extends BaseAction {
+  value: string | number | boolean;
+}
+
+export interface ActionWithError extends BaseAction {
+  error: Error['error'];
+}
+
+export interface ActionWithLanguage extends BaseAction {
+  language: string;
+}
+
+export interface State {
+  user: {
+    authenticated: boolean;
+  };
+}
+
+function updatePreferences(
+  formParams: UpdatePreferencesRequestBody,
+  dispatch: (
+    action: ActionWithValue | ActionWithError | ActionWithLanguage
+  ) => void
+) {
   apiClient
     .put('/preferences', formParams)
     .then(() => {})
@@ -14,16 +46,18 @@ function updatePreferences(formParams, dispatch) {
     });
 }
 
-export function setPreferencesTab(value) {
+export function setPreferencesTab(value: number): ActionWithValue {
   return {
     type: ActionTypes.SET_PREFERENCES_TAB,
     value
   };
 }
 
-export function setFontSize(value) {
-  return (dispatch, getState) => {
-    // eslint-disable-line
+export function setFontSize(value: UserPreferences['fontSize']) {
+  return (
+    dispatch: (action: ActionWithValue | ActionWithError) => {},
+    getState: () => State
+  ) => {
     dispatch({
       type: ActionTypes.SET_FONT_SIZE,
       value
@@ -40,8 +74,11 @@ export function setFontSize(value) {
   };
 }
 
-export function setLineNumbers(value) {
-  return (dispatch, getState) => {
+export function setLineNumbers(value: UserPreferences['lineNumbers']) {
+  return (
+    dispatch: (action: ActionWithValue | ActionWithError) => {},
+    getState: () => State
+  ) => {
     dispatch({
       type: ActionTypes.SET_LINE_NUMBERS,
       value
@@ -58,8 +95,13 @@ export function setLineNumbers(value) {
   };
 }
 
-export function setAutocloseBracketsQuotes(value) {
-  return (dispatch, getState) => {
+export function setAutocloseBracketsQuotes(
+  value: UserPreferences['autocloseBracketsQuotes']
+) {
+  return (
+    dispatch: (action: ActionWithValue | ActionWithError) => {},
+    getState: () => State
+  ) => {
     dispatch({
       type: ActionTypes.SET_AUTOCLOSE_BRACKETS_QUOTES,
       value
@@ -76,8 +118,13 @@ export function setAutocloseBracketsQuotes(value) {
   };
 }
 
-export function setAutocompleteHinter(value) {
-  return (dispatch, getState) => {
+export function setAutocompleteHinter(
+  value: UserPreferences['autocompleteHinter']
+) {
+  return (
+    dispatch: (action: ActionWithValue | ActionWithError) => {},
+    getState: () => State
+  ) => {
     dispatch({
       type: ActionTypes.SET_AUTOCOMPLETE_HINTER,
       value
@@ -94,8 +141,11 @@ export function setAutocompleteHinter(value) {
   };
 }
 
-export function setAutosave(value) {
-  return (dispatch, getState) => {
+export function setAutosave(value: UserPreferences['autosave']) {
+  return (
+    dispatch: (action: ActionWithValue | ActionWithError) => {},
+    getState: () => State
+  ) => {
     dispatch({
       type: ActionTypes.SET_AUTOSAVE,
       value
@@ -112,8 +162,11 @@ export function setAutosave(value) {
   };
 }
 
-export function setLinewrap(value) {
-  return (dispatch, getState) => {
+export function setLinewrap(value: UserPreferences['linewrap']) {
+  return (
+    dispatch: (action: ActionWithValue | ActionWithError) => {},
+    getState: () => State
+  ) => {
     dispatch({
       type: ActionTypes.SET_LINEWRAP,
       value
@@ -130,8 +183,11 @@ export function setLinewrap(value) {
   };
 }
 
-export function setLintWarning(value) {
-  return (dispatch, getState) => {
+export function setLintWarning(value: UserPreferences['lintWarning']) {
+  return (
+    dispatch: (action: ActionWithValue | ActionWithError) => {},
+    getState: () => State
+  ) => {
     dispatch({
       type: ActionTypes.SET_LINT_WARNING,
       value
@@ -148,8 +204,11 @@ export function setLintWarning(value) {
   };
 }
 
-export function setTextOutput(value) {
-  return (dispatch, getState) => {
+export function setTextOutput(value: UserPreferences['textOutput']) {
+  return (
+    dispatch: (action: ActionWithValue | ActionWithError) => {},
+    getState: () => State
+  ) => {
     dispatch({
       type: ActionTypes.SET_TEXT_OUTPUT,
       value
@@ -166,8 +225,11 @@ export function setTextOutput(value) {
   };
 }
 
-export function setGridOutput(value) {
-  return (dispatch, getState) => {
+export function setGridOutput(value: UserPreferences['gridOutput']) {
+  return (
+    dispatch: (action: ActionWithValue | ActionWithError) => {},
+    getState: () => State
+  ) => {
     dispatch({
       type: ActionTypes.SET_GRID_OUTPUT,
       value
@@ -184,12 +246,11 @@ export function setGridOutput(value) {
   };
 }
 
-export function setTheme(value) {
-  // return {
-  //   type: ActionTypes.SET_THEME,
-  //   value
-  // };
-  return (dispatch, getState) => {
+export function setTheme(value: UserPreferences['theme']) {
+  return (
+    dispatch: (action: ActionWithValue | ActionWithError) => {},
+    getState: () => State
+  ) => {
     dispatch({
       type: ActionTypes.SET_THEME,
       value
@@ -206,12 +267,11 @@ export function setTheme(value) {
   };
 }
 
-export function setAutorefresh(value) {
-  // return {
-  //   type: ActionTypes.SET_AUTOREFRESH,
-  //   value
-  // };
-  return (dispatch, getState) => {
+export function setAutorefresh(value: UserPreferences['autorefresh']) {
+  return (
+    dispatch: (action: ActionWithValue | ActionWithError) => {},
+    getState: () => State
+  ) => {
     dispatch({
       type: ActionTypes.SET_AUTOREFRESH,
       value
@@ -228,15 +288,23 @@ export function setAutorefresh(value) {
   };
 }
 
-export function setAllAccessibleOutput(value) {
+export function setAllAccessibleOutput(
+  value: UserPreferences['textOutput'] | UserPreferences['gridOutput']
+) {
   return (dispatch) => {
     dispatch(setTextOutput(value));
     dispatch(setGridOutput(value));
   };
 }
 
-export function setLanguage(value, { persistPreference = true } = {}) {
-  return (dispatch, getState) => {
+export function setLanguage(
+  value: UserPreferences['language'],
+  { persistPreference = true } = {}
+) {
+  return (
+    dispatch: (action: ActionWithLanguage | ActionWithError) => {},
+    getState: () => State
+  ) => {
     i18next.changeLanguage(value);
     dispatch({
       type: ActionTypes.SET_LANGUAGE,
