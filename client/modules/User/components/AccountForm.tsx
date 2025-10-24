@@ -6,7 +6,11 @@ import { Button, ButtonTypes } from '../../../common/Button';
 import { validateSettings } from '../../../utils/reduxFormUtils';
 import { updateSettings, initiateVerification } from '../actions';
 import { apiClient } from '../../../utils/apiClient';
-import type { DuplicateUserCheckQuery } from '../../../../common/types';
+import type {
+  DuplicateUserCheckQuery,
+  UpdateSettingsRequestBody
+} from '../../../../common/types';
+import type { RootState } from '../../../reducers';
 
 function asyncValidate(
   fieldToValidate: DuplicateUserCheckQuery['check_type'],
@@ -31,25 +35,27 @@ function asyncValidate(
 
 function AccountForm() {
   const { t } = useTranslation();
-  const user = useSelector((state) => state.user);
+  const user = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch();
 
-  const handleInitiateVerification = (evt) => {
+  const handleInitiateVerification = (
+    evt: React.MouseEvent<HTMLButtonElement>
+  ) => {
     evt.preventDefault();
     dispatch(initiateVerification());
   };
 
-  function validateUsername(username) {
-    if (username === user.username) return '';
+  function validateUsername(username: DuplicateUserCheckQuery['username']) {
+    if (username === user.username || !username) return '';
     return asyncValidate('username', username);
   }
 
-  function validateEmail(email) {
-    if (email === user.email) return '';
+  function validateEmail(email: DuplicateUserCheckQuery['email']) {
+    if (email === user.email || !email) return '';
     return asyncValidate('email', email);
   }
 
-  function onSubmit(formProps) {
+  function onSubmit(formProps: UpdateSettingsRequestBody) {
     return dispatch(updateSettings(formProps));
   }
 
@@ -59,11 +65,13 @@ function AccountForm() {
       validate={validateSettings}
       onSubmit={onSubmit}
     >
-      {({ handleSubmit, submitting, invalid, restart }) => (
+      {({ handleSubmit, submitting, invalid, form }) => (
         <form
           className="form"
-          onSubmit={(event) => {
-            handleSubmit(event).then(restart);
+          onSubmit={async (event) => {
+            const result = await handleSubmit(event);
+            form.restart();
+            return result;
           }}
         >
           <Field
@@ -103,7 +111,7 @@ function AccountForm() {
                 </span>
               ) : (
                 <Button
-                  onClick={handleInitiateVerification}
+                  onClick={() => handleInitiateVerification}
                   className="form__resend-button"
                 >
                   {t('AccountForm.Resend')}
