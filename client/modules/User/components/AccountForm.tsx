@@ -6,6 +6,7 @@ import { Button, ButtonTypes } from '../../../common/Button';
 import { validateSettings } from '../../../utils/reduxFormUtils';
 import { updateSettings, initiateVerification } from '../actions';
 import { apiClient } from '../../../utils/apiClient';
+import {}
 
 function asyncValidate(fieldToValidate, value) {
   if (!value || value.trim().length === 0) {
