@@ -6,15 +6,19 @@ import { Button, ButtonTypes } from '../../../common/Button';
 import { validateSettings } from '../../../utils/reduxFormUtils';
 import { updateSettings, initiateVerification } from '../actions';
 import { apiClient } from '../../../utils/apiClient';
-import {}
+import type { DuplicateUserCheckQuery } from '../../../../common/types';
 
-function asyncValidate(fieldToValidate, value) {
+function asyncValidate(
+  fieldToValidate: DuplicateUserCheckQuery['check_type'],
+  value: string
+) {
   if (!value || value.trim().length === 0) {
     return '';
   }
-  const queryParams = {};
+  const queryParams: DuplicateUserCheckQuery = {
+    check_type: fieldToValidate
+  };
   queryParams[fieldToValidate] = value;
-  queryParams.check_type = fieldToValidate;
   return apiClient
     .get('/signup/duplicate_check', { params: queryParams })
     .then((response) => {
