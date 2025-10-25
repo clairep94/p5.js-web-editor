@@ -7,7 +7,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { parse } from 'query-string';
 import AccountForm from '../components/AccountForm';
 import SocialAuthButton from '../components/SocialAuthButton';
-import APIKeyForm from '../components/APIKeyForm';
+import { APIKeyForm } from '../components/APIKeyForm';
 import Nav from '../../IDE/components/Header/Nav';
 import ErrorModal from '../../IDE/components/ErrorModal';
 import Overlay from '../../App/components/Overlay';

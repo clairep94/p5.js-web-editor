@@ -7,30 +7,24 @@ import { PlusIcon } from '../../../common/icons';
 import CopyableInput from '../../IDE/components/CopyableInput';
 import { createApiKey, removeApiKey } from '../actions';
 
-import APIKeyList from './APIKeyList';
+import { APIKeyList } from './APIKeyList';
+import { RootState } from '../../../reducers';
+import type { SanitisedApiKey } from '../../../../common/types';
 
-export const APIKeyPropType = PropTypes.shape({
-  id: PropTypes.string.isRequired,
-  token: PropTypes.string,
-  label: PropTypes.string.isRequired,
-  createdAt: PropTypes.string.isRequired,
-  lastUsedAt: PropTypes.string
-});
-
-const APIKeyForm = () => {
+export const APIKeyForm = () => {
   const { t } = useTranslation();
-  const apiKeys = useSelector((state) => state.user.apiKeys);
+  const apiKeys = useSelector((state: RootState) => state.user.apiKeys);
   const dispatch = useDispatch();
 
   const [keyLabel, setKeyLabel] = useState('');
 
-  const addKey = (event) => {
+  const addKey = (event: React.FormEvent) => {
     event.preventDefault();
     dispatch(createApiKey(keyLabel));
     setKeyLabel('');
   };
 
-  const removeKey = (key) => {
+  const removeKey = (key: SanitisedApiKey) => {
     const message = t('APIKeyForm.ConfirmDelete', {
       key_label: key.label
     });
@@ -49,7 +43,7 @@ const APIKeyForm = () => {
     return <p>{t('APIKeyForm.NoTokens')}</p>;
   };
 
-  const keyWithToken = apiKeys.find((k) => !!k.token);
+  const keyWithToken = apiKeys.find((k: SanitisedApiKey) => !!k.token);
 
   return (
     <div className="api-key-form">
@@ -77,7 +71,7 @@ const APIKeyForm = () => {
           <Button
             disabled={keyLabel === ''}
             iconBefore={<PlusIcon />}
-            label="Create new key"
+            aria-labelledby="Create new key"
             type={ButtonTypes.SUBMIT}
           >
             {t('APIKeyForm.CreateTokenSubmit')}
@@ -109,5 +103,3 @@ const APIKeyForm = () => {
     </div>
   );
 };
-
-export default APIKeyForm;

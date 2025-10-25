@@ -23,7 +23,9 @@ export interface ApiKeyDocument
  * and can be exposed to the client
  */
 export interface SanitisedApiKey
-  extends Pick<ApiKeyDocument, 'id' | 'label' | 'lastUsedAt' | 'createdAt'> {}
+  extends Pick<ApiKeyDocument, 'id' | 'label' | 'lastUsedAt' | 'createdAt'> {
+  token?: string; // sometimes injected by userController.createApiKey
+}
 
 /** Mongoose model for API Key */
 export interface ApiKeyModel extends Model<ApiKeyDocument> {}
@@ -37,7 +39,7 @@ export type ApiKeyResponseOrError = ApiKeyResponse | Error;
 
 /** Response for api-key related endpoints, containing list of keys */
 export interface ApiKeyResponse {
-  apiKeys: ApiKeyDocument[];
+  apiKeys: SanitisedApiKey[];
 }
 
 /** userController.createApiKey - Request */
