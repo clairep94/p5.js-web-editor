@@ -8,13 +8,12 @@ import {
 import TrashCanIcon from '../../../images/trash-can.svg';
 import type { SanitisedApiKey } from '../../../../common/types';
 
-export function APIKeyList({
-  apiKeys,
-  onRemove
-}: {
+export interface APIKeyListProps {
   apiKeys: SanitisedApiKey[];
   onRemove: (key: SanitisedApiKey) => void;
-}) {
+}
+
+export function APIKeyList({ apiKeys, onRemove }: APIKeyListProps) {
   const { t } = useTranslation();
   return (
     <table className="api-key-list">
