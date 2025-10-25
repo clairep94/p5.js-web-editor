@@ -7,16 +7,18 @@ import { Button, ButtonTypes } from '../../../common/Button';
 import { validateLogin } from '../../../utils/reduxFormUtils';
 import { validateAndLoginUser } from '../actions';
 import { useSyncFormTranslations } from '../../../common/useSyncFormTranslations';
+import type { LoginForm as LoginFormType } from '../../../utils/reduxFormUtils';
+import type { FormLike } from '../../../common/useSyncFormTranslations';
 
-function LoginForm() {
+export function LoginForm() {
   const { t, i18n } = useTranslation();
 
   const dispatch = useDispatch();
-  function onSubmit(formProps) {
+  function onSubmit(formProps: LoginFormType) {
     return dispatch(validateAndLoginUser(formProps));
   }
   const [showPassword, setShowPassword] = useState(false);
-  const formRef = useRef(null);
+  const formRef: React.MutableRefObject<FormLike | null> = useRef(null);
 
   const handleVisibility = () => {
     setShowPassword(!showPassword);
@@ -114,5 +116,3 @@ function LoginForm() {
     </Form>
   );
 }
-
-export default LoginForm;
