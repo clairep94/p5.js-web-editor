@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import React from 'react';
 import { Form, Field } from 'react-final-form';
 import { useDispatch } from 'react-redux';
@@ -6,13 +5,18 @@ import { useTranslation } from 'react-i18next';
 import { validateNewPassword } from '../../../utils/reduxFormUtils';
 import { updatePassword } from '../actions';
 import { Button, ButtonTypes } from '../../../common/Button';
+import type { ResetOrUpdatePasswordRequestParams } from '../../../../common/types';
+import type { NewPasswordForm as NewPasswordFormType } from '../../../utils/reduxFormUtils';
 
-function NewPasswordForm(props) {
-  const { resetPasswordToken } = props;
+export type NewPasswordFormProps = {
+  resetPasswordToken: ResetOrUpdatePasswordRequestParams['token'];
+};
+
+export function NewPasswordForm({ resetPasswordToken }: NewPasswordFormProps) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
 
-  function onSubmit(formProps) {
+  function onSubmit(formProps: NewPasswordFormType) {
     return dispatch(updatePassword(formProps, resetPasswordToken));
   }
 
@@ -75,9 +79,3 @@ function NewPasswordForm(props) {
     </Form>
   );
 }
-
-NewPasswordForm.propTypes = {
-  resetPasswordToken: PropTypes.string.isRequired
-};
-
-export default NewPasswordForm;
