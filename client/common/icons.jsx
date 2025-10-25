@@ -73,7 +73,7 @@ function withLabel(SvgComponent) {
   };
 
   Icon.defaultProps = {
-    'aria-label': null
+    'aria-label': undefined
   };
 
   return Icon;
