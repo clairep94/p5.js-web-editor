@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
@@ -25,7 +24,17 @@ const FilterOptions = styled(Options)`
   }
 `;
 
-const DashboardTabSwitcher = ({ currentTab, isOwner, username }) => {
+export interface DashboardTabSwitcherProps {
+  currentTab: string;
+  isOwner: boolean;
+  username: string;
+}
+
+export const DashboardTabSwitcher = ({
+  currentTab,
+  isOwner,
+  username
+}: DashboardTabSwitcherProps) => {
   const isMobile = useIsMobile();
   const { t } = useTranslation();
   const dispatch = useDispatch();
@@ -89,11 +98,3 @@ const DashboardTabSwitcher = ({ currentTab, isOwner, username }) => {
     </div>
   );
 };
-
-DashboardTabSwitcher.propTypes = {
-  currentTab: PropTypes.string.isRequired,
-  isOwner: PropTypes.bool.isRequired,
-  username: PropTypes.string.isRequired
-};
-
-export default DashboardTabSwitcher;

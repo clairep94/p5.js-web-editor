@@ -1,41 +1,61 @@
 import { FORM_ERROR } from 'final-form';
+import { AnyAction, Dispatch } from 'redux';
 import * as ActionTypes from '../../constants';
 import browserHistory from '../../browserHistory';
 import { apiClient } from '../../utils/apiClient';
 import { showErrorModal, justOpenedProject } from '../IDE/actions/ide';
 import { setLanguage } from '../IDE/actions/preferences';
 import { showToast, setToastText } from '../IDE/actions/toast';
+import type {
+  CookieConsentOptions,
+  CreateUserRequestBody,
+  Error,
+  PublicUser,
+  ResetOrUpdatePasswordRequestParams,
+  ResetPasswordInitiateRequestBody,
+  SanitisedApiKey,
+  UpdatePasswordRequestBody,
+  UpdateSettingsRequestBody,
+  UserPreferences
+} from '../../../common/types';
+import { RootState } from '../../reducers';
+import type { GetRootState } from '../IDE/actions/preferences.types';
 
-export function authError(error) {
+export function authError(error: Error) {
   return {
     type: ActionTypes.AUTH_ERROR,
     payload: error
   };
 }
 
-export function signUpUser(formValues) {
+export function signUpUser(formValues: CreateUserRequestBody) {
   return apiClient.post('/signup', formValues);
 }
 
-export function loginUser(formValues) {
+export function loginUser(formValues: /** TODO: replace with actual type when server/session.controller is migrated */ {
+  username: string;
+  password: string;
+}) {
   return apiClient.post('/login', formValues);
 }
 
-export function authenticateUser(user) {
+export function authenticateUser(
+  user: PublicUser /** Not sure if UserDocument or PublicUser, to check after relevant route is migrated */
+) {
   return {
     type: ActionTypes.AUTH_USER,
     user
   };
 }
 
-export function loginUserFailure(error) {
+export function loginUserFailure(error: Error) {
   return {
     type: ActionTypes.AUTH_ERROR,
     error
   };
 }
 
-export function setPreferences(preferences) {
+export function setPreferences(preferences: UserPreferences) {
   return {
     type: ActionTypes.SET_PREFERENCES,
     preferences
@@ -43,12 +63,12 @@ export function setPreferences(preferences) {
 }
 
 export function validateAndLoginUser(formProps) {
-  return (dispatch, getState) => {
+  return (dispatch: Dispatch, getState: GetRootState) => {
     const state = getState();
     const { previousPath } = state.ide;
-    return new Promise((resolve) => {
+    return new Promise<void | Error>((resolve) => {
       loginUser(formProps)
-        .then((response) => {
+        .then((response: { data: PublicUser }) => {
           dispatch(authenticateUser(response.data));
           dispatch(setPreferences(response.data.preferences));
           dispatch(
@@ -70,10 +90,10 @@ export function validateAndLoginUser(formProps) {
 }
 
 export function validateAndSignUpUser(formValues) {
-  return (dispatch, getState) => {
+  return (dispatch: Dispatch, getState: GetRootState) => {
     const state = getState();
     const { previousPath } = state.ide;
-    return new Promise((resolve) => {
+    return new Promise<void | Error>((resolve) => {
       signUpUser(formValues)
         .then((response) => {
           dispatch(authenticateUser(response.data));
@@ -91,7 +111,7 @@ export function validateAndSignUpUser(formValues) {
 }
 
 export function getUser() {
-  return async (dispatch) => {
+  return async (dispatch: Dispatch) => {
     try {
       const response = await apiClient.get('/session');
       const { data } = response;
@@ -106,7 +126,7 @@ export function getUser() {
         preferences: data.preferences
       });
       setLanguage(data.preferences.language, { persistPreference: false });
-    } catch (error) {
+    } catch (error: any) {
       const message = error.response
         ? error.response.data.error || error.response.message
         : 'Unknown error.';
@@ -116,7 +136,7 @@ export function getUser() {
 }
 
 export function validateSession() {
-  return async (dispatch, getState) => {
+  return async (dispatch: Dispatch, getState: () => RootState) => {
     try {
       const response = await apiClient.get('/session');
       const state = getState();
@@ -124,7 +144,7 @@ export function validateSession() {
       if (state.user.username !== response.data.username) {
         dispatch(showErrorModal('staleSession'));
       }
-    } catch (error) {
+    } catch (error: any) {
       if (error.response && error.response.status === 404) {
         dispatch(showErrorModal('staleSession'));
       }
@@ -132,7 +152,7 @@ export function validateSession() {
   };
 }
 
-export function resetProject(dispatch) {
+export function resetProject(dispatch: Dispatch) {
   dispatch({
     type: ActionTypes.RESET_PROJECT
   });
@@ -143,7 +163,7 @@ export function resetProject(dispatch) {
 }
 
 export function logoutUser() {
-  return (dispatch) => {
+  return (dispatch: Dispatch) => {
     apiClient
       .get('/logout')
       .then(() => {
@@ -159,9 +179,11 @@ export function logoutUser() {
   };
 }
 
-export function initiateResetPassword(formValues) {
-  return (dispatch) =>
-    new Promise((resolve) => {
+export function initiateResetPassword(
+  formValues: ResetPasswordInitiateRequestBody
+) {
+  return (dispatch: Dispatch) =>
+    new Promise<void | Error>((resolve) => {
       dispatch({
         type: ActionTypes.RESET_PASSWORD_INITIATE
       });
@@ -180,7 +202,7 @@ export function initiateResetPassword(formValues) {
 }
 
 export function initiateVerification() {
-  return (dispatch) => {
+  return (dispatch: Dispatch) => {
     dispatch({
       type: ActionTypes.EMAIL_VERIFICATION_INITIATE
     });
@@ -199,8 +221,10 @@ export function initiateVerification() {
   };
 }
 
-export function verifyEmailConfirmation(token) {
-  return (dispatch) => {
+export function verifyEmailConfirmation(
+  token: ResetOrUpdatePasswordRequestParams['token']
+) {
+  return (dispatch: Dispatch) => {
     dispatch({
       type: ActionTypes.EMAIL_VERIFICATION_VERIFY,
       state: 'checking'
@@ -229,8 +253,10 @@ export function resetPasswordReset() {
   };
 }
 
-export function validateResetPasswordToken(token) {
-  return (dispatch) => {
+export function validateResetPasswordToken(
+  token: ResetOrUpdatePasswordRequestParams['token']
+) {
+  return (dispatch: Dispatch) => {
     apiClient
       .get(`/reset-password/${token}`)
       .then(() => {
@@ -244,9 +270,12 @@ export function validateResetPasswordToken(token) {
   };
 }
 
-export function updatePassword(formValues, token) {
-  return (dispatch) =>
-    new Promise((resolve) =>
+export function updatePassword(
+  formValues: UpdatePasswordRequestBody,
+  token: ResetOrUpdatePasswordRequestParams['token']
+) {
+  return (dispatch: Dispatch) =>
+    new Promise<void | Error>((resolve) =>
       apiClient
         .post(`/reset-password/${token}`, formValues)
         .then((response) => {
@@ -263,20 +292,30 @@ export function updatePassword(formValues, token) {
     );
 }
 
-export function updateSettingsSuccess(user) {
+export function updateSettingsSuccess(user: PublicUser) {
   return {
     type: ActionTypes.SETTINGS_UPDATED,
     user
   };
 }
 
-export function submitSettings(formValues) {
+/**
+ * - Method: `PUT`
+ * - Endpoint: `/account`
+ * - Authenticated: `true`
+ * - Id: `UserController.updateSettings`
+ *
+ * Description:
+ *   - Used to update the user's username, email, or password on the `/account` page while authenticated
+ *   - Currently the client only shows the `currentPassword` and `newPassword` fields if no social logins (github & google) are enabled
+ */
+export function submitSettings(formValues: UpdateSettingsRequestBody) {
   return apiClient.put('/account', formValues);
 }
 
-export function updateSettings(formValues) {
-  return (dispatch) =>
-    new Promise((resolve) => {
+export function updateSettings(formValues: UpdateSettingsRequestBody) {
+  return (dispatch: Dispatch) =>
+    new Promise<void | Error>((resolve) => {
       if (!formValues.currentPassword && formValues.newPassword) {
         dispatch(showToast(5500));
         dispatch(setToastText('Toast.EmptyCurrentPass'));
@@ -313,15 +352,24 @@ export function updateSettings(formValues) {
     });
 }
 
-export function createApiKeySuccess(user) {
+export function createApiKeySuccess(user: PublicUser) {
   return {
     type: ActionTypes.API_KEY_CREATED,
     user
   };
 }
 
-export function createApiKey(label) {
-  return (dispatch) =>
+/**
+ * - Method: `POST`
+ * - Endpoint: `/account/api-keys`
+ * - Authenticated: `true`
+ * - Id: `UserController.createApiKey`
+ *
+ * Description:
+ *   - Create API key
+ */
+export function createApiKey(label: SanitisedApiKey['label']) {
+  return (dispatch: Dispatch) =>
     apiClient
       .post('/account/api-keys', { label })
       .then((response) => {
@@ -333,8 +381,17 @@ export function createApiKey(label) {
       });
 }
 
-export function removeApiKey(keyId) {
-  return (dispatch) =>
+/**
+ * - Method: `DELETE`
+ * - Endpoint: `/account/api-keys/:keyId`
+ * - Authenticated: `true`
+ * - Id: `UserController.removeApiKey`
+ *
+ * Description:
+ *   - Remove API key
+ */
+export function removeApiKey(keyId: SanitisedApiKey['id']) {
+  return (dispatch: Dispatch) =>
     apiClient
       .delete(`/account/api-keys/${keyId}`)
       .then((response) => {
@@ -349,8 +406,8 @@ export function removeApiKey(keyId) {
       });
 }
 
-export function unlinkService(service) {
-  return (dispatch) => {
+export function unlinkService(service: string) {
+  return (dispatch: Dispatch) => {
     if (!['github', 'google'].includes(service)) return;
     apiClient
       .delete(`/auth/${service}`)
@@ -365,9 +422,18 @@ export function unlinkService(service) {
   };
 }
 
-export function setUserCookieConsent(cookieConsent) {
+/**
+ * - Method: `PUT`
+ * - Endpoint: `/cookie-consent`
+ * - Authenticated: `true`
+ * - Id: `UserController.updatePreferences`
+ *
+ * Description:
+ *   - Update user cookie consent
+ */
+export function setUserCookieConsent(cookieConsent: CookieConsentOptions) {
   // maybe also send this to the server rn?
-  return (dispatch) => {
+  return (dispatch: Dispatch) => {
     apiClient
       .put('/cookie-consent', { cookieConsent })
       .then(() => {
