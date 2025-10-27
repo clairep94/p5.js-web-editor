@@ -144,7 +144,6 @@
     "@types/nodemailer": "^7.0.1",
     "@types/nodemailer-mailgun-transport": "^1.4.6",
     "@types/passport": "^1.0.17",
-    "@types/passport": "^1.0.17",
     "@types/react": "^16.14.0",
     "@types/react-dom": "^16.9.25",
     "@types/react-router-dom": "^5.3.3",
@@ -306,10 +305,12 @@
     "stacktrace-js": "^2.0.2",
     "styled-components": "^5.3.0",
     "styled-theming": "^2.2.0",
+    "swagger-ui-express": "^5.0.1",
     "url": "^0.11.0",
     "uuid": "^8.3.2",
     "webpack": "^5.94.0",
     "webpack-dev-middleware": "^5.3.4",
-    "xhr": "^2.6.0"
+    "xhr": "^2.6.0",
+    "yamljs": "^0.3.0"
   }
 }
