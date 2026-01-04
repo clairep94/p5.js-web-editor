@@ -174,8 +174,8 @@
 .nav__dropdown {
   @extend %dropdown-open-left;
   display: none;
-  max-height: 60vh;
-  overflow-y: auto;
+  max-height: none;
+  overflow: visible;
   .nav__item--open & {
     display: flex;
   }
@@ -253,6 +253,7 @@
 .nav__keyboard-shortcut {
   font-size: #{math.div(12, $base-font-size)}rem;
   font-family: Inconsololata, monospace;
+  margin-left: auto;
 
   @include themify() {
     color: getThemifyVariable('keyboard-shortcut-color');
