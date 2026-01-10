@@ -33,8 +33,7 @@ export default function IDEOverlays() {
     preferencesIsVisible,
     keyboardShortcutVisible,
     shareModalVisible,
-    errorType,
-    previousPath
+    errorType
   } = useSelector((state) => state.ide);
 
   return (
@@ -51,7 +50,6 @@ export default function IDEOverlays() {
       {location.pathname === '/feedback' && (
         <Overlay
           title={t('IDEView.SubmitFeedback')}
-          previousPath={previousPath}
           ariaLabel={t('IDEView.SubmitFeedbackARIA')}
         >
           <Feedback />
@@ -61,7 +59,6 @@ export default function IDEOverlays() {
         <Overlay
           ariaLabel={t('IDEView.AddCollectionARIA')}
           title={t('IDEView.AddCollectionTitle')}
-          previousPath={previousPath}
           actions={<CollectionSearchbar />}
           isFixedHeight
         >
