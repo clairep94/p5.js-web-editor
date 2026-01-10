@@ -4,10 +4,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import { useTranslation } from 'react-i18next';
 import ReactMarkdown from 'react-markdown';
-import PropTypes from 'prop-types';
 import PlusIcon from '../../../../images/plus.svg';
 import MinusIcon from '../../../../images/minus.svg';
 import beepUrl from '../../../../sounds/audioAlert.mp3';
+import type { RootState } from '../../../../reducers';
 import {
   setTheme,
   setAutosave,
@@ -29,8 +29,9 @@ import { CmControllerContext } from '../../pages/IDEView';
 import Stars from '../Stars';
 import Admonition from '../Admonition';
 import TextArea from '../TextArea';
+import { AppThemeOptions } from '../../../../../common/types';
 
-export default function Preferences() {
+export function Preferences() {
   const { t } = useTranslation();
 
   const dispatch = useDispatch();
@@ -47,41 +48,45 @@ export default function Preferences() {
     theme,
     autocloseBracketsQuotes,
     autocompleteHinter
-  } = useSelector((state) => state.preferences);
+  } = useSelector((state: RootState) => state.preferences);
 
-  const [state, setState] = useState({ fontSize });
+  const [state, setState] = useState<{
+    fontSize: string | number;
+  }>({ fontSize });
   const { versionInfo, indexID } = useP5Version();
   const cmRef = useContext(CmControllerContext);
-  const [showStars, setShowStars] = useState(null);
-  const timerRef = useRef(null);
-  const pickerRef = useRef(null);
-  const onChangeVersion = (version) => {
+  const [showStars, setShowStars] = useState<{ top: number; left: number }>();
+  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const pickerRef = useRef<HTMLDivElement | null>(null);
+  const onChangeVersion = (version: string) => {
     const shouldShowStars = majorVersion(version) === '2';
     const box = pickerRef.current?.getBoundingClientRect();
     if (shouldShowStars) {
       setShowStars({ left: box?.left || 0, top: box?.top || 0 });
       clearTimeout(timerRef.current);
-      timerRef.current = setTimeout(() => setShowStars(null), 3000);
+      timerRef.current = setTimeout(() => setShowStars(undefined), 3000);
     }
   };
 
-  function onFontInputChange(event) {
+  function onFontInputChange(event: React.ChangeEvent<HTMLInputElement>) {
     const INTEGER_REGEX = /^[0-9\b]+$/;
     if (event.target.value === '' || INTEGER_REGEX.test(event.target.value)) {
       setState({
-        fontSize: event.target.value
+        fontSize: event.target.value // sets to string while user is typing but has not submitted
       });
     }
   }
 
-  function handleFontSize(value) {
+  function handleFontSize(value: RootState['preferences']['fontSize']) {
     setState({ fontSize: value });
     dispatch(setFontSize(value));
   }
 
-  function onFontInputSubmit(event) {
-    event.preventDefault();
-    let value = parseInt(state.fontSize, 10);
+  const parsedFontSizeValue = useMemo(() => {
+    let value =
+      typeof state.fontSize === 'number'
+        ? state.fontSize
+        : parseInt(state.fontSize, 10);
     if (Number.isNaN(value)) {
       value = 16;
     }
@@ -91,56 +96,59 @@ export default function Preferences() {
     if (value < 8) {
       value = 8;
     }
-    handleFontSize(value);
+    return value;
+  }, [state.fontSize]);
+
+  function onFontInputSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    handleFontSize(parsedFontSizeValue);
   }
 
   function decreaseFontSize() {
-    const newValue = Number(state.fontSize) - 2;
+    const newValue = parsedFontSizeValue - 2;
     handleFontSize(newValue);
   }
 
   function increaseFontSize() {
-    const newValue = Number(state.fontSize) + 2;
+    const newValue = parsedFontSizeValue + 2;
     handleFontSize(newValue);
   }
 
-  function changeTab(index) {
+  function changeTab(index: RootState['preferences']['tabIndex']) {
     dispatch(setPreferencesTab(index));
   }
 
-  const fontSizeInputRef = useRef(null);
+  const fontSizeInputRef = useRef<HTMLInputElement>(null);
 
-  const updateHTML = (src) => {
+  const updateHTML = (src: string) => {
     dispatch(updateFileContent(indexID, src));
     cmRef.current?.updateFileContent(indexID, src);
   };
 
   const markdownComponents = useMemo(() => {
     // eslint-disable-next-line react/no-unstable-nested-components
-    const ExternalLink = ({ children, ...props }) => (
+    const ExternalLink = ({
+      children,
+      ...props
+    }: React.HTMLAttributes<HTMLAnchorElement> & {
+      children?: React.ReactNode;
+    }) => (
       <a {...props} target="_blank">
         {children}
       </a>
     );
-    ExternalLink.propTypes = {
-      children: PropTypes.node
-    };
-    ExternalLink.defaultProps = {
-      children: undefined
-    };
 
     // eslint-disable-next-line react/no-unstable-nested-components
-    const Paragraph = ({ children, ...props }) => (
+    const Paragraph = ({
+      children,
+      ...props
+    }: React.HTMLAttributes<HTMLParagraphElement> & {
+      children?: React.ReactNode;
+    }) => (
       <p className="preference__paragraph" {...props}>
         {children}
       </p>
     );
-    Paragraph.propTypes = {
-      children: PropTypes.node
-    };
-    Paragraph.defaultProps = {
-      children: undefined
-    };
 
     return {
       a: ExternalLink,
@@ -177,7 +185,7 @@ export default function Preferences() {
             <fieldset className="preference__options">
               <input
                 type="radio"
-                onChange={() => dispatch(setTheme('light'))}
+                onChange={() => dispatch(setTheme(AppThemeOptions.LIGHT))}
                 aria-label={t('Preferences.LightThemeARIA')}
                 name="light theme"
                 id="light-theme-on"
@@ -190,7 +198,7 @@ export default function Preferences() {
               </label>
               <input
                 type="radio"
-                onChange={() => dispatch(setTheme('dark'))}
+                onChange={() => dispatch(setTheme(AppThemeOptions.DARK))}
                 aria-label={t('Preferences.DarkThemeARIA')}
                 name="dark theme"
                 id="dark-theme-on"
@@ -203,7 +211,7 @@ export default function Preferences() {
               </label>
               <input
                 type="radio"
-                onChange={() => dispatch(setTheme('contrast'))}
+                onChange={() => dispatch(setTheme(AppThemeOptions.CONTRAST))}
                 aria-label={t('Preferences.HighContrastThemeARIA')}
                 name="high contrast theme"
                 id="high-contrast-theme-on"
