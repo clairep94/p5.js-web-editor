@@ -14,7 +14,7 @@ import * as ConsoleActions from '../actions/console';
 import { useDidUpdate } from '../hooks/custom-hooks';
 import useHandleMessageEvent from '../hooks/useHandleMessageEvent';
 import { listen } from '../../../utils/dispatcher';
-import getConsoleFeedStyle from '../utils/consoleStyles';
+import { getConsoleFeedStyle } from '../utils/consoleStyles';
 
 const Console = () => {
   const { t } = useTranslation();
