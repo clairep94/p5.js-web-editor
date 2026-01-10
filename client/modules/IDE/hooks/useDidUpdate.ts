@@ -1,7 +1,5 @@
 import React, { useEffect, useRef } from 'react';
 
-export const noop = () => {};
-
 export const useDidUpdate = (
   callback: () => void,
   deps: React.DependencyList
