@@ -11,7 +11,7 @@ import DownArrowIcon from '../../../images/down-arrow.svg';
 
 import * as IDEActions from '../actions/ide';
 import * as ConsoleActions from '../actions/console';
-import { useDidUpdate } from '../hooks/custom-hooks';
+import { useDidUpdate } from '../hooks';
 import useHandleMessageEvent from '../hooks/useHandleMessageEvent';
 import { listen } from '../../../utils/dispatcher';
 import { getConsoleFeedStyle } from '../utils/consoleStyles';
