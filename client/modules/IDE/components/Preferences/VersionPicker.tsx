@@ -4,15 +4,15 @@ import { useTranslation } from 'react-i18next';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
-import { prop } from '../../../theme';
-import { useP5Version } from '../hooks/useP5Version';
-import { p5Versions } from '../../../../common/p5Versions';
-import { MenuItem } from '../../../components/Dropdown/MenuItem';
-import { DropdownMenu } from '../../../components/Dropdown/DropdownMenu';
-import { updateFileContent } from '../actions/files';
+import { prop } from '../../../../theme';
+import { useP5Version } from '../../hooks/useP5Version';
+import { p5Versions } from '../../../../../common/p5Versions';
+import { MenuItem } from '../../../../components/Dropdown/MenuItem';
+import { DropdownMenu } from '../../../../components/Dropdown/DropdownMenu';
+import { updateFileContent } from '../../actions/files';
 // eslint-disable-next-line import/no-cycle
-import { CmControllerContext } from '../pages/IDEView';
-import { DropdownArrowIcon } from '../../../common/icons';
+import { CmControllerContext } from '../../pages/IDEView';
+import { DropdownArrowIcon } from '../../../../common/icons';
 
 const VersionPickerButton = styled.div`
   display: flex;
