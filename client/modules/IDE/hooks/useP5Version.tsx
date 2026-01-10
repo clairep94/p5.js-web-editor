@@ -20,7 +20,25 @@ export const p5SoundURLOld = p5SoundURLOldTemplate.replace(
 );
 export const p5URL = p5URLTemplate.replace('$VERSION', currentP5Version);
 
-const P5VersionContext = React.createContext({});
+const P5VersionContext = React.createContext<{
+  indexID: string;
+  versionInfo: {
+    version: string;
+    isVersion2: boolean;
+    minified: boolean;
+    replaceVersion: (newVersion: string) => void;
+    p5Sound: boolean;
+    setP5Sound: (enabled: boolean) => string;
+    setP5SoundURL: (url: string) => string;
+    p5SoundURL: string | null;
+    p5PreloadAddon: boolean;
+    setP5PreloadAddon: (enabled: boolean) => string;
+    p5ShapesAddon: boolean;
+    setP5ShapesAddon: (enabled: boolean) => string;
+    p5DataAddon: boolean;
+    setP5DataAddon: (enabled: boolean) => string;
+  } | null;
+} | null>(null);
 
 export function P5VersionProvider(props: { children: React.ReactNode }) {
   const files = useSelector((state: RootState) => state.files);
@@ -189,7 +207,7 @@ export function P5VersionProvider(props: { children: React.ReactNode }) {
         p5Sound: !!p5SoundNode,
         setP5Sound,
         setP5SoundURL,
-        p5SoundURL: p5SoundNode?.getAttribute('src'),
+        p5SoundURL: p5SoundNode?.getAttribute('src') ?? null,
         p5PreloadAddon: !!p5PreloadAddonNode,
         setP5PreloadAddon,
         p5ShapesAddon: !!p5ShapesAddonNode,
@@ -212,8 +230,11 @@ export function P5VersionProvider(props: { children: React.ReactNode }) {
 }
 
 export function useP5Version() {
-  if (!P5VersionContext) {
+  const context = useContext(P5VersionContext);
+
+  if (!context) {
     throw new Error('useP5Version must be used within a P5VersionProvider');
   }
-  return useContext(P5VersionContext);
+
+  return context;
 }
