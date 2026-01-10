@@ -33,10 +33,6 @@ export const App = ({ children }: { children?: React.ReactNode }) => {
     dispatch(setLanguage(language, { persistPreference: false }));
   }, [language]);
 
-  // TODO: do we actually need this? - Linda
-  const [isMounted, setIsMounted] = useState(false);
-  useEffect(() => setIsMounted(true), []);
-
   const previousLocationRef = useRef(location);
   useEffect(() => {
     const prevLocation = previousLocationRef.current;
@@ -54,7 +50,7 @@ export const App = ({ children }: { children?: React.ReactNode }) => {
   return (
     <div className="app">
       <CookieConsent hide={hide} />
-      {isMounted && showReduxDevTools() && <DevTools />}
+      {showReduxDevTools() && <DevTools />}
       {children}
     </div>
   );
