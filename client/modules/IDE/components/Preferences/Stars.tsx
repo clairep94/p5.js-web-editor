@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import AsteriskIcon from '../../../images/p5-asterisk.svg';
+import AsteriskIcon from '../../../../images/p5-asterisk.svg';
 
 export const Stars = ({ top, left }: { top: number; left: number }) => {
   const stars = useMemo(() => {
