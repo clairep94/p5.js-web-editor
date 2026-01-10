@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 
 export const useDidUpdate = (
   callback: () => void,
-  deps: React.DependencyList
+  deps: React.DependencyList = []
 ) => {
   const hasMount = useRef(false);
 
