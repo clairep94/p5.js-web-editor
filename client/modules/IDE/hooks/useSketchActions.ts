@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
@@ -27,7 +28,7 @@ export const useSketchActions = () => {
   const { t } = useTranslation();
   const params = useParams<{ username: string }>();
 
-  function newSketch() {
+  const newSketch = useCallback(() => {
     if (!unsavedChanges) {
       dispatch(showToast('Toast.OpenedNewSketch'));
       dispatch(newProject());
@@ -35,35 +36,49 @@ export const useSketchActions = () => {
       dispatch(showToast('Toast.OpenedNewSketch'));
       dispatch(newProject());
     }
-  }
+  }, [dispatch, showToast, newProject, unsavedChanges]);
 
-  function saveSketch(cmController?: { getContent: () => null | undefined }) {
-    if (authenticated) {
-      dispatch(saveProject(cmController?.getContent()));
-    } else {
-      dispatch(showErrorModal('forceAuthentication'));
-    }
-  }
+  const saveSketch = useCallback(
+    (cmController: { getContent: () => null | undefined }) => {
+      if (authenticated) {
+        dispatch(saveProject(cmController.getContent()));
+      } else {
+        dispatch(showErrorModal('forceAuthentication'));
+      }
+    },
+    [dispatch, saveProject, showErrorModal, authenticated]
+  );
 
-  function downloadSketch() {
+  const downloadSketch = useCallback(() => {
     if (authenticated && user.id === project.owner.id) {
       dispatch(autosaveProject());
       exportProjectAsZip(project.id);
     }
-  }
+  }, [
+    dispatch,
+    authenticated,
+    autosaveProject,
+    user,
+    project,
+    autosaveProject,
+    exportProjectAsZip
+  ]);
 
-  function shareSketch() {
+  const shareSketch = useCallback(() => {
     const { username } = params;
     dispatch(showShareModal(project.id, project.name, username));
-  }
+  }, [params, dispatch, showShareModal, project]);
 
-  function changeSketchName(name: string) {
-    const newProjectName = name.trim();
-    if (newProjectName.length > 0) {
-      dispatch(setProjectName(newProjectName));
-      if (project.id) dispatch(saveProject());
-    }
-  }
+  const changeSketchName = useCallback(
+    (name: string) => {
+      const newProjectName = name.trim();
+      if (newProjectName.length > 0) {
+        dispatch(setProjectName(newProjectName));
+        if (project.id) dispatch(saveProject());
+      }
+    },
+    [dispatch, setProjectName, project.id, saveProject]
+  );
 
   return {
     newSketch,
