@@ -26,7 +26,7 @@ import { p5SoundURL } from '../../../../../common/p5URLs';
 import VersionPicker from '../VersionPicker';
 import { updateFileContent } from '../../actions/files';
 import { CmControllerContext } from '../../pages/IDEView';
-import Stars from '../Stars';
+import { Stars } from './Stars';
 import Admonition from '../Admonition';
 import TextArea from '../TextArea';
 import { AppThemeOptions } from '../../../../../common/types';
