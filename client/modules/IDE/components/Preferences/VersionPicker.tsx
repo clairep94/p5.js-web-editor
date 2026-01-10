@@ -1,7 +1,6 @@
 import React, { useCallback, useContext } from 'react';
 import { useDispatch } from 'react-redux';
 import { useTranslation } from 'react-i18next';
-import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 import { prop } from '../../../../theme';
@@ -43,88 +42,81 @@ const VersionDropdownMenu = styled(DropdownMenu)`
   margin-bottom: 0.5rem;
 `;
 
-const VersionPicker = React.forwardRef(({ onChangeVersion }, ref) => {
-  const { indexID, versionInfo } = useP5Version();
-  const { t } = useTranslation();
-  const dispatch = useDispatch();
-  const cmRef = useContext(CmControllerContext);
-  const dispatchReplaceVersion = useCallback(
-    (version) => {
-      if (!indexID || !versionInfo) return;
-      if (onChangeVersion) {
-        onChangeVersion(version);
-      }
-      const src = versionInfo.replaceVersion(version);
-      dispatch(updateFileContent(indexID, src));
-      cmRef.current?.updateFileContent(indexID, src);
-    },
-    [indexID, versionInfo, cmRef, onChangeVersion]
-  );
-
-  if (!versionInfo) {
-    return (
-      <VersionPickerButton>
-        <VersionPickerText>
-          {t('Toolbar.CustomLibraryVersion')}
-        </VersionPickerText>
-        <VersionPickerArrow>
-          <DropdownArrowIcon />
-        </VersionPickerArrow>
-      </VersionPickerButton>
+export const VersionPicker = React.forwardRef(
+  ({ onChangeVersion }: { onChangeVersion: (next: string) => void }, ref) => {
+    const { indexID, versionInfo } = useP5Version();
+    const { t } = useTranslation();
+    const dispatch = useDispatch();
+    const cmRef = useContext(CmControllerContext);
+    const dispatchReplaceVersion = useCallback(
+      (version) => {
+        if (!indexID || !versionInfo) return;
+        if (onChangeVersion) {
+          onChangeVersion(version);
+        }
+        const src = versionInfo.replaceVersion(version);
+        dispatch(updateFileContent(indexID, src));
+        cmRef.current?.updateFileContent(indexID, src);
+      },
+      [indexID, versionInfo, cmRef, onChangeVersion]
     );
-  }
 
-  return (
-    <VersionDropdownMenu
-      className="versionPicker"
-      aria-label="Select p5.js version"
-      anchor={
-        <VersionPickerButton ref={ref}>
+    if (!versionInfo) {
+      return (
+        <VersionPickerButton>
           <VersionPickerText>
-            {versionInfo
-              ? (() => {
-                  const current = p5Versions.find((v) =>
-                    typeof v === 'string'
-                      ? v === versionInfo.version
-                      : v.version === versionInfo.version
-                  );
-                  if (!current) return versionInfo.version;
-                  if (typeof current === 'string') return current;
-                  return `${current.version} ${current.label}`;
-                })()
-              : t('Toolbar.CustomLibraryVersion')}
+            {t('Toolbar.CustomLibraryVersion')}
           </VersionPickerText>
           <VersionPickerArrow>
             <DropdownArrowIcon />
           </VersionPickerArrow>
         </VersionPickerButton>
-      }
-      align="left"
-      maxHeight="50vh"
-    >
-      {p5Versions.map((item) => {
-        const version = typeof item === 'string' ? item : item.version;
-        const label =
-          typeof item === 'string' ? item : `${item.version} ${item.label}`;
+      );
+    }
 
-        return (
-          <MenuItem
-            key={version}
-            onClick={() => dispatchReplaceVersion(version)}
-          >
-            {label}
-          </MenuItem>
-        );
-      })}
-    </VersionDropdownMenu>
-  );
-});
+    return (
+      <VersionDropdownMenu
+        className="versionPicker"
+        aria-label="Select p5.js version"
+        anchor={
+          <VersionPickerButton ref={ref}>
+            <VersionPickerText>
+              {versionInfo
+                ? (() => {
+                    const current = p5Versions.find((v) =>
+                      typeof v === 'string'
+                        ? v === versionInfo.version
+                        : v.version === versionInfo.version
+                    );
+                    if (!current) return versionInfo.version;
+                    if (typeof current === 'string') return current;
+                    return `${current.version} ${current.label}`;
+                  })()
+                : t('Toolbar.CustomLibraryVersion')}
+            </VersionPickerText>
+            <VersionPickerArrow>
+              <DropdownArrowIcon />
+            </VersionPickerArrow>
+          </VersionPickerButton>
+        }
+        align="left"
+        maxHeight="50vh"
+      >
+        {p5Versions.map((item) => {
+          const version = typeof item === 'string' ? item : item.version;
+          const label =
+            typeof item === 'string' ? item : `${item.version} ${item.label}`;
 
-VersionPicker.propTypes = {
-  onChangeVersion: PropTypes.func
-};
-VersionPicker.defaultProps = {
-  onChangeVersion: undefined
-};
-
-export default VersionPicker;
+          return (
+            <MenuItem
+              key={version}
+              onClick={() => dispatchReplaceVersion(version)}
+            >
+              {label}
+            </MenuItem>
+          );
+        })}
+      </VersionDropdownMenu>
+    );
+  }
+);
