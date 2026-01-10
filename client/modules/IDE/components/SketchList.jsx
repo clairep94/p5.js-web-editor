@@ -12,7 +12,7 @@ import * as ToastActions from '../actions/toast';
 import * as SortingActions from '../actions/sorting';
 import getSortedSketches from '../selectors/projects';
 import { Loader } from '../../App/components/Loader';
-import Overlay from '../../App/components/Overlay';
+import { Overlay } from '../../App/components/Overlay';
 import AddToCollectionList from './AddToCollectionList';
 import ArrowUpIcon from '../../../images/sort-arrow-up.svg';
 import ArrowDownIcon from '../../../images/sort-arrow-down.svg';
