@@ -1,10 +1,9 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
-import { CopyIcon } from '../../../common/icons';
-import { showToast } from '../actions/toast';
+import { CopyIcon } from '../../../../common/icons';
+import { showToast } from '../../actions/toast';
 
 const TextAreaWrapper = styled.div`
   position: relative;
@@ -16,7 +15,13 @@ const CornerButton = styled.button`
   right: 0.5rem;
 `;
 
-export default function TextArea({ src, className }) {
+export function TextArea({
+  src,
+  className
+}: {
+  src: string;
+  className?: string;
+}) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const copyTextToClipboard = async () => {
@@ -37,12 +42,3 @@ export default function TextArea({ src, className }) {
     </TextAreaWrapper>
   );
 }
-
-TextArea.propTypes = {
-  src: PropTypes.string.isRequired,
-  className: PropTypes.string
-};
-
-TextArea.defaultProps = {
-  className: undefined
-};
