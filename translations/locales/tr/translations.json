@@ -589,10 +589,6 @@
     "TableText": "Tablo Metni",
     "Sound": "Ses"
   },
-  "PreferenceCreators": {
-    "On": "Açık",
-    "Off": "Kapalı"
-  },
   "MobileDashboardView": {
     "Examples": "Örnekler",
     "Sketches": "Eskizler",

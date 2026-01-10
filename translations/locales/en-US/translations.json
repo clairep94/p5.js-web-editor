@@ -655,10 +655,6 @@
     "Preferences": "Preferences",
     "Language": "Language"
   },
-  "PreferenceCreators": {
-    "On": "On",
-    "Off": "Off"
-  },
   "MobileDashboardView": {
     "Examples": "Examples",
     "Sketches": "Sketches",

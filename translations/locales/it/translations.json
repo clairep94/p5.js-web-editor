@@ -595,10 +595,6 @@
     "TableText": "Testo in tabella",
     "Sound": "Suoni"
   },
-  "PreferenceCreators": {
-    "On": "On",
-    "Off": "Off"
-  },
   "MobileDashboardView": {
     "Examples": "Esempi",
     "Sketches": "Sketch",

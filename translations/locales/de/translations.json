@@ -583,10 +583,6 @@
     "TableText": "Tabellarisch",
     "Sound": "Sound"
   },
-  "PreferenceCreators": {
-    "On": "An",
-    "Off": "Aus"
-  },
   "MobileDashboardView": {
     "Examples":  "Beispiele",
     "Sketches":  "Sketche",
