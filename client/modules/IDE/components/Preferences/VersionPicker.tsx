@@ -13,7 +13,7 @@ import { updateFileContent } from '../../actions/files';
 import { CmControllerContext } from '../../pages/IDEView';
 import { DropdownArrowIcon } from '../../../../common/icons';
 
-const VersionPickerButton = styled.div`
+const VersionPickerButton = styled.div<{ ref: React.ForwardedRef<unknown> }>`
   display: flex;
   border: 1px solid ${prop('Modal.border')};
   background: ${prop('backgroundColor')};
