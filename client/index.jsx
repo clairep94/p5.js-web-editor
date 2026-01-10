@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import browserHistory from './browserHistory';
 import { setupStore } from './store';
 import Routing from './routes';
-import ThemeProvider from './modules/App/components/ThemeProvider';
+import { ThemeProvider } from './modules/App/components/ThemeProvider';
 import Loader from './modules/App/components/loader';
 import './i18n';
 import { SkipLink } from './components/SkipLink';

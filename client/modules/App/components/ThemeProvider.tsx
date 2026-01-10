@@ -1,18 +1,12 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
-import { ThemeProvider } from 'styled-components';
+import { ThemeProvider as TProvider } from 'styled-components';
 import theme from '../../../theme';
+import type { RootState } from '../../../reducers';
 
-const Provider = ({ children }) => {
-  const currentTheme = useSelector((state) => state.preferences.theme);
-  return (
-    <ThemeProvider theme={{ ...theme[currentTheme] }}>{children}</ThemeProvider>
+export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
+  const currentTheme = useSelector(
+    (state: RootState) => state.preferences.theme
   );
+  return <TProvider theme={{ ...theme[currentTheme] }}>{children}</TProvider>;
 };
-
-Provider.propTypes = {
-  children: PropTypes.node.isRequired
-};
-
-export default Provider;
