@@ -12,7 +12,7 @@ import * as CollectionsActions from '../../actions/collections';
 import * as ToastActions from '../../actions/toast';
 import * as SortingActions from '../../actions/sorting';
 import getSortedCollections from '../../selectors/collections';
-import Loader from '../../../App/components/loader';
+import { Loader } from '../../../App/components/Loader';
 import Overlay from '../../../App/components/Overlay';
 import AddToCollectionSketchList from '../AddToCollectionSketchList';
 import { SketchSearchbar } from '../Searchbar';
