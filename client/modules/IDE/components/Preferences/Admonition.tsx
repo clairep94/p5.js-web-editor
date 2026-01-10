@@ -1,7 +1,12 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 
-export default function Admonition({ children, title }) {
+export function Admonition({
+  children,
+  title
+}: {
+  title: string;
+  children?: React.ReactNode;
+}) {
   return (
     <div className="admonition">
       <p className="admonition__title">
@@ -11,12 +16,3 @@ export default function Admonition({ children, title }) {
     </div>
   );
 }
-
-Admonition.propTypes = {
-  title: PropTypes.string.isRequired,
-  children: PropTypes.node
-};
-
-Admonition.defaultProps = {
-  children: undefined
-};
