@@ -1,26 +1,37 @@
-import PropTypes from 'prop-types';
 import React, { useCallback, useRef } from 'react';
 import MediaQuery from 'react-responsive';
 import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useModalClose } from '../../../common/useModalClose';
+import type { RootState } from '../../../reducers';
 
 import ExitIcon from '../../../images/exit.svg';
 
-const Overlay = ({
+type OverlayProps = {
+  children?: React.ReactElement;
+  actions?: React.ReactElement;
+  closeOverlay?: () => void;
+  title?: string;
+  ariaLabel?: string;
+  isFixedHeight?: boolean;
+};
+
+export const Overlay = ({
   actions,
-  ariaLabel,
+  ariaLabel = 'modal',
   children,
   closeOverlay,
-  isFixedHeight,
-  title
-}) => {
+  isFixedHeight = false,
+  title = 'Modal'
+}: OverlayProps) => {
   const { t } = useTranslation();
 
-  const previousPath = useSelector((state) => state.ide.previousPath);
+  const previousPath = useSelector(
+    (state: RootState) => state.ide.previousPath
+  );
 
-  const ref = useRef(null);
+  const ref = useRef<HTMLElement>(null);
 
   const browserHistory = useHistory();
 
@@ -29,7 +40,7 @@ const Overlay = ({
     if (!node) return;
     // Only close if it is the last (and therefore the topmost overlay)
     const overlays = document.getElementsByClassName('overlay');
-    if (node.parentElement.parentElement !== overlays[overlays.length - 1])
+    if (node.parentElement?.parentElement !== overlays[overlays.length - 1])
       return;
 
     if (!closeOverlay) {
@@ -76,23 +87,3 @@ const Overlay = ({
     </div>
   );
 };
-
-Overlay.propTypes = {
-  children: PropTypes.element,
-  actions: PropTypes.element,
-  closeOverlay: PropTypes.func,
-  title: PropTypes.string,
-  ariaLabel: PropTypes.string,
-  isFixedHeight: PropTypes.bool
-};
-
-Overlay.defaultProps = {
-  children: null,
-  actions: null,
-  title: 'Modal',
-  closeOverlay: null,
-  ariaLabel: 'modal',
-  isFixedHeight: false
-};
-
-export default Overlay;
