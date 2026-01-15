@@ -10,14 +10,13 @@ import PreviewFrame from '../components/PreviewFrame';
 import Console from '../components/Console';
 import Toast from '../components/Toast';
 import { updateFileContent } from '../actions/files';
-
 import {
   autosaveProject,
   clearPersistedState,
   getProject
 } from '../actions/project';
 import { getIsUserOwner } from '../selectors/users';
-import RootPage from '../../../components/RootPage';
+import { RootPage } from '../../../components/RootPage';
 import Header from '../components/Header';
 import FloatingActionButton from '../components/FloatingActionButton';
 import Editor from '../components/Editor';
@@ -27,6 +26,15 @@ import {
 } from '../components/Editor/MobileEditor';
 import IDEOverlays from '../components/IDEOverlays';
 import useIsMobile from '../hooks/useIsMobile';
+import Banner from '../components/Banner';
+import { P5VersionProvider } from '../hooks/useP5Version';
+
+const BANNER_DISMISS_KEY = 'bannerLastDismissedAt';
+const BANNER_COOLDOWN_MINUTES = 30;
+
+function minutesSince(timestamp) {
+  return (Date.now() - timestamp) / (1000 * 60);
+}
 
 function getTitle(project) {
   const { id } = project;
@@ -96,6 +104,7 @@ const IDEView = () => {
   const project = useSelector((state) => state.project);
   const isUserOwner = useSelector(getIsUserOwner);
   const dispatch = useDispatch();
+
   const { t } = useTranslation();
 
   const params = useParams();
@@ -104,6 +113,7 @@ const IDEView = () => {
   const [sidebarSize, setSidebarSize] = useState(160);
   const [isOverlayVisible, setIsOverlayVisible] = useState(false);
   const [MaxSize, setMaxSize] = useState(window.innerWidth);
+  const [displayBanner, setDisplayBanner] = useState(false); // set to true if in use
 
   const cmRef = useRef({});
 
@@ -148,6 +158,7 @@ const IDEView = () => {
       }
     };
   }, [shouldAutosave, dispatch]);
+
   useEffect(() => {
     const updateInnerWidth = (e) => {
       setMaxSize(e.target.innerWidth);
@@ -160,6 +171,29 @@ const IDEView = () => {
     };
   }, [setMaxSize]);
 
+  // checks how long banner has been closed for to hide banner
+  useEffect(() => {
+    const stored = window.localStorage.getItem(BANNER_DISMISS_KEY);
+    const lastClosedAt = stored ? Number(stored) : null;
+
+    if (!lastClosedAt) {
+      setDisplayBanner(false); // set to true if in use
+      return;
+    }
+
+    if (minutesSince(lastClosedAt) >= BANNER_COOLDOWN_MINUTES) {
+      setDisplayBanner(false); // set to true if in use
+    } else {
+      setDisplayBanner(false);
+    }
+  }, []);
+
+  const handleBannerClose = () => {
+    setDisplayBanner(false);
+
+    window.localStorage.setItem(BANNER_DISMISS_KEY, String(Date.now()));
+  };
+
   const consoleCollapsedSize = 29;
   const currentConsoleSize = ide.consoleIsExpanded
     ? consoleSize
@@ -170,118 +204,123 @@ const IDEView = () => {
       <Helmet>
         <title>{getTitle(project)}</title>
       </Helmet>
+      {displayBanner && <Banner onClose={handleBannerClose} />}
       <IDEKeyHandlers getContent={() => cmRef.current?.getContent()} />
       <WarnIfUnsavedChanges />
       <Toast />
-      <CmControllerContext.Provider value={cmRef}>
-        <Header syncFileContent={syncFileContent} />
-      </CmControllerContext.Provider>
-      {isMobile ? (
-        <>
-          <FloatingActionButton
-            syncFileContent={syncFileContent}
-            offsetBottom={ide.isPlaying ? currentConsoleSize : 0}
-          />
-          <PreviewWrapper show={ide.isPlaying}>
-            <SplitPane
-              style={{ position: 'static' }}
-              split="horizontal"
-              primary="second"
-              size={currentConsoleSize}
-              minSize={consoleCollapsedSize}
-              onChange={(size) => {
-                setConsoleSize(size);
-                setIsOverlayVisible(true);
-              }}
-              onDragFinished={() => {
-                setIsOverlayVisible(false);
-              }}
-              allowResize={ide.consoleIsExpanded}
-              className="editor-preview-subpanel"
-            >
-              <PreviewFrame
-                fullView
-                hide={!ide.isPlaying}
-                cmController={cmRef.current}
-                isOverlayVisible={isOverlayVisible}
-              />
-              <Console />
-            </SplitPane>
-          </PreviewWrapper>
-          <EditorSidebarWrapper show={!ide.isPlaying}>
-            <Sidebar />
-            <Editor
-              provideController={(ctl) => {
-                cmRef.current = ctl;
-              }}
+      <P5VersionProvider>
+        <CmControllerContext.Provider value={cmRef}>
+          <Header syncFileContent={syncFileContent} />
+        </CmControllerContext.Provider>
+        {isMobile ? (
+          <>
+            <FloatingActionButton
+              syncFileContent={syncFileContent}
+              offsetBottom={ide.isPlaying ? currentConsoleSize : 0}
             />
-          </EditorSidebarWrapper>
-        </>
-      ) : (
-        <main className="editor-preview-container">
-          <SplitPane
-            split="vertical"
-            size={ide.sidebarIsExpanded ? sidebarSize : 20}
-            onChange={(size) => {
-              setSidebarSize(size);
-            }}
-            allowResize={ide.sidebarIsExpanded}
-            minSize={150}
-          >
-            <Sidebar />
-            <SplitPane
-              split="vertical"
-              maxSize={MaxSize * 0.965}
-              defaultSize="50%"
-              onChange={() => {
-                setIsOverlayVisible(true);
-              }}
-              onDragFinished={() => {
-                setIsOverlayVisible(false);
-              }}
-              resizerStyle={{
-                borderLeftWidth: '2px',
-                borderRightWidth: '2px',
-                width: '2px',
-                margin: '0px 0px'
-              }}
-            >
+            <PreviewWrapper show={ide.isPlaying}>
               <SplitPane
+                style={{ position: 'static' }}
                 split="horizontal"
                 primary="second"
                 size={currentConsoleSize}
                 minSize={consoleCollapsedSize}
                 onChange={(size) => {
                   setConsoleSize(size);
+                  setIsOverlayVisible(true);
+                }}
+                onDragFinished={() => {
+                  setIsOverlayVisible(false);
                 }}
                 allowResize={ide.consoleIsExpanded}
                 className="editor-preview-subpanel"
               >
-                <Editor
-                  provideController={(ctl) => {
-                    cmRef.current = ctl;
-                  }}
+                <PreviewFrame
+                  fullView
+                  hide={!ide.isPlaying}
+                  cmController={cmRef.current}
+                  isOverlayVisible={isOverlayVisible}
                 />
                 <Console />
               </SplitPane>
-              <section className="preview-frame-holder">
-                <header className="preview-frame__header">
-                  <h2 className="preview-frame__title">
-                    {t('Toolbar.Preview')}
-                  </h2>
-                </header>
-                <div className="preview-frame__content">
-                  <PreviewFrame
-                    cmController={cmRef.current}
-                    isOverlayVisible={isOverlayVisible}
+            </PreviewWrapper>
+            <EditorSidebarWrapper show={!ide.isPlaying}>
+              <Sidebar />
+              <Editor
+                provideController={(ctl) => {
+                  cmRef.current = ctl;
+                }}
+              />
+            </EditorSidebarWrapper>
+          </>
+        ) : (
+          <main className="editor-preview-container">
+            <SplitPane
+              split="vertical"
+              size={ide.sidebarIsExpanded ? sidebarSize : 20}
+              onChange={(size) => {
+                setSidebarSize(size);
+              }}
+              allowResize={ide.sidebarIsExpanded}
+              minSize={150}
+            >
+              <Sidebar />
+              <SplitPane
+                split="vertical"
+                maxSize={MaxSize * 0.965}
+                defaultSize="50%"
+                onChange={() => {
+                  setIsOverlayVisible(true);
+                }}
+                onDragFinished={() => {
+                  setIsOverlayVisible(false);
+                }}
+                resizerStyle={{
+                  borderLeftWidth: '2px',
+                  borderRightWidth: '2px',
+                  width: '2px',
+                  margin: '0px 0px'
+                }}
+              >
+                <SplitPane
+                  split="horizontal"
+                  primary="second"
+                  size={currentConsoleSize}
+                  minSize={consoleCollapsedSize}
+                  onChange={(size) => {
+                    setConsoleSize(size);
+                  }}
+                  allowResize={ide.consoleIsExpanded}
+                  className="editor-preview-subpanel"
+                >
+                  <Editor
+                    provideController={(ctl) => {
+                      cmRef.current = ctl;
+                    }}
                   />
-                </div>
-              </section>
+                  <Console />
+                </SplitPane>
+                <section className="preview-frame-holder">
+                  <header className="preview-frame__header">
+                    <h2 className="preview-frame__title">
+                      {t('Toolbar.Preview')}
+                    </h2>
+                  </header>
+                  <div className="preview-frame__content">
+                    <PreviewFrame
+                      cmController={cmRef.current}
+                      isOverlayVisible={isOverlayVisible}
+                    />
+                  </div>
+                </section>
+              </SplitPane>
             </SplitPane>
-          </SplitPane>
-        </main>
-      )}
-      <IDEOverlays />
+          </main>
+        )}
+        <CmControllerContext.Provider value={cmRef}>
+          <IDEOverlays />
+        </CmControllerContext.Provider>
+      </P5VersionProvider>
     </RootPage>
   );
 };

@@ -1,20 +1,21 @@
 import PropTypes from 'prop-types';
 import slugify from 'slugify';
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import * as ProjectActions from '../actions/project';
 import * as IdeActions from '../actions/ide';
-import TableDropdown from '../../../components/Dropdown/TableDropdown';
-import MenuItem from '../../../components/Dropdown/MenuItem';
-import dates from '../../../utils/formatDate';
-import getConfig from '../../../utils/getConfig';
+import { TableDropdown } from '../../../components/Dropdown/TableDropdown';
+import { MenuItem } from '../../../components/Dropdown/MenuItem';
+import { formatDateToString } from '../../../utils/formatDate';
+import { getConfig } from '../../../utils/getConfig';
+import { VisibilityDropdown } from '../../User/components/VisibilityDropdown';
 
 const ROOT_URL = getConfig('API_URL');
 
 const formatDateCell = (date, mobile = false) =>
-  dates.format(date, { showTime: !mobile });
+  formatDateToString(date, { showTime: !mobile });
 
 const SketchListRowBase = ({
   sketch,
@@ -23,6 +24,8 @@ const SketchListRowBase = ({
   changeProjectName,
   cloneProject,
   deleteProject,
+  showShareModal,
+  changeVisibility,
   t,
   mobile,
   onAddToCollection
@@ -31,10 +34,15 @@ const SketchListRowBase = ({
   const [renameValue, setRenameValue] = useState(sketch.name);
   const renameInput = useRef(null);
 
+  useEffect(() => {
+    if (renameOpen && renameInput.current) {
+      renameInput.current.focus();
+    }
+  }, [renameOpen]);
+
   const openRename = useCallback(() => {
     setRenameOpen(true);
     setRenameValue(sketch.name);
-    renameInput.current.focus();
   }, [sketch.name]);
 
   const closeRename = () => setRenameOpen(false);
@@ -70,11 +78,23 @@ const SketchListRowBase = ({
   };
 
   const handleSketchDuplicate = () => cloneProject(sketch);
+
+  // const handleSketchShare = () => {
+  //   showShareModal(sketch.id, sketch.name, username);
+  // };
+
   const handleSketchDelete = () => {
     if (window.confirm(t('Common.DeleteConfirmation', { name: sketch.name }))) {
       deleteProject(sketch.id);
     }
   };
+
+  const handleVisibilityChange = useCallback(
+    (sketchId, sketchName, newVisibility) => {
+      changeVisibility(sketchId, sketchName, newVisibility, t);
+    },
+    [changeVisibility]
+  );
 
   const userIsOwner = user.username === username;
 
@@ -105,6 +125,12 @@ const SketchListRowBase = ({
       <th scope="row">{name}</th>
       <td>{formatDateCell(sketch.createdAt, mobile)}</td>
       <td>{formatDateCell(sketch.updatedAt, mobile)}</td>
+      <td hidden={!userIsOwner || mobile}>
+        <VisibilityDropdown
+          sketch={sketch}
+          onVisibilityChange={handleVisibilityChange}
+        />
+      </td>{' '}
       <td className="sketch-list__dropdown-column">
         <TableDropdown aria-label={t('SketchList.ToggleLabelARIA')}>
           <MenuItem hideIf={!userIsOwner} onClick={openRename}>
@@ -122,6 +148,9 @@ const SketchListRowBase = ({
           <MenuItem hideIf={!user.authenticated} onClick={onAddToCollection}>
             {t('SketchList.DropdownAddToCollection')}
           </MenuItem>
+          {/* <MenuItem onClick={handleSketchShare}>
+            {t('SketchList.DropdownShare')}
+          </MenuItem> */}
           <MenuItem hideIf={!userIsOwner} onClick={handleSketchDelete}>
             {t('SketchList.DropdownDelete')}
           </MenuItem>
@@ -136,7 +165,8 @@ SketchListRowBase.propTypes = {
     id: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
     createdAt: PropTypes.string.isRequired,
-    updatedAt: PropTypes.string.isRequired
+    updatedAt: PropTypes.string.isRequired,
+    visibility: PropTypes.string
   }).isRequired,
   username: PropTypes.string.isRequired,
   user: PropTypes.shape({
@@ -146,6 +176,8 @@ SketchListRowBase.propTypes = {
   deleteProject: PropTypes.func.isRequired,
   cloneProject: PropTypes.func.isRequired,
   changeProjectName: PropTypes.func.isRequired,
+  showShareModal: PropTypes.func.isRequired,
+  changeVisibility: PropTypes.func.isRequired,
   onAddToCollection: PropTypes.func.isRequired,
   mobile: PropTypes.bool,
   t: PropTypes.func.isRequired

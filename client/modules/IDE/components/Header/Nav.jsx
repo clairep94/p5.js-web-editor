@@ -4,13 +4,14 @@ import { sortBy } from 'lodash';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
-import MenubarSubmenu from '../../../../components/Menubar/MenubarSubmenu';
-import MenubarItem from '../../../../components/Menubar/MenubarItem';
+import { MenubarSubmenu } from '../../../../components/Menubar/MenubarSubmenu';
+import { MenubarItem } from '../../../../components/Menubar/MenubarItem';
 import { availableLanguages, languageKeyToLabel } from '../../../../i18n';
-import getConfig from '../../../../utils/getConfig';
+import { getConfig } from '../../../../utils/getConfig';
+import { parseBoolean } from '../../../../utils/parseStringToType';
 import { showToast } from '../../actions/toast';
 import { setLanguage } from '../../actions/preferences';
-import Menubar from '../../../../components/Menubar/Menubar';
+import { Menubar } from '../../../../components/Menubar/Menubar';
 import CaretLeftIcon from '../../../../images/left-arrow.svg';
 import LogoIcon from '../../../../images/p5js-logo-small.svg';
 import { selectRootFile } from '../../selectors/files';
@@ -39,10 +40,16 @@ const Nav = ({ layout }) => {
   ) : (
     <>
       <header className="nav__header">
-        <Menubar>
-          <LeftLayout layout={layout} />
-          <UserMenu />
-        </Menubar>
+        <div className="nav__item-logo">
+          <Logo />
+        </div>
+
+        <nav className="nav">
+          <Menubar>
+            <LeftLayout layout={layout} />
+            <UserMenu />
+          </Menubar>
+        </nav>
       </header>
     </>
   );
@@ -74,8 +81,14 @@ LeftLayout.defaultProps = {
   layout: 'project'
 };
 
+const isLoginEnabled = parseBoolean(getConfig('LOGIN_ENABLED'), true);
+const isUiCollectionsEnabled = parseBoolean(
+  getConfig('UI_COLLECTIONS_ENABLED'),
+  true
+);
+const isExamplesEnabled = parseBoolean(getConfig('EXAMPLES_ENABLED'), true);
+
 const UserMenu = () => {
-  const isLoginEnabled = getConfig('LOGIN_ENABLED');
   const isAuthenticated = useSelector(getAuthenticated);
 
   if (isLoginEnabled && isAuthenticated) {
@@ -87,19 +100,40 @@ const UserMenu = () => {
   return null;
 };
 
-const DashboardMenu = () => {
+const Logo = () => {
   const { t } = useTranslation();
-  const editorLink = useSelector(selectSketchPath);
-  return (
-    <ul className="nav__items-left">
-      <li className="nav__item-logo">
+  const user = useSelector((state) => state.user);
+
+  if (user?.username) {
+    return (
+      <Link to={`/${user.username}/sketches`}>
         <LogoIcon
           role="img"
           aria-label={t('Common.p5logoARIA')}
           focusable="false"
           className="svg__logo"
         />
-      </li>
+      </Link>
+    );
+  }
+
+  return (
+    <a href="https://p5js.org">
+      <LogoIcon
+        role="img"
+        aria-label={t('Common.p5logoARIA')}
+        focusable="true"
+        className="svg__logo"
+      />
+    </a>
+  );
+};
+
+const DashboardMenu = () => {
+  const { t } = useTranslation();
+  const editorLink = useSelector(selectSketchPath);
+  return (
+    <ul className="nav__items-left" role="group">
       <li className="nav__item nav__item--no-icon">
         <Link to={editorLink} className="nav__back-link">
           <CaretLeftIcon
@@ -118,7 +152,7 @@ const ProjectMenu = () => {
   const isUserOwner = useSelector(getIsUserOwner);
   const project = useSelector((state) => state.project);
   const user = useSelector((state) => state.user);
-  const userSketches = `/${user.username}/sketches`;
+
   const isUnsaved = !project?.id;
 
   const rootFile = useSelector(selectRootFile);
@@ -141,33 +175,17 @@ const ProjectMenu = () => {
     metaKey === 'Ctrl' ? `${metaKeyName}+Alt+N` : `${metaKeyName}+⌥+N`;
 
   return (
-    <ul className="nav__items-left" role="menubar">
-      <li className="nav__item-logo">
-        {user && user.username !== undefined ? (
-          <Link to={userSketches}>
-            <LogoIcon
-              role="img"
-              aria-label={t('Common.p5logoARIA')}
-              focusable="false"
-              className="svg__logo"
-            />
-          </Link>
-        ) : (
-          <a href="https://p5js.org">
-            <LogoIcon
-              role="img"
-              aria-label={t('Common.p5logoARIA')}
-              focusable="false"
-              className="svg__logo"
-            />
-          </a>
-        )}
-      </li>
+    <ul className="nav__items-left" role="group">
       <MenubarSubmenu id="file" title={t('Nav.File.Title')}>
-        <MenubarItem onClick={newSketch}>{t('Nav.File.New')}</MenubarItem>
+        <MenubarItem id="file-new" onClick={newSketch}>
+          {t('Nav.File.New')}
+        </MenubarItem>
         <MenubarItem
-          hideIf={
-            !getConfig('LOGIN_ENABLED') || (project?.owner && !isUserOwner)
+          id="file-save"
+          isDisabled={
+            !user.authenticated ||
+            !isLoginEnabled ||
+            (project?.owner && !isUserOwner)
           }
           onClick={() => saveSketch(cmRef.current)}
         >
@@ -175,67 +193,83 @@ const ProjectMenu = () => {
           <span className="nav__keyboard-shortcut">{metaKeyName}+S</span>
         </MenubarItem>
         <MenubarItem
-          hideIf={isUnsaved || !user.authenticated}
+          id="file-duplicate"
+          isDisabled={isUnsaved || !user.authenticated}
           onClick={() => dispatch(cloneProject())}
         >
           {t('Nav.File.Duplicate')}
         </MenubarItem>
-        <MenubarItem hideIf={isUnsaved} onClick={shareSketch}>
+        <MenubarItem
+          id="file-share"
+          isDisabled={isUnsaved}
+          onClick={shareSketch}
+        >
           {t('Nav.File.Share')}
         </MenubarItem>
-        <MenubarItem hideIf={isUnsaved} onClick={downloadSketch}>
+        <MenubarItem
+          id="file-download"
+          isDisabled={isUnsaved}
+          onClick={downloadSketch}
+        >
           {t('Nav.File.Download')}
         </MenubarItem>
         <MenubarItem
-          hideIf={!user.authenticated}
+          id="file-open"
+          isDisabled={!user.authenticated}
           href={`/${user.username}/sketches`}
         >
           {t('Nav.File.Open')}
         </MenubarItem>
         <MenubarItem
-          hideIf={
-            !getConfig('UI_COLLECTIONS_ENABLED') ||
-            !user.authenticated ||
-            isUnsaved
+          id="file-add-to-collection"
+          isDisabled={
+            !isUiCollectionsEnabled || !user.authenticated || isUnsaved
           }
           href={`/${user.username}/sketches/${project?.id}/add-to-collection`}
         >
           {t('Nav.File.AddToCollection')}
         </MenubarItem>
         <MenubarItem
-          hideIf={!getConfig('EXAMPLES_ENABLED')}
+          id="file-examples"
+          isDisabled={!isExamplesEnabled}
           href="/p5/sketches"
         >
           {t('Nav.File.Examples')}
         </MenubarItem>
       </MenubarSubmenu>
       <MenubarSubmenu id="edit" title={t('Nav.Edit.Title')}>
-        <MenubarItem onClick={cmRef.current?.tidyCode}>
+        <MenubarItem id="edit-tidy" onClick={cmRef.current?.tidyCode}>
           {t('Nav.Edit.TidyCode')}
           <span className="nav__keyboard-shortcut">{metaKeyName}+Shift+F</span>
         </MenubarItem>
-        <MenubarItem onClick={cmRef.current?.showFind}>
+        <MenubarItem id="edit-find" onClick={cmRef.current?.showFind}>
           {t('Nav.Edit.Find')}
           <span className="nav__keyboard-shortcut">{metaKeyName}+F</span>
         </MenubarItem>
-        <MenubarItem onClick={cmRef.current?.showReplace}>
+        <MenubarItem id="edit-replace" onClick={cmRef.current?.showReplace}>
           {t('Nav.Edit.Replace')}
           <span className="nav__keyboard-shortcut">{replaceCommand}</span>
         </MenubarItem>
       </MenubarSubmenu>
       <MenubarSubmenu id="sketch" title={t('Nav.Sketch.Title')}>
-        <MenubarItem onClick={() => dispatch(newFile(rootFile.id))}>
+        <MenubarItem
+          id="sketch-add-file"
+          onClick={() => dispatch(newFile(rootFile.id))}
+        >
           {t('Nav.Sketch.AddFile')}
           <span className="nav__keyboard-shortcut">{newFileCommand}</span>
         </MenubarItem>
-        <MenubarItem onClick={() => dispatch(newFolder(rootFile.id))}>
+        <MenubarItem
+          id="sketch-add-folder"
+          onClick={() => dispatch(newFolder(rootFile.id))}
+        >
           {t('Nav.Sketch.AddFolder')}
         </MenubarItem>
-        <MenubarItem onClick={() => dispatch(startSketch())}>
+        <MenubarItem id="sketch-run" onClick={() => dispatch(startSketch())}>
           {t('Nav.Sketch.Run')}
           <span className="nav__keyboard-shortcut">{metaKeyName}+Enter</span>
         </MenubarItem>
-        <MenubarItem onClick={() => dispatch(stopSketch())}>
+        <MenubarItem id="sketch-stop" onClick={() => dispatch(stopSketch())}>
           {t('Nav.Sketch.Stop')}
           <span className="nav__keyboard-shortcut">
             Shift+{metaKeyName}+Enter
@@ -243,13 +277,36 @@ const ProjectMenu = () => {
         </MenubarItem>
       </MenubarSubmenu>
       <MenubarSubmenu id="help" title={t('Nav.Help.Title')}>
-        <MenubarItem onClick={() => dispatch(showKeyboardShortcutModal())}>
+        <MenubarItem
+          id="help-shortcuts"
+          onClick={() => dispatch(showKeyboardShortcutModal())}
+        >
           {t('Nav.Help.KeyboardShortcuts')}
         </MenubarItem>
-        <MenubarItem href="https://p5js.org/reference/">
+        <MenubarItem id="help-reference" href="https://p5js.org/reference/">
           {t('Nav.Help.Reference')}
         </MenubarItem>
-        <MenubarItem href="/about">{t('Nav.Help.About')}</MenubarItem>
+        <MenubarItem id="help-about" href="/about">
+          {t('About.Title')}
+        </MenubarItem>
+        <MenubarItem
+          id="help-report-bug"
+          href="https://github.com/processing/p5.js-web-editor/issues/new/choose"
+        >
+          {t('Nav.Help.ReportBug')}
+        </MenubarItem>
+        <MenubarItem
+          id="help-discord"
+          href="https://discord.com/invite/SHQ8dH25r9"
+        >
+          {t('Nav.Help.ChatOnDiscord')}
+        </MenubarItem>
+        <MenubarItem
+          id="help-forum"
+          href="https://discourse.processing.org/c/p5js/10"
+        >
+          {t('Nav.Help.PostOnTheForum')}
+        </MenubarItem>
       </MenubarSubmenu>
       {getConfig('TRANSLATIONS_ENABLED') && <LanguageMenu />}
     </ul>
@@ -275,6 +332,7 @@ const LanguageMenu = () => {
       {sortBy(availableLanguages).map((key) => (
         // eslint-disable-next-line react/jsx-no-bind
         <MenubarItem
+          id={key}
           key={key}
           value={key}
           onClick={handleLangSelection}
@@ -291,7 +349,7 @@ const LanguageMenu = () => {
 const UnauthenticatedUserMenu = () => {
   const { t } = useTranslation();
   return (
-    <ul className="nav__items-right" title="user-menu">
+    <ul className="nav__items-right" title="user-menu" role="group">
       <li className="nav__item">
         <Link to="/login" className="nav__auth-button">
           <span className="nav__item-header" title="Login">
@@ -320,7 +378,7 @@ const AuthenticatedUserMenu = () => {
   const dispatch = useDispatch();
 
   return (
-    <ul className="nav__items-right" title="user-menu">
+    <ul className="nav__items-right" title="user-menu" role="group">
       <MenubarSubmenu
         id="account"
         title={
@@ -329,20 +387,23 @@ const AuthenticatedUserMenu = () => {
           </span>
         }
       >
-        <MenubarItem href={`/${username}/sketches`}>
+        <MenubarItem id="account-sketches" href={`/${username}/sketches`}>
           {t('Nav.Auth.MySketches')}
         </MenubarItem>
         <MenubarItem
+          id="account-collections"
           href={`/${username}/collections`}
-          hideIf={!getConfig('UI_COLLECTIONS_ENABLED')}
+          isDisabled={!isUiCollectionsEnabled}
         >
           {t('Nav.Auth.MyCollections')}
         </MenubarItem>
-        <MenubarItem href={`/${username}/assets`}>
+        <MenubarItem id="account-assets" href={`/${username}/assets`}>
           {t('Nav.Auth.MyAssets')}
         </MenubarItem>
-        <MenubarItem href="/account">{t('Preferences.Settings')}</MenubarItem>
-        <MenubarItem onClick={() => dispatch(logoutUser())}>
+        <MenubarItem id="account-settings" href="/account">
+          {t('Nav.Auth.MyAccount')}
+        </MenubarItem>
+        <MenubarItem id="account-logout" onClick={() => dispatch(logoutUser())}>
           {t('Nav.Auth.LogOut')}
         </MenubarItem>
       </MenubarSubmenu>

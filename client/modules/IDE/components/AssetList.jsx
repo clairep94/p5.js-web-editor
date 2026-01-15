@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Helmet } from 'react-helmet';
 import { useTranslation } from 'react-i18next';
 import AssetListRow from './AssetListRow';
-import Loader from '../../App/components/loader';
+import { Loader } from '../../App/components/Loader';
 import * as AssetActions from '../actions/assets';
 
 const AssetList = () => {
@@ -46,7 +46,7 @@ const AssetList = () => {
               <th>{t('AssetList.HeaderName')}</th>
               <th>{t('AssetList.HeaderSize')}</th>
               <th>{t('AssetList.HeaderSketch')}</th>
-              <th scope="col"></th>
+              <th aria-label="dropdown" scope="col"></th>
             </tr>
           </thead>
           <tbody>

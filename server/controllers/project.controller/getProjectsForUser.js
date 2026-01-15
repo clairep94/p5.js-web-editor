@@ -1,5 +1,5 @@
 import Project from '../../models/project';
-import User from '../../models/user';
+import { User } from '../../models/user';
 import { toApi as toApiProjectObject } from '../../domain-objects/Project';
 
 /**
@@ -16,6 +16,7 @@ const createCoreHandler = (mapProjectsToResponse) => async (req, res) => {
       res.status(422).json({ message: 'Username not provided' });
       return;
     }
+
     const user = await User.findByUsername(username);
 
     if (!user) {
@@ -57,8 +58,22 @@ const createCoreHandler = (mapProjectsToResponse) => async (req, res) => {
       })
     };
 
-    res.json(response);
-  } catch (e) {
+    const canViewPrivate = req.user && req.user._id.equals(user._id);
+
+    const filter = { user: user._id };
+    if (!canViewPrivate) {
+      filter.visibility = { $ne: 'Private' };
+    }
+
+    // must fix merge conflicts later here
+    // projects = await Project.find(filter)
+    //   .sort('-createdAt')
+    //   .select('name files id createdAt updatedAt visibility')
+    //   .exec();
+
+    // cresponse = mapProjectsToResponse(projects);
+    // res.json(response);
+  } catch (error) {
     res.status(500).json({ message: 'Error fetching projects' });
   }
 };
