@@ -26,24 +26,31 @@ const createCoreHandler = (mapProjectsToResponse) => async (req, res) => {
       return;
     }
 
+    const canViewPrivate = req.user && req.user._id.equals(user._id);
+
+    const filter = { user: user._id };
+    if (!canViewPrivate) {
+      filter.visibility = { $ne: 'Private' };
+    }
+
     const usePagination = page !== undefined && limit !== undefined;
 
-    const parsedPage = parseInt(page, 10) || 1;
-    const parsedLimit = parseInt(limit, 10) || 10;
+    const parsedPage = Math.max(parseInt(page, 10) || 1, 1);
+    const parsedLimit = Math.min(Math.max(parseInt(limit, 10) || 10, 1), 100);
 
-    const query = Project.find({ user: user._id })
+    const query = Project.find(filter)
       .sort('-createdAt')
-      .select('name files id createdAt updatedAt');
+      .select('name files id createdAt updatedAt visibility');
 
     if (usePagination) {
-      query.skip((page - 1) * limit).limit(limit);
+      query.skip((parsedPage - 1) * parsedLimit).limit(parsedLimit);
     }
 
     const projects = await query.exec();
 
     const totalProjects = usePagination
-      ? await Project.countDocuments({ user: user._id })
-      : projects?.length;
+      ? await Project.countDocuments(filter)
+      : projects.length;
 
     const response = {
       projects: mapProjectsToResponse(projects),
@@ -58,21 +65,7 @@ const createCoreHandler = (mapProjectsToResponse) => async (req, res) => {
       })
     };
 
-    const canViewPrivate = req.user && req.user._id.equals(user._id);
-
-    const filter = { user: user._id };
-    if (!canViewPrivate) {
-      filter.visibility = { $ne: 'Private' };
-    }
-
-    // must fix merge conflicts later here
-    // projects = await Project.find(filter)
-    //   .sort('-createdAt')
-    //   .select('name files id createdAt updatedAt visibility')
-    //   .exec();
-
-    // cresponse = mapProjectsToResponse(projects);
-    // res.json(response);
+    res.json(response);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching projects' });
   }
