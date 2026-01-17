@@ -1,5 +1,13 @@
 import { p5Versions, currentP5Version } from '../../common/p5Versions';
 
+export interface ParsedUrlParams {
+  version: string;
+  sound: boolean;
+  preload: boolean;
+  shapes: boolean;
+  data: boolean;
+}
+
 const DEFAULTS = {
   sound: true,
   preload: false,
@@ -7,16 +15,13 @@ const DEFAULTS = {
   data: false
 };
 
-function getVersionString(item) {
+function getVersionString(
+  item: string | { version: string; label: string }
+): string {
   return typeof item === 'string' ? item : item.version;
 }
 
-/**
- * Sorts version strings in descending order and returns the highest version
- * @param {string[]} versions - Array of version strings (e.g., ['1.11.2', '1.11.1'])
- * @returns {string} The highest version from the array
- */
-function getNewestVersion(versions) {
+function getNewestVersion(versions: string[]): string {
   return versions.sort((a, b) => {
     const pa = a.split('.').map((n) => parseInt(n, 10));
     const pb = b.split('.').map((n) => parseInt(n, 10));
@@ -29,7 +34,7 @@ function getNewestVersion(versions) {
   })[0];
 }
 
-function validateVersion(version) {
+function validateVersion(version: string | null): string {
   if (!version) return currentP5Version;
 
   const ver = String(version).trim();
@@ -64,7 +69,7 @@ function validateVersion(version) {
   return currentP5Version;
 }
 
-function validateBool(value, defaultValue) {
+function validateBool(value: string | null, defaultValue: boolean): boolean {
   if (!value) return defaultValue;
 
   const v = String(value).trim().toLowerCase();
@@ -78,7 +83,7 @@ function validateBool(value, defaultValue) {
   return defaultValue;
 }
 
-export function parseUrlParams(url) {
+export function parseUrlParams(url: string): ParsedUrlParams {
   const params = new URLSearchParams(
     new URL(url, 'https://dummy.origin').search
   );
