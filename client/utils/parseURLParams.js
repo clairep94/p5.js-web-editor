@@ -7,6 +7,10 @@ const DEFAULTS = {
   data: false
 };
 
+function getVersionString(item) {
+  return typeof item === 'string' ? item : item.version;
+}
+
 /**
  * Sorts version strings in descending order and returns the highest version
  * @param {string[]} versions - Array of version strings (e.g., ['1.11.2', '1.11.1'])
@@ -30,13 +34,15 @@ function validateVersion(version) {
 
   const ver = String(version).trim();
 
-  if (p5Versions.includes(ver)) return ver;
+  const versions = p5Versions.map(getVersionString);
+
+  if (versions.includes(ver)) return ver;
 
   // if only major.minor provided like "1.11"
   const majorMinorMatch = /^(\d+)\.(\d+)$/.exec(ver);
   if (majorMinorMatch) {
     const [, major, minor] = majorMinorMatch;
-    const matches = p5Versions.filter((v) => {
+    const matches = versions.filter((v) => {
       const parts = v.split('.');
       return parts[0] === major && parts[1] === minor;
     });
@@ -49,7 +55,7 @@ function validateVersion(version) {
   const majorOnlyMatch = /^(\d+)$/.exec(ver);
   if (majorOnlyMatch) {
     const [, major] = majorOnlyMatch;
-    const matches = p5Versions.filter((v) => v.split('.')[0] === major);
+    const matches = versions.filter((v) => v.split('.')[0] === major);
     if (matches.length) {
       return getNewestVersion(matches);
     }
