@@ -589,10 +589,6 @@
     "TableText": "表格文字",
     "Sound": "聲"
   },
-  "PreferenceCreators": {
-    "On": "啟用",
-    "Off": "停用"
-  },
   "MobileDashboardView": {
     "Examples": "範例",
     "Sketches": "草稿",

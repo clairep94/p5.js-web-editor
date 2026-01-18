@@ -1,7 +1,7 @@
 import React from 'react';
 import { act, fireEvent, reduxRender, screen } from '../../../../test-utils';
 import { initialState } from '../../reducers/preferences';
-import Preferences from './index';
+import { Preferences } from './index';
 import * as PreferencesActions from '../../actions/preferences';
 import { P5VersionProvider } from '../../hooks/useP5Version';
 

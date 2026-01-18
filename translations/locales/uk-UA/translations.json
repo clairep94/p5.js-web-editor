@@ -648,10 +648,6 @@
     "TableText": "Текст у таблиці",
     "Sound": "Звук"
   },
-  "PreferenceCreators": {
-    "On": "Так",
-    "Off": "Ні"
-  },
   "MobileDashboardView": {
     "Examples": "Приклади",
     "Sketches": "Скетчі",

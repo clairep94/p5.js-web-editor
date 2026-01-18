@@ -585,10 +585,6 @@
     "TableText": "tabelltext",
     "Sound": "Ljud"
   },
-  "PreferenceCreators": {
-    "On": "På",
-    "Off": "Av"
-  },
   "MobileDashboardView": {
     "Examples": "Exempel",
     "Sketches": "Sketcher",

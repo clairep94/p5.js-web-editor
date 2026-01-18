@@ -1,8 +1,7 @@
 import React, { useMemo } from 'react';
-import PropTypes from 'prop-types';
-import AsteriskIcon from '../../../images/p5-asterisk.svg';
+import AsteriskIcon from '../../../../images/p5-asterisk.svg';
 
-const Stars = ({ top, left }) => {
+export const Stars = ({ top, left }: { top: number; left: number }) => {
   const stars = useMemo(() => {
     const styles = [];
 
@@ -42,10 +41,3 @@ const Stars = ({ top, left }) => {
     </div>
   );
 };
-
-Stars.propTypes = {
-  top: PropTypes.number.isRequired,
-  left: PropTypes.number.isRequired
-};
-
-export default Stars;

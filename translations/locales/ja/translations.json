@@ -586,10 +586,6 @@
       "TableText": "テーブルテキスト",
       "Sound": "サウンド"
     },
-    "PreferenceCreators": {
-      "On": "オン",
-      "Off": "オフ"
-    },
     "MobileDashboardView": {
       "Examples": "サンプル",
       "Sketches": "スケッチ",

@@ -20,6 +20,12 @@ declare module '*.svg' {
   export default ReactComponent;
 }
 
+declare module '*.mp3' {
+  const url: string;
+  // eslint-disable-next-line import/no-default-export
+  export default url;
+}
+
 // Extend window for Redux DevTools
 interface Window {
   __REDUX_DEVTOOLS_EXTENSION__?: () => any;

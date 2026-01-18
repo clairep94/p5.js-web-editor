@@ -15,7 +15,7 @@ import Feedback from './Feedback';
 import KeyboardShortcutModal from './KeyboardShortcutModal';
 import NewFileModal from './NewFileModal';
 import NewFolderModal from './NewFolderModal';
-import Preferences from './Preferences';
+import { Preferences } from './Preferences';
 import { CollectionSearchbar } from './Searchbar';
 import ShareModal from './ShareModal';
 import UploadFileModal from './UploadFileModal';

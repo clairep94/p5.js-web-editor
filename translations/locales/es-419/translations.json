@@ -592,10 +592,6 @@
     "TableText": "Tablero de texto",
     "Sound": "Sonido"
   },
-  "PreferenceCreators": {
-    "On": "Activar",
-    "Off": "Desactivar"
-  },
   "MobileDashboardView": {
     "Examples": "Ejemplos",
     "Sketches": "Bosquejos",
