@@ -1,5 +1,5 @@
 import React, { useCallback, useRef } from 'react';
-import MediaQuery from 'react-responsive';
+import { useMediaQuery } from 'react-responsive';
 import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -9,8 +9,8 @@ import type { RootState } from '../../../reducers';
 import ExitIcon from '../../../images/exit.svg';
 
 type OverlayProps = {
-  children?: React.ReactElement;
-  actions?: React.ReactElement;
+  children?: React.ReactNode;
+  actions?: React.ReactNode;
   closeOverlay?: () => void;
   title?: string;
   ariaLabel?: string;
@@ -34,6 +34,9 @@ export const Overlay = ({
   const ref = useRef<HTMLElement>(null);
 
   const browserHistory = useHistory();
+
+  const isDesktop = useMediaQuery({ minWidth: 770 });
+  const isMobile = useMediaQuery({ maxWidth: 769 });
 
   const close = useCallback(() => {
     const node = ref.current;
@@ -66,7 +69,7 @@ export const Overlay = ({
           <header className="overlay__header">
             <h2 className="overlay__title">{title}</h2>
             <div className="overlay__actions">
-              <MediaQuery minWidth={770}>{actions}</MediaQuery>
+              {isDesktop && actions}
               <button
                 className="overlay__close-button"
                 onClick={close}
@@ -76,11 +79,9 @@ export const Overlay = ({
               </button>
             </div>
           </header>
-          <MediaQuery maxWidth={769}>
-            {actions && (
-              <div className="overlay__actions-mobile">{actions}</div>
-            )}
-          </MediaQuery>
+          {isMobile && actions && (
+            <div className="overlay__actions-mobile">{actions}</div>
+          )}
           {children}
         </section>
       </div>
