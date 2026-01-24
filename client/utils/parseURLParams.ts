@@ -21,7 +21,7 @@ function getVersionString(
   return typeof item === 'string' ? item : item.version;
 }
 
-export const p5VersionStrings = p5Versions.map(getVersionString);
+const p5VersionStrings = p5Versions.map(getVersionString);
 
 function getNewestVersion(versions: string[]): string {
   return versions.sort((a, b) => {
@@ -83,6 +83,12 @@ function validateBool(value: string | null, defaultValue: boolean): boolean {
   return defaultValue;
 }
 
+/**
+ * Parses URL parameters for version and boolean flags.
+ *
+ * @param url - The URL string to parse.
+ * @returns Parsed and validated URL parameters including version and library flags.
+ */
 export function parseUrlParams(url: string): ParsedUrlParams {
   const params = new URLSearchParams(
     new URL(url, 'https://dummy.origin').search

@@ -1,5 +1,13 @@
-import { parseUrlParams, p5VersionStrings } from './parseURLParams';
-import { currentP5Version } from '../../common/p5Versions';
+import { parseUrlParams } from './parseURLParams';
+import { p5Versions, currentP5Version } from '../../common/p5Versions';
+
+function getVersionString(
+  item: string | { version: string; label: string }
+): string {
+  return typeof item === 'string' ? item : item.version;
+}
+
+const p5VersionStrings = p5Versions.map(getVersionString);
 
 describe('parseUrlParams', () => {
   describe('default behavior', () => {
@@ -39,7 +47,7 @@ describe('parseUrlParams', () => {
       const good = parseUrlParams('https://example.com?version=1.4.0');
       expect(good.version).toBe('1.4.0');
 
-      const bad = parseUrlParams('https://example.com?version=9.9.9');
+      const bad = parseUrlParams('https://example.com?version=invalid-version');
       expect(bad.version).toBe(currentP5Version);
     });
 
