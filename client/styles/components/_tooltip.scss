@@ -1,6 +1,7 @@
 .tooltip-wrapper {
   position: relative;
-  display: inline-flex;
+  display: flex;
+  width: 100%;
 }
 
 .tooltip-wrapper .tooltipped::after {

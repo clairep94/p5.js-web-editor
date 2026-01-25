@@ -1,7 +1,7 @@
 import React, { useEffect, useContext, useRef } from 'react';
 import { MenubarContext, SubmenuContext, ParentMenuContext } from './contexts';
 import { ButtonOrLink, ButtonOrLinkProps } from '../../common/ButtonOrLink';
-import { Tooltip, TooltipDirection } from '../../common/Tooltip';
+import { Tooltip, TooltipProps } from '../../common/Tooltip';
 
 export enum MenubarItemRole {
   MENU_ITEM = 'menuitem',
@@ -14,8 +14,7 @@ export interface MenubarItemProps extends Omit<ButtonOrLinkProps, 'role'> {
    */
   role?: MenubarItemRole;
   selected?: boolean;
-  tooltipContent?: string;
-  tooltipDirection?: TooltipDirection;
+  tooltipContent?: TooltipProps['content'];
 }
 
 /**
@@ -58,7 +57,6 @@ export function MenubarItem({
   isDisabled = false,
   selected = false,
   tooltipContent,
-  tooltipDirection,
   ...rest
 }: MenubarItemProps) {
   const { createMenuItemHandlers, hasFocus } = useContext(MenubarContext);
@@ -104,9 +102,7 @@ export function MenubarItem({
   );
 
   const content = tooltipContent ? (
-    <Tooltip content={tooltipContent} direction={tooltipDirection}>
-      {buttonOrLink}
-    </Tooltip>
+    <Tooltip content={tooltipContent}>{buttonOrLink}</Tooltip>
   ) : (
     buttonOrLink
   );

@@ -139,7 +139,6 @@ export default function SideBar() {
                   ) : (
                     <Tooltip
                       content={t('Sidebar.UploadFileTooltipUnauthenticated')}
-                      direction="n"
                     >
                       <button
                         aria-label={t('Sidebar.UploadFileARIA')}
