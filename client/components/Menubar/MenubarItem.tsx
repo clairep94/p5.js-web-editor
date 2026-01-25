@@ -89,24 +89,6 @@ export function MenubarItem({
     return unregister;
   }, [submenuItems, registerSubmenuItem]);
 
-  const buttonOrLink = (
-    <ButtonOrLink
-      {...rest}
-      {...handlers}
-      {...ariaSelected}
-      role={role}
-      tabIndex={-1}
-      id={id}
-      isDisabled={isDisabled}
-    />
-  );
-
-  const content = tooltipContent ? (
-    <Tooltip content={tooltipContent}>{buttonOrLink}</Tooltip>
-  ) : (
-    buttonOrLink
-  );
-
   return (
     <li
       className={`${className} ${
@@ -115,7 +97,29 @@ export function MenubarItem({
       ref={menuItemRef}
       onMouseEnter={handleMouseEnter}
     >
-      {content}
+      {tooltipContent ? (
+        <Tooltip content={tooltipContent}>
+          <ButtonOrLink
+            {...rest}
+            {...handlers}
+            {...ariaSelected}
+            role={role}
+            tabIndex={-1}
+            id={id}
+            isDisabled={isDisabled}
+          />
+        </Tooltip>
+      ) : (
+        <ButtonOrLink
+          {...rest}
+          {...handlers}
+          {...ariaSelected}
+          role={role}
+          tabIndex={-1}
+          id={id}
+          isDisabled={isDisabled}
+        />
+      )}
     </li>
   );
 }
