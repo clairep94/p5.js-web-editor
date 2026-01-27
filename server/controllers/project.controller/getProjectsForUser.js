@@ -10,36 +10,51 @@ import { toApi as toApiProjectObject } from '../../domain-objects/Project';
 const createCoreHandler = (mapProjectsToResponse) => async (req, res) => {
   try {
     const { username } = req.params;
-    const { page, limit } = req.query;
+    const { page, limit, sortField, sortDir, q } = req.query;
 
     if (!username) {
-      res.status(422).json({ message: 'Username not provided' });
-      return;
+      return res.status(422).json({ message: 'Username not provided' });
     }
 
     const user = await User.findByUsername(username);
 
     if (!user) {
-      res
+      return res
         .status(404)
         .json({ message: 'User with that username does not exist.' });
-      return;
     }
 
     const canViewPrivate = req.user && req.user._id.equals(user._id);
-
     const filter = { user: user._id };
+
     if (!canViewPrivate) {
       filter.visibility = { $ne: 'Private' };
+    }
+
+    if (q && q.trim()) {
+      const term = q.trim();
+      const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+      filter.name = { $regex: escaped, $options: 'i' };
     }
 
     const usePagination = page !== undefined && limit !== undefined;
 
     const parsedPage = Math.max(parseInt(page, 10) || 1, 1);
     const parsedLimit = Math.min(Math.max(parseInt(limit, 10) || 10, 1), 100);
+    const dir = sortDir === 'desc' ? -1 : 1;
+    const allowedSortFields = new Set([
+      'name',
+      'createdAt',
+      'updatedAt',
+      'visibility'
+    ]);
+    const safeSortField = allowedSortFields.has(sortField)
+      ? sortField
+      : 'updatedAt';
 
     const query = Project.find(filter)
-      .sort('-createdAt')
+      .sort({ [safeSortField]: dir, _id: dir })
       .select('name files id createdAt updatedAt visibility');
 
     if (usePagination) {
@@ -56,8 +71,8 @@ const createCoreHandler = (mapProjectsToResponse) => async (req, res) => {
       projects: mapProjectsToResponse(projects),
       ...(usePagination && {
         metadata: {
-          currentPage: parsedPage || 1,
-          totalPages: Math.ceil(totalProjects / parsedLimit) || 1,
+          page: parsedPage,
+          totalPages: Math.max(Math.ceil(totalProjects / parsedLimit), 1),
           totalProjects,
           limit: parsedLimit,
           hasPagination: true
@@ -65,9 +80,9 @@ const createCoreHandler = (mapProjectsToResponse) => async (req, res) => {
       })
     };
 
-    res.json(response);
+    return res.json(response);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching projects' });
+    return res.status(500).json({ message: 'Error fetching projects' });
   }
 };
 
