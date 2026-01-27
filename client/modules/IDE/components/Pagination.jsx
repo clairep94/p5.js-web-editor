@@ -3,28 +3,29 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 const Pagination = ({
-  currentPage,
+  page,
   totalPages,
   onPageChange,
-  sketchesPerPage,
-  totalSketches
+  limit,
+  totalSketches,
+  isOverlay
 }) => {
   if (totalPages <= 1) return null;
 
-  const startSketch = (currentPage - 1) * sketchesPerPage + 1;
-  const endSketch = Math.min(currentPage * sketchesPerPage, totalSketches);
+  const startSketch = (page - 1) * limit + 1;
+  const endSketch = Math.min(page * limit, totalSketches);
 
   return (
-    <div className="pagination">
+    <div className={`pagination ${isOverlay ? 'pagination-overlay' : ''}`}>
       <ul className="pagination-ul">
         <li className="page-item">
           <button
             className="page-link"
-            onClick={() => onPageChange(currentPage - 1)}
-            disabled={currentPage === 1}
+            onClick={() => onPageChange(page - 1)}
+            disabled={page === 1}
             aria-label="Previous Page"
           >
-            Prev
+            Previous
           </button>
         </li>
 
@@ -36,16 +37,17 @@ const Pagination = ({
             of {totalSketches}
           </span>
         </li>
-
         <li
           className={classNames('page-item', {
-            disabled: currentPage === totalPages
+            disabled: page === totalPages
           })}
         >
           <button
             className="page-link"
-            onClick={() => onPageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
+            onClick={() => {
+              onPageChange(page + 1);
+            }}
+            disabled={page === totalPages}
             aria-label="Next Page"
           >
             Next
@@ -57,11 +59,16 @@ const Pagination = ({
 };
 
 Pagination.propTypes = {
-  currentPage: PropTypes.number.isRequired,
+  page: PropTypes.number.isRequired,
   totalPages: PropTypes.number.isRequired,
   onPageChange: PropTypes.func.isRequired,
-  sketchesPerPage: PropTypes.number.isRequired,
-  totalSketches: PropTypes.number.isRequired
+  limit: PropTypes.number.isRequired,
+  totalSketches: PropTypes.number.isRequired,
+  isOverlay: PropTypes.bool
+};
+
+Pagination.defaultProps = {
+  isOverlay: false
 };
 
 export default Pagination;
