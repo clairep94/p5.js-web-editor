@@ -10,7 +10,6 @@ import * as ProjectsActions from '../actions/projects';
 import * as CollectionsActions from '../actions/collections';
 import * as ToastActions from '../actions/toast';
 import * as SortingActions from '../actions/sorting';
-import getSortedSketches from '../selectors/projects';
 import { Loader } from '../../App/components/Loader';
 import { Overlay } from '../../App/components/Overlay';
 import AddToCollectionList from './AddToCollectionList';
@@ -26,22 +25,39 @@ const SketchList = ({
   username,
   loading,
   sorting,
-  paginationData,
+  search,
+  paginationMeta,
   toggleDirectionForField,
   resetSorting,
   mobile
 }) => {
   const [isInitialDataLoad, setIsInitialDataLoad] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [page, setPage] = useState(1);
+  const limit = mobile ? 7 : 10;
   const [sketchToAddToCollection, setSketchToAddToCollection] = useState(null);
   const { t } = useTranslation();
 
-  const sketchesPerPage = mobile ? 7 : 10;
+  const sortField = sorting.field || 'updatedAt';
+  const sortDir =
+    sorting.direction === SortingActions.DIRECTION.ASC ? 'asc' : 'desc';
 
   useEffect(() => {
-    getProjects(username, currentPage, sketchesPerPage);
     resetSorting();
-  }, [getProjects, username, currentPage, resetSorting]);
+  }, [username, resetSorting]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [username, search, sortField, sortDir]);
+
+  useEffect(() => {
+    getProjects(username, {
+      page,
+      limit,
+      sortField,
+      sortDir,
+      q: search
+    });
+  }, [getProjects, username, page, limit, sortField, sortDir, search]);
 
   useEffect(() => {
     if (Array.isArray(sketches)) {
@@ -95,11 +111,15 @@ const SketchList = ({
         'sketches-table__header--selected': field === fieldName
       });
       const buttonLabel = getButtonLabel(fieldName, displayName);
+
       return (
         <th scope="col">
           <button
             className="sketch-list__sort-button"
-            onClick={() => toggleDirectionForField(fieldName)}
+            onClick={() => {
+              toggleDirectionForField(fieldName);
+              setPage(1);
+            }}
             aria-label={buttonLabel}
           >
             <span className={headerClass}>{displayName}</span>
@@ -127,73 +147,74 @@ const SketchList = ({
   const userIsOwner = user.username === username;
 
   return (
-    <article className="sketches-table-container">
-      <Helmet>
-        <title>{getSketchesTitle}</title>
-      </Helmet>
-      {renderLoader()}
-      {renderEmptyTable()}
-      {hasSketches() && (
-        <table
-          className="sketches-table"
-          summary={t('SketchList.TableSummary')}
-        >
-          <thead>
-            <tr>
-              {renderFieldHeader('name', t('SketchList.HeaderName'))}
-              {renderFieldHeader(
-                'createdAt',
-                t('SketchList.HeaderCreatedAt', {
-                  context: mobile ? 'mobile' : ''
-                })
-              )}
-              {renderFieldHeader(
-                'updatedAt',
-                t('SketchList.HeaderUpdatedAt', {
-                  context: mobile ? 'mobile' : ''
-                })
-              )}
-              {userIsOwner &&
-                renderFieldHeader('visibility', t('Visibility.Label'))}
-              <th scope="col"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {sketches.map((sketch) => (
-              <SketchListRowBase
-                mobile={mobile}
-                key={sketch.id}
-                sketch={sketch}
-                user={user}
-                username={username}
-                onAddToCollection={() => setSketchToAddToCollection(sketch)}
-                t={t}
-              />
-            ))}
-          </tbody>
-        </table>
-      )}
+    <>
+      <article className="sketches-table-container">
+        <Helmet>
+          <title>{getSketchesTitle}</title>
+        </Helmet>
+        {renderLoader()}
+        {renderEmptyTable()}
+        {hasSketches() && (
+          <table
+            className="sketches-table"
+            summary={t('SketchList.TableSummary')}
+          >
+            <thead>
+              <tr>
+                {renderFieldHeader('name', t('SketchList.HeaderName'))}
+                {renderFieldHeader(
+                  'createdAt',
+                  t('SketchList.HeaderCreatedAt', {
+                    context: mobile ? 'mobile' : ''
+                  })
+                )}
+                {renderFieldHeader(
+                  'updatedAt',
+                  t('SketchList.HeaderUpdatedAt', {
+                    context: mobile ? 'mobile' : ''
+                  })
+                )}
+                {userIsOwner &&
+                  renderFieldHeader('visibility', t('Visibility.Label'))}
+                <th scope="col"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {sketches.map((sketch) => (
+                <SketchListRowBase
+                  mobile={mobile}
+                  key={sketch.id}
+                  sketch={sketch}
+                  user={user}
+                  username={username}
+                  onAddToCollection={() => setSketchToAddToCollection(sketch)}
+                  t={t}
+                />
+              ))}
+            </tbody>
+          </table>
+        )}
 
+        {sketchToAddToCollection && (
+          <Overlay
+            isFixedHeight
+            title={t('SketchList.AddToCollectionOverlayTitle')}
+            closeOverlay={() => setSketchToAddToCollection(null)}
+          >
+            <AddToCollectionList projectId={sketchToAddToCollection.id} />
+          </Overlay>
+        )}
+      </article>
       {hasSketches() && (
         <Pagination
-          currentPage={currentPage}
-          totalPages={paginationData.totalPages}
-          onPageChange={setCurrentPage}
-          sketchesPerPage={sketchesPerPage}
-          totalSketches={paginationData.totalProjects}
+          page={page}
+          totalPages={paginationMeta.totalPages}
+          onPageChange={setPage}
+          limit={limit}
+          totalSketches={paginationMeta.totalProjects}
         />
       )}
-
-      {sketchToAddToCollection && (
-        <Overlay
-          isFixedHeight
-          title={t('SketchList.AddToCollectionOverlayTitle')}
-          closeOverlay={() => setSketchToAddToCollection(null)}
-        >
-          <AddToCollectionList projectId={sketchToAddToCollection.id} />
-        </Overlay>
-      )}
-    </article>
+    </>
   );
 };
 
@@ -212,8 +233,8 @@ SketchList.propTypes = {
       visibility: PropTypes.string
     })
   ).isRequired,
-  paginationData: PropTypes.shape({
-    currentPage: PropTypes.number.isRequired,
+  paginationMeta: PropTypes.shape({
+    page: PropTypes.number.isRequired,
     totalPages: PropTypes.number.isRequired,
     totalProjects: PropTypes.number.isRequired,
     limit: PropTypes.number.isRequired,
@@ -227,6 +248,7 @@ SketchList.propTypes = {
     field: PropTypes.string.isRequired,
     direction: PropTypes.string.isRequired
   }).isRequired,
+  search: PropTypes.string.isRequired,
   mobile: PropTypes.bool
 };
 
@@ -238,10 +260,17 @@ SketchList.defaultProps = {
 function mapStateToProps(state) {
   return {
     user: state.user,
-    sketches: getSortedSketches(state).sketches,
-    paginationData: getSortedSketches(state).metadata,
+    sketches: state.sketches.projects ?? [],
+    paginationMeta: state.sketches.metadata ?? {
+      page: 1,
+      totalPages: 1,
+      totalProjects: 0,
+      limit: 10,
+      hasPagination: true
+    },
     sorting: state.sorting,
     loading: state.loading,
+    search: state.search.sketchSearchTerm,
     project: state.project
   };
 }
