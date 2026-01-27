@@ -130,7 +130,7 @@ const SketchListRowBase = ({
           sketch={sketch}
           onVisibilityChange={handleVisibilityChange}
         />
-      </td>{' '}
+      </td>
       <td className="sketch-list__dropdown-column">
         <TableDropdown aria-label={t('SketchList.ToggleLabelARIA')}>
           <MenuItem hideIf={!userIsOwner} onClick={openRename}>
