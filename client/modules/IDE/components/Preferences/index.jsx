@@ -21,12 +21,8 @@ import {
   setLinewrap,
   setPreferencesTab
 } from '../../actions/preferences';
-import {
-  majorVersion,
-  p5SoundURL,
-  p5URL,
-  useP5Version
-} from '../../hooks/useP5Version';
+import { majorVersion, p5URL, useP5Version } from '../../hooks/useP5Version';
+import { p5SoundURL } from '../../../../../common/p5URLs';
 import VersionPicker from '../VersionPicker';
 import { updateFileContent } from '../../actions/files';
 import { CmControllerContext } from '../../pages/IDEView';
@@ -627,10 +623,9 @@ export default function Preferences() {
                         versionInfo.isVersion2 ? 'beta.' : ''
                       }p5js.org/reference/p5.sound`}
                     >
-                      {t('Preferences.SoundReference').replace(
-                        '$VERSION',
-                        versionInfo.version
-                      )}
+                      {t('Preferences.SoundReference', {
+                        version: versionInfo.version
+                      })}
                     </a>
                   </legend>
                 </fieldset>
