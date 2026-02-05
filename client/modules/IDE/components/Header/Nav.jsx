@@ -345,7 +345,7 @@ const LanguageMenu = () => {
 
   function handleLangSelection(event) {
     dispatch(setLanguage(event.target.value));
-    dispatch(showToast('Toast.LangChange'));
+    dispatch(showToast('Toast.LangChange', 1000000000));
   }
 
   return (
