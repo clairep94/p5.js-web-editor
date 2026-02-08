@@ -118,7 +118,6 @@ const SketchList = ({
             className="sketch-list__sort-button"
             onClick={() => {
               toggleDirectionForField(fieldName);
-              setPage(1);
             }}
             aria-label={buttonLabel}
           >

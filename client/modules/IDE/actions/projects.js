@@ -50,14 +50,12 @@ const fetchProjects = (username, options, successType) => (dispatch) => {
     });
 };
 
-export const getProjects = (username, options) => {
+export const getProjects = (username, options) =>
   fetchProjects(username, options, ActionTypes.SET_PROJECTS);
-};
 
-export const getProjectsForCollectionList = (username, options) => {
+export const getProjectsForCollectionList = (username, options) =>
   fetchProjects(
     username,
     options,
     ActionTypes.SET_PROJECTS_FOR_COLLECTION_LIST
   );
-};
