@@ -24,6 +24,7 @@ const SketchListRowBase = ({
   changeProjectName,
   cloneProject,
   deleteProject,
+  onDeletedProject,
   showShareModal,
   changeVisibility,
   t,
@@ -85,7 +86,9 @@ const SketchListRowBase = ({
 
   const handleSketchDelete = () => {
     if (window.confirm(t('Common.DeleteConfirmation', { name: sketch.name }))) {
-      deleteProject(sketch.id);
+      deleteProject(sketch.id).finally(() => {
+        onDeletedProject();
+      });
     }
   };
 
@@ -174,6 +177,7 @@ SketchListRowBase.propTypes = {
     authenticated: PropTypes.bool.isRequired
   }).isRequired,
   deleteProject: PropTypes.func.isRequired,
+  onDeletedProject: PropTypes.func.isRequired,
   cloneProject: PropTypes.func.isRequired,
   changeProjectName: PropTypes.func.isRequired,
   showShareModal: PropTypes.func.isRequired,

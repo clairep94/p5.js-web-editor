@@ -73,6 +73,30 @@ const SketchList = ({
     [username, user.username, t]
   );
 
+  const handleDeletedProject = useCallback(() => {
+    // sketches table refetches projects post-project deletion for server-side pagination
+    if (sketches.length === 1 && page > 1) {
+      setPage((p) => p - 1);
+    } else {
+      getProjects(username, {
+        page,
+        limit,
+        sortField,
+        sortDir,
+        q: search
+      });
+    }
+  }, [
+    sketches.length,
+    page,
+    getProjects,
+    username,
+    limit,
+    sortField,
+    sortDir,
+    search
+  ]);
+
   const isLoading = () => loading && isInitialDataLoad;
 
   const hasSketches = () => !isLoading() && sketches.length > 0;
@@ -184,6 +208,7 @@ const SketchList = ({
                   user={user}
                   username={username}
                   onAddToCollection={() => setSketchToAddToCollection(sketch)}
+                  onDeletedProject={handleDeletedProject}
                   t={t}
                 />
               ))}
