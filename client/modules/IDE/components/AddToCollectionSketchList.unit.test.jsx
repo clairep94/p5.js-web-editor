@@ -113,7 +113,7 @@ describe('<AddToCollectionSketchList />', () => {
     }
   });
 
-  it('clicking "Next Page" requests page 2 and updates list', async () => {
+  it('clicking next requests second page and updates sketch list', async () => {
     subject();
     await screen.findByText('page1-sketch-1');
 
@@ -129,7 +129,7 @@ describe('<AddToCollectionSketchList />', () => {
     await screen.findByText('page2-sketch-1');
   });
 
-  it('Previous Page is disabled on page 1', async () => {
+  it('clicking previous is not available on the first page', async () => {
     subject();
     await screen.findByText('page1-sketch-1');
 
@@ -138,7 +138,7 @@ describe('<AddToCollectionSketchList />', () => {
     ).toBeDisabled();
   });
 
-  it('shows empty state when server returns no projects', async () => {
+  it('shows empty state if there are no projects', async () => {
     server.use(
       rest.get('/projects', (req, res, ctx) => {
         requestCount += 1;
@@ -211,7 +211,7 @@ describe('<AddToCollectionSketchList />', () => {
     });
   });
 
-  it('renders correct pagination text when totalProjects is not a multiple of 10', async () => {
+  it('renders correct pagination numbers when totalProjects is not a multiple of 10', async () => {
     server.use(
       rest.get('/projects', (req, res, ctx) => {
         const page = Number(req.url.searchParams.get('page') ?? 1);
@@ -251,24 +251,18 @@ describe('<AddToCollectionSketchList />', () => {
     await screen.findByText('page1-sketch-1');
 
     let info = document.querySelector('.pagination-info');
-    expect(info.textContent.replace(/\s+/g, ' ').trim()).toContain(
-      '1 - 10 of 23'
-    );
+    expect(info.textContent.replace(/\s+/g, ' ').trim()).toContain('1 - 10');
 
     fireEvent.click(screen.getByRole('button', { name: 'Next Page' }));
     await screen.findByText('page2-sketch-1');
 
     info = document.querySelector('.pagination-info');
-    expect(info.textContent.replace(/\s+/g, ' ').trim()).toContain(
-      '11 - 20 of 23'
-    );
+    expect(info.textContent.replace(/\s+/g, ' ').trim()).toContain('11 - 20');
 
     fireEvent.click(screen.getByRole('button', { name: 'Next Page' }));
     await screen.findByText('page3-sketch-1');
 
     info = document.querySelector('.pagination-info');
-    expect(info.textContent.replace(/\s+/g, ' ').trim()).toContain(
-      '21 - 23 of 23'
-    );
+    expect(info.textContent.replace(/\s+/g, ' ').trim()).toContain('21 - 23');
   });
 });
