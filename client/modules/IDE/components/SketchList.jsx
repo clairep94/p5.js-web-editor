@@ -75,12 +75,12 @@ const SketchList = ({
 
   const isLoading = () => loading && isInitialDataLoad;
 
-  const hasSketches = () => !isLoading() && sketches?.length > 0;
+  const hasSketches = () => !isLoading() && sketches.length > 0;
 
   const renderLoader = () => isLoading() && <Loader />;
 
   const renderEmptyTable = () => {
-    if (!isLoading() && sketches?.length === 0) {
+    if (!isLoading() && sketches.length === 0) {
       return (
         <p className="sketches-table__empty">{t('SketchList.NoSketches')}</p>
       );
@@ -111,14 +111,11 @@ const SketchList = ({
         'sketches-table__header--selected': field === fieldName
       });
       const buttonLabel = getButtonLabel(fieldName, displayName);
-
       return (
         <th scope="col">
           <button
             className="sketch-list__sort-button"
-            onClick={() => {
-              toggleDirectionForField(fieldName);
-            }}
+            onClick={() => toggleDirectionForField(fieldName)}
             aria-label={buttonLabel}
           >
             <span className={headerClass}>{displayName}</span>
