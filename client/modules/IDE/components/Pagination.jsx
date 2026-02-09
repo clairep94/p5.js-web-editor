@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import { useTranslation } from 'react-i18next';
 
 const Pagination = ({
   page,
@@ -11,6 +12,8 @@ const Pagination = ({
   isOverlay
 }) => {
   if (totalPages <= 1) return null;
+
+  const { t } = useTranslation();
 
   const startSketch = (page - 1) * limit + 1;
   const endSketch = Math.min(page * limit, totalSketches);
@@ -25,7 +28,7 @@ const Pagination = ({
             disabled={page === 1}
             aria-label="Previous Page"
           >
-            Previous
+            {t('Pagination.Previous')}
           </button>
         </li>
 
@@ -34,7 +37,7 @@ const Pagination = ({
             <span className="bold-text">
               {startSketch} - {endSketch}
             </span>{' '}
-            of {totalSketches}
+            {t('Pagination.Of')} {totalSketches}
           </span>
         </li>
         <li
@@ -50,7 +53,7 @@ const Pagination = ({
             disabled={page === totalPages}
             aria-label="Next Page"
           >
-            Next
+            {t('Pagination.Next')}
           </button>
         </li>
       </ul>
