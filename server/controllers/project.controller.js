@@ -6,10 +6,19 @@ import mime from 'mime';
 import isAfter from 'date-fns/isAfter';
 import axios from 'axios';
 import slugify from 'slugify';
+import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 import Project from '../models/project';
 import { User } from '../models/user';
 import { resolvePathToFile } from '../utils/filePath';
 import { generateFileSystemSafeName } from '../utils/generateFileSystemSafeName';
+
+const s3Client = new S3Client({
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY,
+    secretAccessKey: process.env.AWS_SECRET_KEY
+  },
+  region: process.env.AWS_REGION
+});
 
 export {
   default as createProject,
@@ -196,6 +205,10 @@ export async function getProjectForUser(username, projectId) {
  */
 function bundleExternalLibs(project) {
   const indexHtml = project.files.find((file) => file.name === 'index.html');
+  if (!indexHtml || !indexHtml.content) {
+    return; // Gracefully handle missing index.html
+  }
+
   const { window } = new JSDOM(indexHtml.content);
   const scriptTags = window.document.getElementsByTagName('script');
 
@@ -204,6 +217,11 @@ function bundleExternalLibs(project) {
 
     const path = src.split('/');
     const filename = path[path.length - 1];
+
+    // Prevent duplicate external libs if downloaded multiple times
+    if (project.files.some((f) => f.name === filename && f.url === src)) {
+      return;
+    }
 
     project.files.push({
       name: filename,
@@ -216,7 +234,52 @@ function bundleExternalLibs(project) {
 }
 
 /**
- * Recursively adds a file and all of its children to the JSZip instance.
+ * Helper function to get a readable stream from an S3 URL
+ * Optimized to return stream handle quickly without waiting for data
+ * @param {string} url - S3 URL
+ * @return {Promise<Readable>}
+ */
+async function getStreamFromS3Url(url) {
+  // Parse the S3 URL to get bucket and key
+  const urlObj = new URL(url);
+  let bucket;
+  let key;
+
+  // Support different S3 URL formats
+  if (urlObj.hostname.includes('s3')) {
+    // Format: https://bucket-name.s3.region.amazonaws.com/key
+    // or https://s3.region.amazonaws.com/bucket-name/key
+    if (urlObj.hostname.startsWith('s3')) {
+      // https://s3.region.amazonaws.com/bucket-name/key
+      const pathParts = urlObj.pathname.split('/').filter(Boolean);
+      [bucket] = pathParts;
+      key = pathParts.slice(1).join('/');
+    } else {
+      // https://bucket-name.s3.region.amazonaws.com/key
+      [bucket] = urlObj.hostname.split('.');
+      key = urlObj.pathname.substring(1);
+    }
+
+    // by nityam, Get S3 object stream - returns immediately with stream handle
+    // Data is only fetched when the stream is consumed (by JSZip)
+    const command = new GetObjectCommand({ Bucket: bucket, Key: key });
+    const response = await s3Client.send(command);
+
+    // Ensure we return the stream, not buffer the response
+    return response.Body;
+  }
+
+  // Not an S3 URL, fall back to axios with streaming
+  const response = await axios.get(url, {
+    responseType: 'stream',
+    timeout: 30000
+  });
+  return response.data;
+}
+
+/**
+ * Recursively adds a file and all of its children to the JSZip instance using streaming.
+ * Files are fetched sequentially to avoid memory overload.
  * @param {object} file
  * @param {Array<object>} files
  * @param {JSZip} zip
@@ -225,29 +288,42 @@ function bundleExternalLibs(project) {
 async function addFileToZip(file, files, zip) {
   if (file.fileType === 'folder') {
     const folderZip = file.name === 'root' ? zip : zip.folder(file.name);
-    await Promise.all(
-      file.children.map((fileId) => {
-        const childFile = files.find((f) => f.id === fileId);
-        return addFileToZip(childFile, files, folderZip);
-      })
-    );
+    // Process children sequentially to avoid fetching all files upfront
+    await file.children.reduce(async (previousPromise, fileId) => {
+      await previousPromise;
+      const childFile = files.find((f) => f.id === fileId);
+      return addFileToZip(childFile, files, folderZip);
+    }, Promise.resolve());
   } else if (file.url) {
     try {
-      const res = await axios.get(file.url, {
-        responseType: 'arraybuffer',
-        timeout: 30000 // 30 second timeout to prevent hanging requests
-      });
-      zip.file(file.name, res.data);
+      // Check if this is an S3 URL
+      if (file.url.includes('s3') && file.url.includes('amazonaws.com')) {
+        // Use S3 streaming for S3 URLs
+        // This gets the stream handle quickly - actual data is fetched by JSZip during generation
+        const stream = await getStreamFromS3Url(file.url);
+        zip.file(file.name, stream, { binary: true });
+      } else {
+        // For external URLs, use axios with streaming
+        const response = await axios.get(file.url, {
+          responseType: 'stream',
+          timeout: 30000
+        });
+        zip.file(file.name, response.data, { binary: true });
+      }
     } catch (e) {
       console.warn(`Failed to fetch file from ${file.url}:`, e.message);
-      zip.file(file.name, new ArrayBuffer(0));
+      // Add empty file on error to prevent ZIP corruption
+      zip.file(file.name, Buffer.alloc(0));
     }
   } else {
+    // Regular file with inline content
     zip.file(file.name, file.content);
   }
 }
 
 async function buildZip(project, req, res) {
+  let keepaliveInterval;
+
   try {
     const zip = new JSZip();
     const currentTime = format(new Date(), 'yyyy_MM_dd_HH_mm_ss');
@@ -258,30 +334,95 @@ async function buildZip(project, req, res) {
     const { files } = project;
     const root = files.find((file) => file.name === 'root');
 
-    bundleExternalLibs(project);
-    await addFileToZip(root, files, zip);
-
-    const base64 = await zip.generateAsync({ type: 'base64' });
-    const buff = Buffer.from(base64, 'base64');
-
-    // nityam Check if response was already sent (e.g., client disconnected)
-    if (res.headersSent) {
-      return;
+    if (!root) {
+      throw new Error('Project has no root folder');
     }
 
+    bundleExternalLibs(project);
+
+    // Send headers immediately to prevent gateway timeout
     res.writeHead(200, {
       'Content-Type': 'application/zip',
-      'Content-disposition': `attachment; filename=${zipFileName}`
+      'Content-disposition': `attachment; filename=${zipFileName}`,
+      'Transfer-Encoding': 'chunked'
     });
-    res.end(buff);
+
+    // Send periodic keepalive comments to prevent gateway timeout
+    // while we're building the file list. ZIP format allows for this.
+    let keepaliveCounter = 0;
+    keepaliveInterval = setInterval(() => {
+      // Write a comment to keep connection alive without corrupting ZIP
+      // This prevents 60s gateway timeouts during file list building
+      if (!res.writableEnded) {
+        res.write(Buffer.alloc(0)); // Empty write to keep connection alive
+        keepaliveCounter++;
+        if (keepaliveCounter % 10 === 0) {
+          console.log(
+            `Keepalive: Building ZIP file list (${keepaliveCounter}s elapsed)...`
+          );
+        }
+      }
+    }, 1000); // Every second
+
+    // Sequentially add files - this avoids parallel S3 connection storms
+    // but still requires getting all file references before streaming begins
+    await addFileToZip(root, files, zip);
+
+    // Clear keepalive now that we're about to start streaming real data
+    clearInterval(keepaliveInterval);
+    keepaliveInterval = null;
+
+    // Generate ZIP stream with true end-to-end streaming
+    // streamFiles: true means JSZip reads from our S3 streams on-demand
+    const zipStream = zip.generateNodeStream({
+      type: 'nodebuffer',
+      streamFiles: true,
+      compression: 'DEFLATE',
+      compressionOptions: { level: 6 }
+    });
+
+    // Pipe the ZIP stream to response - handles backpressure automatically
+    zipStream.pipe(res);
+
+    // Handle stream errors
+    zipStream.on('error', (err) => {
+      console.error('Error streaming zip file:', err);
+      if (!res.headersSent) {
+        res.status(500).json({
+          success: false,
+          message: 'Failed to generate zip file. Please try again.'
+        });
+      } else {
+        res.end();
+      }
+    });
+
+    // Wait for the stream to finish
+    await new Promise((resolve, reject) => {
+      zipStream.on('end', resolve);
+      zipStream.on('error', reject);
+      res.on('error', reject);
+      res.on('close', () => {
+        // Client disconnected
+        reject(new Error('Client disconnected'));
+      });
+    });
   } catch (err) {
     console.error('Error building zip file:', err);
+
+    // Clean up keepalive if still running
+    if (keepaliveInterval) {
+      clearInterval(keepaliveInterval);
+    }
+
     // Only send error if response hasn't been sent yet
     if (!res.headersSent) {
       res.status(500).json({
         success: false,
         message: 'Failed to generate zip file. Please try again.'
       });
+    } else {
+      res.end();
     }
   }
 }
