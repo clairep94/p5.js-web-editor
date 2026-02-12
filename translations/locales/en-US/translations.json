@@ -78,6 +78,8 @@
     "UsernameOrEmailARIA": "Email or Username",
     "Password": "Password",
     "PasswordARIA": "Password",
+    "ShowPasswordARIA": "Show password as plain text",
+    "HidePasswordARIA": "Hide password",
     "Submit": "Log In",
     "Errors": {
       "invalidCredentials": "Invalid email or password."
@@ -425,8 +427,12 @@
     "EmailARIA": "email",
     "Password": "Password",
     "PasswordARIA": "password",
+    "ShowPasswordARIA": "Show password as plain text",
+    "HidePasswordARIA": "Hide password",
     "ConfirmPassword": "Confirm Password",
     "ConfirmPasswordARIA": "Confirm password",
+    "ShowConfirmPasswordARIA": "Show confirm password as plain text",
+    "HideConfirmPasswordARIA": "Hide confirm password",
     "SubmitSignup": "Sign Up"
   },
   "SignupView": {
