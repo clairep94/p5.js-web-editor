@@ -6,11 +6,7 @@ import {
 } from '../../domain-objects/Project';
 
 export default function createProject(req, res) {
-  let projectValues = {
-    user: req.user._id
-  };
-
-  projectValues = Object.assign(projectValues, req.body);
+  const projectValues = Object.assign({}, req.body, { user: req.user._id });
 
   function sendFailure(err) {
     res.status(400).json({ success: false });
