@@ -28,7 +28,7 @@ export default function createProject(req, res) {
 
 // TODO: What happens if you don't supply any files?
 export async function apiCreateProject(req, res) {
-  const params = Object.assign({ user: req.user._id }, req.body);
+  const params = Object.assign({}, req.body, { user: req.user._id });
 
   const sendValidationErrors = (err, type, code = 422) => {
     res.status(code).json({
