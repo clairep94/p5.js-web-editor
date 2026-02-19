@@ -1,6 +1,6 @@
 {
   "name": "p5.js-web-editor",
-  "version": "2.19.4",
+  "version": "2.20.2",
   "description": "The web editor for p5.js.",
   "scripts": {
     "clean": "rimraf dist",
@@ -190,7 +190,7 @@
     "rimraf": "^2.7.1",
     "sass": "^1.66.1",
     "sass-loader": "^13.3.3",
-    "storybook": "^7.6.21",
+    "storybook": "^10.2.9",
     "storybook-addon-theme-playground": "^3.1.0",
     "style-loader": "^3.3.4",
     "terser-webpack-plugin": "^5.3.1",
@@ -261,7 +261,7 @@
     "jsdom": "^20.0.0",
     "jshint": "^2.13.0",
     "jszip": "^3.10.1",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "loop-protect": "github:catarak/loop-protect",
     "mime": "^3.0.0",
     "mjml": "^4.14.1",
