@@ -195,7 +195,9 @@ describe('<SketchList />', () => {
 
     const before = requestCount;
 
-    fireEvent.click(screen.getByRole('button', { name: 'Pagination.NextPageARIA' }));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Pagination.NextPageARIA' })
+    );
 
     await waitFor(() => {
       expect(requestCount).toBeGreaterThan(before);
@@ -209,7 +211,9 @@ describe('<SketchList />', () => {
     subject();
     await screen.findByText('page1-sketch-1');
 
-    const prev = screen.getByRole('button', { name: 'Pagination.PreviousPageARIA' });
+    const prev = screen.getByRole('button', {
+      name: 'Pagination.PreviousPageARIA'
+    });
     expect(prev).toBeDisabled();
   });
 
