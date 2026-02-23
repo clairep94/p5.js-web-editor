@@ -15,12 +15,17 @@ const sketches = (state = [], action) => {
       });
     }
     case ActionTypes.RENAME_PROJECT: {
-      return state.map((sketch) => {
+      const updatedproject = state.projects.map((sketch) => {
         if (sketch.id === action.payload.id) {
           return { ...sketch, name: action.payload.name };
         }
         return sketch;
       });
+
+      return {
+        ...state,
+        projects: updatedproject
+      };
     }
     default:
       return state;
