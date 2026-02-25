@@ -57,10 +57,18 @@ export async function updateProject(req, res) {
       });
       return;
     }
+    // only allow whitelisted fields so ownership/slug etc can't be overwritten
+    const allowedFields = ['name', 'files', 'updatedAt', 'visibility'];
+    const updateData = {};
+    allowedFields.forEach((field) => {
+      if (req.body[field] !== undefined) {
+        updateData[field] = req.body[field];
+      }
+    });
     const updatedProject = await Project.findByIdAndUpdate(
       req.params.project_id,
       {
-        $set: req.body
+        $set: updateData
       },
       {
         new: true,
