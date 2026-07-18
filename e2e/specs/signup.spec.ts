@@ -1,6 +1,6 @@
 import { test, expect } from '../fixtures';
 import { dismissCookieBanner } from '../helpers/cookie-banner';
-import { usernamePrefix, emailSuffix, password } from '../helpers/env';
+import { usernamePrefix, emailSuffix, password } from '../helpers/test-user';
 
 test.describe('signup and email verification', () => {
   test('can sign up and verify email via the emailed link', async ({
