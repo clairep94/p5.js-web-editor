@@ -1,12 +1,18 @@
 import { defineConfig, devices } from '@playwright/test';
 import { warnToStartE2eAppServerSeparately } from './e2e/setup/warn-to-start-e2e-server-separately';
+import { requireEnv } from './e2e/helpers/require-env';
+import {
+  mailpitApiUrl,
+  mailpitSmtpPort,
+  mailpitUiPort
+} from './e2e/helpers/mailpit';
 
 // DO NOT REMOVE: makes sure that playwright is always run with the e2e env overrides. See loadEnv.js
 process.env.APP_ENV = 'e2e';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require('./loadEnv')();
 
-const EDITOR_URL = process.env.EDITOR_URL || 'http://localhost:9000';
+const EDITOR_URL = requireEnv('EDITOR_URL');
 
 warnToStartE2eAppServerSeparately();
 /**
@@ -38,6 +44,15 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: [
+    {
+      name: 'Mailpit',
+      command: `mailpit --smtp localhost:${mailpitSmtpPort()} --listen localhost:${mailpitUiPort()}`,
+      url: `${mailpitApiUrl()}/info`,
+      reuseExistingServer: true,
+      stdout: 'pipe',
+      stderr: 'pipe',
+      timeout: 15_000
+    },
     {
       name: 'app (e2e env)',
       command: 'npm run start:e2e',
