@@ -126,6 +126,14 @@ export async function getProject(req, res) {
       .status(404)
       .send({ message: 'Project with that id does not exist' });
   }
+  
+  if (
+    project.visibility === 'Private' &&
+    (!req.user || !project.user._id.equals(req.user._id))
+  ) {
+    return res.status(403).send({ message: 'Project is private' });
+  }
+  
   return res.json(project);
 }
 
