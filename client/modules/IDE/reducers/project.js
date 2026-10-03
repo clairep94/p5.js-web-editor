@@ -7,6 +7,8 @@ const initialState = () => {
     generatedString.charAt(0).toUpperCase() + generatedString.slice(1);
   return {
     name: generatedName,
+    // Kept so we can tell whether the user has renamed a new sketch.
+    generatedName,
     updatedAt: '',
     isSaving: false,
     visibility: 'Public'

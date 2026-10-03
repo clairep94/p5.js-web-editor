@@ -21,7 +21,7 @@ import {
   clearLocalBackup,
   hasNewerLocalBackup
 } from '../utils/localBackup';
-import { getIsUserOwner } from '../selectors/users';
+import { selectCanAutosave } from '../selectors/project';
 import { RootPage } from '../../../components/RootPage';
 import Header from '../components/Header';
 import FloatingActionButton from '../components/FloatingActionButton';
@@ -107,9 +107,7 @@ export const CmControllerContext = React.createContext({});
 const IDEView = () => {
   const isMobile = useIsMobile();
   const ide = useSelector((state) => state.ide);
-  const preferences = useSelector((state) => state.preferences);
   const project = useSelector((state) => state.project);
-  const isUserOwner = useSelector(getIsUserOwner);
   const dispatch = useDispatch();
 
   const { t } = useTranslation();
@@ -163,8 +161,7 @@ const IDEView = () => {
     clearLocalBackup(project.id);
   }, [project.id]); // eslint-disable-line
 
-  const autosaveAllowed = isUserOwner && project.id && preferences.autosave;
-  const shouldAutosave = autosaveAllowed && ide.unsavedChanges;
+  const shouldAutosave = useSelector(selectCanAutosave);
 
   // For autosave - send to API after 5 seconds without changes
   useEffect(() => {
